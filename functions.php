@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MBAG_VERSION', '1.25.1' );
+define( 'MBAG_VERSION', '1.25.2' );
 
 /**
  * Theme setup.
@@ -1103,7 +1103,7 @@ function mbag_sanitize_range( $value, $setting ) {
 function mbag_popup_settings() {
 	return array(
 		'enabled'  => (bool) get_theme_mod( 'mbag_popup_enable', true ),
-		'delay'    => (int) get_theme_mod( 'mbag_popup_delay', 15 ),
+		'delay'    => (int) get_theme_mod( 'mbag_popup_delay', 10 ),
 		'scroll'   => (int) get_theme_mod( 'mbag_popup_scroll', 50 ),
 		'title'    => (string) get_theme_mod( 'mbag_popup_title', __( 'Get Free MBA Counselling', 'mba-admission-guide' ) ),
 		'subtitle' => (string) get_theme_mod( 'mbag_popup_subtitle', __( 'Share a few details and a counsellor will call you with the best-fit Online MBA options.', 'mba-admission-guide' ) ),
@@ -1191,7 +1191,7 @@ function mbag_customize_popup( $wp_customize ) {
 	) );
 
 	$wp_customize->add_setting( 'mbag_popup_delay', array(
-		'default'           => 15,
+		'default'           => 10,
 		'sanitize_callback' => 'mbag_sanitize_range',
 	) );
 	$wp_customize->add_control( 'mbag_popup_delay', array(

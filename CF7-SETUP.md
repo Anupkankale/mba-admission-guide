@@ -172,7 +172,7 @@ triggers. It ships enabled and pointed at form ID `570b038`.
 
 | Trigger | Default | Where to change it |
 |---|---|---|
-| After a delay | **15 seconds** | Customize → Lead Forms → *Open after (seconds)* |
+| After a delay | **10 seconds** | Customize → Lead Forms → *Open after (seconds)* |
 | At scroll depth | **50%** | Customize → Lead Forms → *Open at scroll depth (%)* |
 | Button or link | always | add `data-mbag-popup` or the class `mbag-popup` |
 

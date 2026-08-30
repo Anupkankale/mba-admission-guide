@@ -50,7 +50,7 @@ If Contact Form 7 is inactive, Download Brochure falls back to the
 on-page lead form instead of becoming a dead button.
 
 LEAD POPUP
-A modal holding the Popup-slot CF7 form (default ID 570b038). Opens 15
+A modal holding the Popup-slot CF7 form (default ID 570b038). Opens 10
 seconds in, at 50% scroll depth, or from any #apply / #talk CTA and any
 button marked data-mbag-popup / class mbag-popup. Automatic opens happen once per
 browser session and never on the Thank You page. Timings, heading and
