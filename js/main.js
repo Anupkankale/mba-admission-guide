@@ -74,8 +74,18 @@ if(mq){
 }
 
 /* ---------- UNIVERSITY CARDS + TABLE + SELECT ---------- */
+/* The middle form's university select: the theme's own when that slot uses
+   the static markup, otherwise the one inside the CF7 form. */
+function talkUniSelect(){
+  return document.getElementById("t-uni")
+      || document.querySelector('.mbag-cf7--talk select[name="university"], .mbag-cf7--talk select[name="universities"]');
+}
+
 var g=document.getElementById("ugrid"),tb=document.getElementById("tbody"),us=document.getElementById("t-uni");
-if(g&&tb&&us){
+/* Gated on the grid and table only. It used to require the university select
+   too, which silently emptied the whole section the moment a CF7 form
+   replaced the static one. */
+if(g&&tb){
   U.forEach(function(u){
     var c=document.createElement("article");
     c.className="uni rv";
@@ -109,7 +119,7 @@ if(g&&tb&&us){
       "<td>Apply online, submit documents, fee payment</td>";
     tb.appendChild(tr);
 
-    var o=document.createElement("option");o.textContent=u.n;us.appendChild(o);
+    if(us){var o=document.createElement("option");o.textContent=u.n;us.appendChild(o);}
   });
 }
 
@@ -172,8 +182,16 @@ if(fq){
 /* ---------- GET DETAILS ---------- */
 document.addEventListener("click",function(e){
   var b=e.target.closest("[data-uni]");if(!b)return;
-  if(us){us.value=b.getAttribute("data-uni");}
-  go(document.getElementById("talk"));flash(us);
+  var sel=talkUniSelect(),name=b.getAttribute("data-uni");
+  if(sel){
+    /* Only take the value if that option exists, so a name the form does not
+       offer leaves the select alone rather than setting something invalid. */
+    var match=Array.prototype.filter.call(sel.options,function(o){
+      return o.value===name||o.textContent.trim()===name;
+    })[0];
+    if(match)sel.value=match.value;
+  }
+  go(document.getElementById("talk"));flash(sel);
 });
 
 /* ---------- FORMS ---------- */

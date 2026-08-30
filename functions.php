@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MBAG_VERSION', '1.19.0' );
+define( 'MBAG_VERSION', '1.19.1' );
 
 /**
  * Theme setup.
