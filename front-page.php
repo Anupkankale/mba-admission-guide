@@ -212,7 +212,13 @@ get_header();
       <span class="eyebrow">Student stories</span>
       <h2 class="h2">What Learners Say</h2>
     </div>
-    <div class="tgrid" id="tgrid"></div>
+    <div class="tcarousel">
+      <!-- The track is natively scrollable, so it works without JS; the
+           arrows and auto-advance are progressive enhancement. -->
+      <div class="tgrid" id="tgrid" role="region" aria-label="Student stories" tabindex="0"></div>
+      <button class="tnav tnav--prev" type="button" id="tPrev" aria-label="Previous stories"><?php mbag_icon( 'arrow-left' ); ?></button>
+      <button class="tnav tnav--next" type="button" id="tNext" aria-label="Next stories"><?php mbag_icon( 'arrow-right' ); ?></button>
+    </div>
   </div>
 </section>
 

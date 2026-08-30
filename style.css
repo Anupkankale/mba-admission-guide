@@ -5,7 +5,7 @@ Author: Anup Kankale
 Author URI: https://anupkankale.com
 Description: Online MBA Admission counselling & comparison theme. Landing page front end plus full WordPress template hierarchy — pages, posts, archives, search, 404 and a dedicated Thank You (lead confirmation) page template.
 Tags: education, landing-page, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
-Version: 1.22.0
+Version: 1.23.0
 Requires at least: 6.0
 Requires PHP: 7.4
 License: GNU General Public License v2 or later
@@ -361,7 +361,56 @@ tbody td:first-child{color:var(--ink);font-weight:800;white-space:nowrap;font-fa
 .step p{font-size:14.5px;color:var(--muted)}
 
 /* ================= TESTIMONIALS ================= */
-.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+/* =========================================================================
+   TESTIMONIAL CAROUSEL
+
+   Three cards in view, the rest reached by scrolling. The track is a plain
+   overflow-x container with scroll snapping, so it swipes on touch and
+   scrolls with the keyboard even if the JS never runs — the arrows and the
+   auto-advance are enhancement on top, not the mechanism.
+   ========================================================================= */
+.tcarousel{position:relative}
+.tgrid{
+  display:flex;gap:22px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  /* Room for the cards' hover lift and shadow, which overflow would clip. */
+  padding:4px 4px 14px;
+  scrollbar-width:none
+}
+.tgrid::-webkit-scrollbar{display:none}
+.tgrid:focus-visible{outline:3px solid var(--color-focus);outline-offset:4px;border-radius:var(--r)}
+.tgrid>.tcard{
+  flex:0 0 calc((100% - 44px)/3);   /* 3 across, minus the two 22px gaps */
+  scroll-snap-align:start
+}
+
+/* Arrows sit outside the cards on wide screens and overlap the edges when
+   the container runs out of room. */
+.tnav{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:2;
+  width:44px;height:44px;border-radius:50%;cursor:pointer;
+  background:var(--white);border:1px solid var(--color-border);
+  color:var(--color-primary);display:grid;place-items:center;
+  box-shadow:var(--sh);
+  transition:background var(--dur) var(--ease),color var(--dur) var(--ease),opacity var(--dur) var(--ease)
+}
+.tnav:hover{background:var(--night);border-color:var(--night);color:var(--white)}
+.tnav--prev{left:-18px}
+.tnav--next{right:-18px}
+.tnav[disabled]{opacity:.35;cursor:default}
+.tnav[disabled]:hover{background:var(--white);border-color:var(--color-border);color:var(--color-primary)}
+
+@media (max-width:1024px){
+  .tgrid>.tcard{flex-basis:calc((100% - 22px)/2)}   /* 2 across */
+  .tnav--prev{left:-8px}
+  .tnav--next{right:-8px}
+}
+@media (max-width:760px){
+  .tgrid>.tcard{flex-basis:88%}                     /* 1 across, next peeking */
+  .tnav{display:none}                               /* swipe instead */
+}
 .tcard{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:26px;display:flex;flex-direction:column;gap:14px}
 .tcard p{font-size:15px;color:#3B4A6B}
 .twho{display:flex;align-items:center;gap:12px;margin-top:auto}

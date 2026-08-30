@@ -172,6 +172,62 @@ if(tg){
       '<div class="twho"><div class="av" aria-hidden="true">'+esc(t[0].charAt(0))+'</div><div><b>'+esc(t[0])+'</b><span>'+esc(t[1])+'</span></div></div>';
     tg.appendChild(d);
   });
+
+  /* ----- carousel controls -----
+     Enhancement only: the track already scrolls and snaps on its own. */
+  (function(){
+    var prev=document.getElementById("tPrev"),next=document.getElementById("tNext");
+    if(!prev||!next)return;
+
+    function step(){
+      var card=tg.querySelector(".tcard");
+      if(!card)return tg.clientWidth;
+      /* One card plus the gap, so a click lands cleanly on the next snap. */
+      return card.getBoundingClientRect().width+22;
+    }
+    function atStart(){return tg.scrollLeft<=2;}
+    function atEnd(){return tg.scrollLeft+tg.clientWidth>=tg.scrollWidth-2;}
+    function sync(){
+      prev.disabled=atStart();
+      next.disabled=atEnd();
+    }
+
+    prev.addEventListener("click",function(){tg.scrollBy({left:-step(),behavior:"smooth"});});
+    next.addEventListener("click",function(){
+      /* Wrap round at the end rather than dead-ending on the last card. */
+      if(atEnd())tg.scrollTo({left:0,behavior:"smooth"});
+      else tg.scrollBy({left:step(),behavior:"smooth"});
+    });
+    tg.addEventListener("scroll",sync,{passive:true});
+    window.addEventListener("resize",sync);
+    sync();
+
+    /* Auto-advance, paused whenever the visitor is reading or interacting,
+       and switched off entirely for anyone who asked for reduced motion. */
+    var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+    if(reduce)return;
+
+    var timer=null;
+    function play(){
+      if(timer)return;
+      timer=window.setInterval(function(){
+        if(document.hidden)return;
+        if(atEnd())tg.scrollTo({left:0,behavior:"smooth"});
+        else tg.scrollBy({left:step(),behavior:"smooth"});
+      },5000);
+    }
+    function pause(){window.clearInterval(timer);timer=null;}
+
+    ["mouseenter","focusin","touchstart","pointerdown"].forEach(function(ev){
+      tg.addEventListener(ev,pause,{passive:true});
+    });
+    ["mouseleave","focusout"].forEach(function(ev){
+      tg.addEventListener(ev,play);
+    });
+    prev.addEventListener("click",pause);
+    next.addEventListener("click",pause);
+    play();
+  })();
 }
 
 /* ---------- FAQ ---------- */
