@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MBAG_VERSION', '1.19.1' );
+define( 'MBAG_VERSION', '1.20.0' );
 
 /**
  * Theme setup.
@@ -1233,9 +1233,9 @@ add_action( 'customize_register', 'mbag_customize_popup' );
 
 /**
  * ---------------------------------------------------------------
- * LEFT CTA RAIL
+ * RIGHT CTA RAIL
  *
- * Two vertical buttons pinned to the left edge:
+ * Two vertical buttons pinned to the right edge:
  *
  *   Enquire Now       -> tel: link, the number from Contact Details
  *   Download Brochure -> opens the lead popup, because the brochure is
@@ -1286,7 +1286,7 @@ function mbag_brochure_button( $class, $label, $icon = 'download' ) {
 }
 
 /**
- * Print the left CTA rail.
+ * Print the right CTA rail.
  */
 function mbag_render_cta_rail() {
 	if ( ! get_theme_mod( 'mbag_rail_enable', true ) ) {
@@ -1315,8 +1315,8 @@ function mbag_customize_rail( $wp_customize ) {
 		'sanitize_callback' => 'mbag_sanitize_checkbox',
 	) );
 	$wp_customize->add_control( 'mbag_rail_enable', array(
-		'label'       => __( 'Show the left CTA rail', 'mba-admission-guide' ),
-		'description' => __( 'The vertical "Enquire Now" and "Download Brochure" buttons pinned to the left edge.', 'mba-admission-guide' ),
+		'label'       => __( 'Show the CTA rail', 'mba-admission-guide' ),
+		'description' => __( 'The vertical "Enquire Now" and "Download Brochure" buttons pinned to the right edge. Hidden on phones, where the bottom bar carries the same CTAs.', 'mba-admission-guide' ),
 		'section'     => 'mbag_contact',
 		'type'        => 'checkbox',
 	) );

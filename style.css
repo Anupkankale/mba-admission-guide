@@ -5,7 +5,7 @@ Author: Anup Kankale
 Author URI: https://anupkankale.com
 Description: Online MBA Admission counselling & comparison theme. Landing page front end plus full WordPress template hierarchy — pages, posts, archives, search, 404 and a dedicated Thank You (lead confirmation) page template.
 Tags: education, landing-page, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
-Version: 1.19.1
+Version: 1.20.0
 Requires at least: 6.0
 Requires PHP: 7.4
 License: GNU General Public License v2 or later
@@ -863,37 +863,35 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 
 /* =========================================================================
-   LEFT CTA RAIL
+   RIGHT CTA RAIL
 
-   Two vertical tabs pinned to the left edge, mid-screen. Deliberately on
-   the opposite edge from the WhatsApp button and clear of the mobile
-   bottom bar, so the three sets of CTAs never stack on each other.
+   Two vertical tabs pinned to the right edge, mid-screen. It sits clear of
+   the WhatsApp button (bottom-right) and the mobile bottom bar, so the CTA
+   sets never stack on each other.
 
-   Reading direction: writing-mode turns the text on its side and the 180°
-   rotation makes it read bottom-to-top, which is the convention for a
-   left-edge tab. That rotation also swaps the corners, so the radius is
-   declared on the LEFT pair to render on the right — the side facing the
-   page. Change one, change the other.
+   Reading direction: on a right-hand tab the convention is top-to-bottom,
+   which is plain `writing-mode: vertical-rl` with no rotation — unlike a
+   left-hand tab, which reads bottom-to-top and needs rotate(180deg). No
+   rotation also means the corners are declared as they render, so the
+   radius is simply on the left pair: the side facing the page.
    ========================================================================= */
 .rail{
-  position:fixed;left:0;top:50%;transform:translateY(-50%);
+  position:fixed;right:0;top:50%;transform:translateY(-50%);
   z-index:var(--z-wa);display:grid;gap:10px
 }
 .rail__btn{
   writing-mode:vertical-rl;
-  transform:rotate(180deg);
   display:inline-flex;align-items:center;justify-content:center;gap:9px;
   padding:20px 12px;border:0;cursor:pointer;
   font-family:var(--dis);font-weight:800;font-size:14px;letter-spacing:.01em;
-  border-radius:12px 0 0 12px;   /* renders on the right — see note above */
+  border-radius:12px 0 0 12px;   /* rounded on the page-facing side */
   box-shadow:0 8px 24px rgba(11,18,53,.28);
   transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease),filter var(--dur) var(--ease)
 }
 .rail__btn--call{background:var(--grad-hot);color:var(--color-on-accent)}
 .rail__btn--brochure{background:var(--grad-royal);color:var(--white)}
 .rail__btn:hover{
-  /* Rotation lives in the same property, so the nudge has to keep it. */
-  transform:rotate(180deg) translateY(3px);
+  transform:translateX(-3px);
   box-shadow:0 14px 32px rgba(11,18,53,.4);
   filter:brightness(1.06)
 }

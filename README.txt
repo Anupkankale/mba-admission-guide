@@ -34,15 +34,15 @@ Any of .svg .webp .png .jpg works; SVG is preferred when present. The URL
 carries the file's timestamp, so a replacement is picked up without a
 version bump.
 
-LEFT CTA RAIL (desktop / tablet)
-Two vertical buttons pinned to the left edge, above 760px wide:
+CTA RAIL (desktop / tablet)
+Two vertical buttons pinned to the right edge, above 760px wide:
   Enquire Now       - dials the Contact Details number
   Download Brochure - opens the lead popup, with its own heading
                       ("Download the Brochure") so the modal matches
                       what was clicked
 Switch it off in Appearance > Customize > Contact Details.
 
-On phones the rail is hidden - it would overlap the left edge of the
+On phones the rail is hidden - it would overlap the edge of the
 content - and the sticky bottom bar carries all four CTAs instead:
 Call / WhatsApp / Brochure / Apply Free. To bring the rail back on
 mobile, delete the .rail{display:none} rule in style.css.
