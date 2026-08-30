@@ -16,9 +16,21 @@ the next page load — no code change, no admin setting.
 Accepted extensions: .svg .avif .webp .png .jpg .jpeg (checked in that order)
 
 WHERE TO PUT THEM
-Prefer  wp-content/uploads/university-logos/
-Files in this theme folder are DELETED when the theme is re-uploaded or
-updated. The uploads folder survives. Both work; uploads is checked first.
+Put them HERE, in the theme. They then travel with the zip / git deploy,
+which is what makes them appear on the live site with no extra upload step.
+The theme is the source of truth: a theme update restores these files
+rather than losing them, because they are committed to the repo.
+
+wp-content/uploads/university-logos/ is still checked FIRST, so you can
+override any single logo on the server without touching the theme. Use it
+when someone needs to swap a logo without a deploy.
+
+FORMAT NOTE
+Prefer .webp or .png over .avif. The live server currently sends .avif as
+Content-Type: text/plain because the MIME type is not mapped, which some
+browsers refuse to render. Adding this to .htaccess fixes it:
+
+  AddType image/avif .avif
 
 FILE GUIDANCE
 - The card plate is 2:1 and the logo is contained inside it, so a wide
