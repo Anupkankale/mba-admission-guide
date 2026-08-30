@@ -1,0 +1,1010 @@
+/*
+Theme Name: MBA Admission Guide
+Theme URI: https://anupkankale.com
+Author: Anup Kankale
+Author URI: https://anupkankale.com
+Description: Online MBA Admission counselling & comparison theme. Landing page front end plus full WordPress template hierarchy — pages, posts, archives, search, 404 and a dedicated Thank You (lead confirmation) page template.
+Tags: education, landing-page, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
+Version: 1.12.0
+Requires at least: 6.0
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: mba-admission-guide
+*/
+
+/* =========================================================================
+   DESIGN TOKENS
+
+   Four layers, in this order. Never skip a layer upward: a component rule
+   uses a semantic token, a semantic token uses a primitive, and a raw hex
+   value appears exactly once — in the primitive layer.
+
+     1. PRIMITIVES  the palette. Named by hue + lightness, no meaning.
+     2. SEMANTIC    what a colour is FOR. This is what new rules should use.
+     3. LEGACY      the original short names, kept as aliases so the
+                    existing component rules below keep working.
+     4. SCALES      spacing, radius, shadow, type, motion, layering.
+
+   Contrast: every foreground/background pair used for text in this file
+   meets WCAG 2.1 AA (4.5:1 body, 3:1 for 24px+ / bold 19px+). If you
+   retune a colour, re-check the pair before shipping it.
+   ========================================================================= */
+:root{
+  color-scheme:light;
+
+  /* ---------- 1. PRIMITIVES ---------- */
+  /* Navy — surfaces that carry the brand and all dark sections */
+  --navy-950:#070C24;
+  --navy-900:#0B1235;
+  --navy-800:#131C4D;
+  --navy-700:#1B2A6B;
+  --navy-100:#D3DBF2;
+
+  /* Royal / violet — the secondary gradient pair */
+  --royal-600:#2A3B96;
+  --violet-600:#4B2E83;
+  --violet-500:#5B2E9E;
+
+  /* Amber — the single accent. Used for CTAs and nothing else. */
+  --amber-700:#9C5709;   /* AA on light sand: 5.06:1 */
+  --amber-500:#FFB020;
+  --amber-400:#FFD166;
+  --amber-100:#FFF3DF;
+  --amber-050:#FFF6E6;
+
+  /* Neutrals */
+  --ink-900:#141B34;
+  --ink-700:#33436B;
+  --ink-600:#3A4A70;
+  --ink-500:#5C6A8A;   /* AA on white: 5.41:1 */
+  --ink-300:#93A4CC;
+  --ink-200:#B9C4E4;
+  --grey-100:#F5F7FC;
+  --grey-200:#E2E8F3;
+  --white:#FFFFFF;
+
+  /* Status */
+  --green-700:#12833B;  /* AA as text on white: 4.84:1 */
+  --green-500:#16A34A;  /* decorative fills and dots only */
+  --green-100:#ECFDF3;
+  --red-600:#D92D50;
+  --pink-500:#FF5C7A;
+  --whatsapp:#25D366;
+
+  /* ---------- 2. SEMANTIC ---------- */
+  --color-bg:var(--white);
+  --color-bg-alt:var(--grey-100);
+  --color-bg-invert:var(--navy-900);
+  --color-bg-footer:var(--navy-950);
+
+  --color-text:var(--ink-900);
+  --color-text-soft:var(--ink-700);
+  --color-text-muted:var(--ink-500);
+  --color-text-invert:var(--white);
+  --color-text-invert-muted:var(--ink-200);
+
+  --color-border:var(--grey-200);
+  --color-border-strong:#C9D5EE;
+
+  --color-primary:var(--royal-600);
+  --color-accent:var(--amber-500);
+  --color-accent-soft:var(--amber-400);
+  --color-accent-text:var(--amber-700);   /* accent used AS text, on light */
+  --color-on-accent:#2A1600;              /* text placed ON the accent: 9.46:1 */
+
+  --color-success:var(--green-700);
+  --color-success-bg:var(--green-100);
+  --color-danger:var(--red-600);
+
+  --color-focus:var(--amber-500);
+
+  /* ---------- 3. LEGACY ALIASES ---------- */
+  /* Kept so every component rule written before the token refactor keeps
+     resolving. Prefer the semantic names above in anything new. */
+  --night:var(--navy-900);
+  --night-2:var(--navy-800);
+  --violet:var(--violet-600);
+  --royal:var(--royal-600);
+  --ink:var(--ink-900);
+  --muted:var(--ink-500);
+  --line:var(--grey-200);
+  --surface:var(--grey-100);
+  --gold:var(--amber-500);
+  --gold-2:var(--amber-400);
+  --green:var(--green-500);
+  --pink:var(--pink-500);
+
+  --grad-hot:linear-gradient(135deg,#FFB020 0%,#FF7A3D 100%);
+  --grad-royal:linear-gradient(135deg,#2A3B96 0%,#5B2E9E 100%);
+  --grad-text:linear-gradient(100deg,#FFD166 0%,#FFB020 40%,#FF8A4C 100%);
+
+  /* ---------- 4. SCALES ---------- */
+  /* Spacing — a 4px base. Use these instead of arbitrary pixel values. */
+  --space-1:4px;  --space-2:8px;  --space-3:12px; --space-4:16px;
+  --space-5:24px; --space-6:32px; --space-7:48px; --space-8:78px;
+
+  --r:16px; --r-lg:26px; --r-pill:999px; --r-sm:12px;
+
+  --sh:0 10px 30px rgba(11,18,53,.10);
+  --sh-lg:0 30px 70px rgba(11,18,53,.28);
+  --sh-focus:0 0 0 4px rgba(42,59,150,.12);
+
+  --dis:'Plus Jakarta Sans',system-ui,sans-serif;
+  --body:'Manrope',system-ui,sans-serif;
+
+  /* Motion — one duration and one easing, so nothing feels out of step. */
+  --dur:.2s;
+  --ease:cubic-bezier(.2,.8,.3,1);
+
+  /* Layering — the only z-index values in the file. */
+  --z-header:100;
+  --z-sticky:95;
+  --z-wa:90;
+  --z-toast:120;
+  --z-progress:200;
+  --z-modal:300;
+
+  --maxw:1180px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--body);background:#fff;color:var(--ink);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;display:block}
+h1,h2,h3,h4{margin:0;font-family:var(--dis);font-weight:800;line-height:1.15;letter-spacing:-.02em}
+p{margin:0}
+a{color:inherit;text-decoration:none}
+ul{margin:0;padding:0;list-style:none}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:8px}
+
+.container{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 20px}
+.section{padding:78px 0;position:relative}
+.tint{background:var(--surface)}
+.center{text-align:center}
+
+/* ================= SCROLL PROGRESS ================= */
+.progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--grad-hot);z-index:200;transition:width .1s linear}
+
+/* ================= TICKER ================= */
+.ticker{background:var(--grad-hot);color:#2A1600;font-weight:800;font-size:13.5px;letter-spacing:.02em;overflow:hidden;white-space:nowrap;padding:8px 0}
+.ticker__track{display:inline-flex;gap:44px;animation:slide 26s linear infinite;will-change:transform}
+.ticker span::before{font-family:"Font Awesome 6 Free";font-weight:900;content:"\f005";opacity:.75;margin-right:7px;font-size:11px}
+@keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ================= HEADER ================= */
+.header{position:sticky;top:0;z-index:100;background:rgba(11,18,53,.86);backdrop-filter:blur(14px) saturate(160%);border-bottom:1px solid rgba(255,255,255,.08)}
+.header__in{display:flex;align-items:center;justify-content:space-between;gap:16px;height:66px}
+.brand{display:flex;align-items:center;gap:11px;color:#fff}
+.brand__mark{width:40px;height:40px;border-radius:12px;background:var(--grad-hot);color:#2A1600;display:grid;place-items:center;font-family:var(--dis);font-weight:800;font-size:20px;flex:none;box-shadow:0 8px 20px rgba(255,176,32,.35)}
+.brand b{font-family:var(--dis);font-size:16px;font-weight:800;display:block;line-height:1.2}
+.brand small{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#93A4CC;font-weight:700}
+.header__right{display:flex;align-items:center;gap:12px}
+.hphone{color:#fff;font-weight:800;font-family:var(--dis);font-size:15px;display:flex;align-items:center;gap:8px}
+.hphone small{display:block;font-size:10px;color:#93A4CC;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.pulse-dot{width:9px;height:9px;border-radius:50%;background:#38E08A;box-shadow:0 0 0 0 rgba(56,224,138,.7);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(56,224,138,0)}100%{box-shadow:0 0 0 0 rgba(56,224,138,0)}}
+
+/* ================= BUTTONS ================= */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:15px 26px;border-radius:var(--r-pill);border:1px solid transparent;font-family:var(--dis);font-weight:800;font-size:15.5px;cursor:pointer;transition:transform .18s,box-shadow .18s,background .18s,color .18s;text-align:center}
+.btn:hover{transform:translateY(-3px)}
+.btn--hot{background:var(--grad-hot);color:#2A1600;box-shadow:0 12px 30px rgba(255,138,60,.42)}
+.btn--hot:hover{box-shadow:0 18px 40px rgba(255,138,60,.55)}
+.btn--dark{background:var(--night);color:#fff}
+.btn--dark:hover{background:var(--night-2)}
+.btn--glass{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.28);backdrop-filter:blur(6px)}
+.btn--glass:hover{background:rgba(255,255,255,.16)}
+.btn--line{background:#fff;color:var(--night);border-color:var(--line)}
+.btn--line:hover{border-color:var(--night)}
+.btn--wa{background:#25D366;color:#04361A}
+.btn--block{width:100%}
+.btn--sm{padding:11px 18px;font-size:14px}
+.btn--lg{padding:17px 32px;font-size:16.5px}
+.shine{position:relative;overflow:hidden}
+.shine::after{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:shine 3.6s ease-in-out infinite}
+@keyframes shine{0%,65%{left:-120%}100%{left:140%}}
+
+/* ================= HERO ================= */
+.hero{position:relative;background:var(--night);color:#fff;padding:64px 0 92px;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;pointer-events:none}
+.orb--a{width:520px;height:520px;background:#5B2E9E;top:-160px;left:-120px;animation:float 14s ease-in-out infinite}
+.orb--b{width:460px;height:460px;background:#C8631A;top:-80px;right:-120px;animation:float 18s ease-in-out infinite reverse}
+.orb--c{width:400px;height:400px;background:#153A8A;bottom:-200px;left:40%;animation:float 20s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-34px)}}
+.hero::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:58px 58px;mask-image:radial-gradient(circle at 50% 20%,#000,transparent 72%)}
+.hero__in{position:relative;z-index:2;display:grid;grid-template-columns:1.06fr .94fr;gap:52px;align-items:start}
+.pill{display:inline-flex;align-items:center;gap:9px;padding:8px 16px;border-radius:var(--r-pill);background:rgba(255,176,32,.14);border:1px solid rgba(255,176,32,.4);color:var(--gold-2);font-weight:800;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:20px}
+.hero h1{font-size:clamp(36px,5.4vw,60px);margin-bottom:18px}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero__sub{color:#B9C4E4;font-size:18px;max-width:560px}
+.rating{display:flex;align-items:center;gap:12px;margin-top:24px;flex-wrap:wrap}
+.stars{color:var(--gold);letter-spacing:2px;font-size:17px}
+.rating b{font-family:var(--dis)}
+.rating span{color:#9FADD4;font-size:14px}
+.hero__cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:28px}
+.usp{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin-top:34px;max-width:600px}
+.usp li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:#D3DBF2;font-weight:600}
+.tick{flex:none;width:22px;height:22px;border-radius:50%;background:rgba(56,224,138,.16);color:#38E08A;display:grid;place-items:center;font-size:12px;font-weight:800;margin-top:2px}
+
+/* ================= FORM CARD ================= */
+.card{background:#fff;color:var(--ink);border-radius:var(--r-lg);box-shadow:var(--sh-lg);overflow:hidden;position:relative}
+.card__head{background:var(--grad-royal);color:#fff;padding:22px 26px;position:relative;overflow:hidden}
+.card__head::after{content:"";position:absolute;width:180px;height:180px;background:rgba(255,176,32,.25);border-radius:50%;filter:blur(50px);top:-70px;right:-40px}
+.card__head h2{font-size:23px;position:relative}
+.card__head p{font-size:14px;color:#CBD4F2;position:relative;margin-top:4px}
+.card__body{padding:24px 26px 26px}
+.timer{display:flex;align-items:center;justify-content:center;gap:10px;background:#FFF6E6;border:1px dashed #FFC978;color:#8A5200;font-weight:800;font-size:13.5px;border-radius:12px;padding:9px 12px;margin-bottom:18px;font-family:var(--dis)}
+.timer b{background:var(--night);color:#FFD166;padding:3px 8px;border-radius:7px;font-variant-numeric:tabular-nums}
+.form{display:grid;gap:13px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.field{display:grid;gap:5px}
+.field label{font-size:12.5px;font-weight:800;color:#3A4A70;font-family:var(--dis)}
+.req{color:var(--pink)}
+.field input,.field select{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:#FAFBFE;font-size:15px;transition:border-color .16s,box-shadow .16s,background .16s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--royal);background:#fff;box-shadow:0 0 0 4px rgba(42,59,150,.12)}
+.field input::placeholder{color:#9FADC7}
+.field.err input,.field.err select{border-color:var(--pink);background:#FFF5F7}
+.emsg{display:none;font-size:12px;color:#D92D50;font-weight:700}
+.field.err .emsg{display:block}
+.tiny{font-size:12px;color:var(--muted);text-align:center}
+.secure{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);font-weight:600}
+.ok{display:none;gap:12px;align-items:flex-start;background:#ECFDF3;border:1px solid #A6E7C0;color:#0B5C36;padding:15px 17px;border-radius:14px;font-size:14.5px;font-weight:700}
+.ok.show{display:flex}
+.ok i{font-style:normal;font-size:18px}
+
+/* ================= MARQUEE LOGOS ================= */
+.strip{background:#fff;border-bottom:1px solid var(--line);padding:22px 0;overflow:hidden}
+.strip__label{text-align:center;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--color-text-muted);font-weight:800;margin-bottom:16px}
+.marquee{display:flex;gap:14px;animation:slide 30s linear infinite;width:max-content}
+.marquee:hover{animation-play-state:paused}
+.mlogo{display:flex;align-items:center;gap:10px;padding:10px 18px;border:1px solid var(--line);border-radius:var(--r-pill);font-weight:700;font-size:14px;color:#33436B;white-space:nowrap;background:#fff}
+.mlogo__mark{width:26px;height:26px;flex:none;border-radius:8px;display:grid;place-items:center}
+
+/* ================= STATS ================= */
+.stats{background:var(--grad-royal);color:#fff;padding:44px 0}
+.stats__g{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center}
+.stat b{display:block;font-family:var(--dis);font-size:clamp(30px,4vw,44px);font-weight:800;color:var(--gold-2);line-height:1}
+.stat span{font-size:13.5px;color:#C6CFF0;font-weight:600}
+
+/* ================= HEADINGS ================= */
+.head{max-width:720px;margin:0 auto 46px;text-align:center}
+.eyebrow{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--color-accent-text);background:#FFF3DF;border:1px solid #FFDCA8;padding:6px 14px;border-radius:var(--r-pill);margin-bottom:14px}
+.h2{font-size:clamp(28px,4.2vw,42px)}
+.lead{color:var(--muted);font-size:17px;margin-top:14px}
+.dark .h2{color:#fff}
+.dark .lead{color:#B6C1E2}
+.dark .eyebrow{color:var(--gold-2);background:rgba(255,176,32,.12);border-color:rgba(255,176,32,.35)}
+
+/* ================= UNIVERSITY CARDS ================= */
+.ugrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.uni{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:24px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden;transition:transform .22s,box-shadow .22s,border-color .22s}
+.uni::after{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--grad-hot);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.uni:hover{transform:translateY(-6px);box-shadow:var(--sh);border-color:#C9D5EE}
+.uni:hover::after{transform:scaleX(1)}
+.uni__top{display:flex;gap:14px}
+.ulogo{width:50px;height:50px;flex:none;border-radius:14px;display:grid;place-items:center}
+.uni h3{font-size:18px;line-height:1.25}
+.tag{display:inline-block;margin-top:6px;font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:var(--r-pill);background:#E9FBF1;color:#0B7A45}
+.tag.warn{background:#FFF3DF;color:#A2610C}
+.uni ul{display:grid;gap:8px;font-size:14.5px;color:var(--muted)}
+.uni ul li{display:flex;gap:9px}
+.uni ul li::before{font-family:"Font Awesome 6 Free";font-weight:900;content:"\f00c";color:var(--color-accent);font-size:11px;line-height:1.7;flex:none}
+.uni .btn{margin-top:auto}
+.note{margin-top:26px;font-size:13.5px;color:var(--muted);background:#fff;border:1px dashed #CBD6EC;border-radius:14px;padding:16px 18px}
+
+/* ================= FEATURES ================= */
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.feat{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:26px;transition:transform .22s,box-shadow .22s}
+.feat:hover{transform:translateY(-6px);box-shadow:var(--sh)}
+.fico{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:21px;margin-bottom:15px;background:var(--grad-hot);color:#2A1600;box-shadow:0 10px 22px rgba(255,138,60,.28)}
+.feat h3{font-size:19px;margin-bottom:7px}
+.feat p{color:var(--muted);font-size:14.8px}
+
+/* ================= CHIPS ================= */
+.chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:32px}
+.chip{padding:12px 22px;border-radius:var(--r-pill);background:#fff;border:1.5px solid var(--line);font-family:var(--dis);font-weight:700;font-size:15px;cursor:pointer;transition:all .18s}
+.chip:hover{background:var(--night);color:#fff;border-color:var(--night);transform:translateY(-3px)}
+
+/* ================= TABLE ================= */
+.twrap{border:1px solid var(--line);border-radius:var(--r);background:#fff;overflow:auto;box-shadow:var(--sh);-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;min-width:980px;font-size:14.2px}
+thead th{background:var(--night);color:#fff;text-align:left;padding:15px 16px;font-family:var(--dis);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;position:sticky;top:0}
+tbody td{padding:15px 16px;border-bottom:1px solid #EEF2F9;color:var(--muted);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:#F8FAFF}
+tbody td:first-child{color:var(--ink);font-weight:800;white-space:nowrap;font-family:var(--dis)}
+.fee{color:var(--color-accent-text);font-weight:800;white-space:nowrap}
+
+/* Fees change every intake, so the cell asks rather than states. It is a
+   real <button>: it performs an action on the page, it does not navigate. */
+.fee__btn{
+  font:inherit;color:var(--color-accent-text);font-weight:800;white-space:nowrap;
+  background:var(--amber-100);border:1px solid #FFDCA8;border-radius:var(--r-pill);
+  padding:7px 14px;cursor:pointer;
+  transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),transform var(--dur) var(--ease)
+}
+.fee__btn:hover{background:var(--grad-hot);border-color:transparent;color:var(--color-on-accent);transform:translateY(-2px)}
+@media (hover:none){
+  /* Touch devices: bigger hit area, and no hover state to get stuck in. */
+  .fee__btn{padding:12px 16px}
+  .fee__btn:hover{transform:none}
+}
+.hint{font-size:13px;color:var(--muted);margin-top:12px;display:none;text-align:center}
+.actions{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:32px}
+
+/* ================= STEPS ================= */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;position:relative}
+.step{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:26px 22px;position:relative}
+.step b{font-family:var(--dis);font-size:13px;font-weight:800;color:#fff;background:var(--grad-hot);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#2A1600;margin-bottom:14px}
+.step h3{font-size:17.5px;margin-bottom:6px}
+.step p{font-size:14.5px;color:var(--muted)}
+
+/* ================= TESTIMONIALS ================= */
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.tcard{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:26px;display:flex;flex-direction:column;gap:14px}
+.tcard p{font-size:15px;color:#3B4A6B}
+.twho{display:flex;align-items:center;gap:12px;margin-top:auto}
+.av{width:44px;height:44px;border-radius:50%;background:var(--grad-royal);color:#fff;display:grid;place-items:center;font-family:var(--dis);font-weight:800;flex:none}
+.twho b{display:block;font-family:var(--dis);font-size:15px}
+.twho span{font-size:13px;color:var(--muted)}
+
+/* ================= SPLIT CTA ================= */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center}
+.split ul{display:grid;gap:13px;margin-top:26px}
+.split ul li{display:flex;gap:11px;font-size:15.5px;color:#D3DBF2;font-weight:600}
+
+/* ================= FAQ ================= */
+.faq{max-width:840px;margin:0 auto;display:grid;gap:12px}
+.fitem{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:box-shadow .2s,border-color .2s}
+.fitem.open{box-shadow:var(--sh);border-color:#C9D5EE}
+.fq{width:100%;background:none;border:0;cursor:pointer;text-align:left;padding:19px 52px 19px 20px;position:relative;font-family:var(--dis);font-size:17px;font-weight:700}
+.fq::after{font-family:"Font Awesome 6 Free";font-weight:900;content:"\2b";position:absolute;right:18px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;background:var(--surface);color:var(--royal);display:grid;place-items:center;font-size:15px;line-height:1}
+.fitem.open .fq::after{content:"\f068";background:var(--grad-hot);color:var(--color-on-accent)}
+.fa{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.fa p{padding:0 52px 20px 20px;color:var(--muted);font-size:15.3px}
+
+/* ================= FINAL ================= */
+.final{position:relative;background:var(--night);color:#fff;padding:82px 0;overflow:hidden;text-align:center}
+.final .fform{max-width:640px;margin:32px auto 0;text-align:left;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);padding:26px;border-radius:var(--r-lg);backdrop-filter:blur(8px)}
+.final .field label{color:#CBD4F2}
+.final .field input,.final .field select{background:rgba(255,255,255,.95);border-color:transparent}
+.final .tiny,.final .secure{color:#9FADD4}
+
+/* ================= FOOTER ================= */
+.footer{background:#070C24;color:#93A4CC;padding:32px 0 24px}
+.fin{display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between}
+.flinks{display:flex;flex-wrap:wrap;gap:20px;font-size:14px}
+.flinks a:hover{color:var(--gold)}
+.fbot{margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.09);font-size:12.5px;text-align:center}
+
+/* ================= FLOATING / STICKY ================= */
+.wa{position:fixed;right:18px;bottom:96px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;display:grid;place-items:center;box-shadow:0 12px 28px rgba(37,211,102,.45);font-size:26px}
+.wa:hover{transform:scale(1.06)}
+.sticky{position:fixed;left:0;right:0;bottom:0;z-index:95;display:none;gap:8px;padding:8px 12px;background:#fff;border-top:1px solid var(--line);box-shadow:0 -8px 26px rgba(11,18,53,.12);padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+/* Four CTAs have to share ~312px on a 360px phone, so the icon goes above
+   the label rather than beside it — that keeps every label readable and
+   every target a full quarter of the bar wide. */
+.sticky .btn{
+  flex:1 1 0;min-width:0;
+  flex-direction:column;gap:3px;
+  padding:9px 4px;font-size:11.5px;line-height:1.2;
+  border-radius:var(--r-sm)
+}
+.sticky .btn .mbag-i{font-size:15px}
+.sticky .btn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.sticky .btn:hover{transform:none}
+
+/* ================= TOAST ================= */
+.toast{position:fixed;left:18px;bottom:18px;z-index:120;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);padding:12px 16px;display:flex;gap:11px;align-items:center;max-width:310px;transform:translateY(140%);transition:transform .4s cubic-bezier(.2,.8,.3,1)}
+.toast.show{transform:none}
+.toast .dot{width:9px;height:9px;border-radius:50%;background:var(--green);flex:none;animation:pulse 2s infinite}
+.toast p{font-size:13.3px;color:#3B4A6B;line-height:1.4}
+.toast b{font-family:var(--dis)}
+
+/* ================= REVEAL ================= */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .6s ease,transform .6s ease}
+.rv.in{opacity:1;transform:none}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width:1024px){
+  .hero__in{grid-template-columns:1fr;gap:40px}
+  .ugrid,.fgrid,.tgrid{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr;gap:36px}
+  .hint{display:block}
+}
+@media (max-width:760px){
+  .section{padding:56px 0}
+  .hero{padding:44px 0 64px}
+  .usp{grid-template-columns:1fr;max-width:none}
+  .stats__g{grid-template-columns:1fr 1fr;gap:26px}
+  .ugrid,.fgrid,.tgrid,.steps{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr}
+  .hphone{display:none}
+  .sticky{display:flex}
+  body{padding-bottom:84px}
+  .wa{bottom:96px;width:52px;height:52px}
+  .toast{display:none}
+  .fin{flex-direction:column;align-items:flex-start}
+  .card__body{padding:20px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .rv{opacity:1;transform:none}
+}
+
+/* ================= CONTACT FORM 7 ================= */
+/* CF7 forms are rendered with html_class="form mbag-form", so they inherit
+   all of the .form / .row / .field styling above. These rules only fix the
+   extra wrappers and messages that CF7 injects on its own. */
+
+.mbag-cf7{display:block}
+
+/* CF7 wraps every control in a <span>; make it behave like a block. */
+.mbag-form .wpcf7-form-control-wrap{display:block;width:100%}
+
+/* Kill CF7's default <p> spacing if any stray <p> wrappers survive. */
+.mbag-form > p{margin:0}
+
+/* Buttons: CF7 renders <input type="submit">, so mirror .btn sizing. */
+.mbag-form input[type="submit"],
+.mbag-form .wpcf7-submit{width:100%;cursor:pointer;border:0}
+
+/* Inline validation messages -> match the theme's .emsg style. */
+.mbag-form .wpcf7-not-valid-tip{display:block;margin-top:5px;font-size:12px;color:#D92D50;font-weight:700}
+.mbag-form .wpcf7-not-valid{border-color:var(--pink) !important;background:#FFF5F7 !important}
+
+/* Response output (success / error banner) -> match the theme's .ok style. */
+.mbag-form .wpcf7-response-output{
+  margin:4px 0 0;padding:15px 17px;border-radius:14px;
+  font-size:14.5px;font-weight:700;line-height:1.5;
+  border:1px solid #A6E7C0;background:#ECFDF3;color:#0B5C36
+}
+.mbag-form.invalid .wpcf7-response-output,
+.mbag-form.unaccepted .wpcf7-response-output,
+.mbag-form.failed .wpcf7-response-output,
+.mbag-form.aborted .wpcf7-response-output{
+  border-color:#F3B0BF;background:#FFF5F7;color:#B01B3B
+}
+.mbag-form .wpcf7-response-output:empty,
+.mbag-form.init .wpcf7-response-output{display:none}
+
+/* Spinner sits inline next to the button instead of pushing layout around. */
+.mbag-form .wpcf7-spinner{display:block;margin:8px auto 0}
+
+/* On the dark final section, keep labels and messages readable. */
+.final .mbag-form .wpcf7-not-valid-tip{color:#FFB3C4}
+.final .mbag-form .wpcf7-response-output{background:rgba(255,255,255,.95)}
+
+/* ================= ACCESSIBILITY ================= */
+.screen-reader-text{
+  border:0;clip:rect(1px,1px,1px,1px);clip-path:inset(50%);height:1px;width:1px;
+  margin:-1px;overflow:hidden;padding:0;position:absolute!important;word-wrap:normal!important
+}
+.screen-reader-text:focus{
+  background:#fff;border-radius:8px;box-shadow:0 0 3px rgba(0,0,0,.3);clip:auto!important;clip-path:none;
+  color:var(--night);display:block;font-size:14px;font-weight:800;height:auto;left:12px;line-height:normal;
+  padding:14px 20px;text-decoration:none;top:12px;width:auto;z-index:100000
+}
+.skip-link:focus{outline:3px solid var(--gold)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid var(--gold);outline-offset:2px;border-radius:6px
+}
+
+/* ================= PRIMARY NAVIGATION ================= */
+.nav{display:flex;align-items:center;gap:26px}
+.nav__list{display:flex;align-items:center;gap:24px;font-family:var(--dis);font-weight:700;font-size:14.5px}
+.nav__list li{position:relative}
+.nav__list a{color:#D7DEF4;transition:color .16s}
+.nav__list a:hover,.nav__list .current-menu-item>a,.nav__list .current_page_item>a{color:var(--gold-2)}
+.nav__list .sub-menu{
+  display:none;position:absolute;top:100%;left:0;min-width:210px;background:#fff;border:1px solid var(--line);
+  border-radius:14px;box-shadow:var(--sh);padding:8px;z-index:120
+}
+.nav__list li:hover>.sub-menu,.nav__list li:focus-within>.sub-menu{display:block}
+.nav__list .sub-menu a{display:block;color:var(--ink);padding:9px 12px;border-radius:9px;font-size:14px}
+.nav__list .sub-menu a:hover{background:var(--surface);color:var(--royal)}
+.nav__cta{display:none;gap:10px}
+.navtoggle{
+  display:none;width:44px;height:44px;border:1px solid rgba(255,255,255,.24);border-radius:12px;
+  background:rgba(255,255,255,.06);cursor:pointer;place-items:center;margin-left:auto
+}
+.navtoggle__bars,.navtoggle__bars::before,.navtoggle__bars::after{
+  content:"";display:block;width:18px;height:2px;background:#fff;border-radius:2px;transition:transform .2s,opacity .2s
+}
+.navtoggle__bars::before{transform:translateY(-6px)}
+.navtoggle__bars::after{transform:translateY(4px)}
+.nav-open .navtoggle__bars{background:transparent}
+.nav-open .navtoggle__bars::before{transform:rotate(45deg)}
+.nav-open .navtoggle__bars::after{transform:rotate(-45deg) translateY(-2px)}
+.header .custom-logo{max-height:44px;width:auto}
+
+/* ================= INNER PAGE HERO ================= */
+.site-main{display:block}
+.page-hero{position:relative;background:var(--night);color:#fff;padding:52px 0 58px;overflow:hidden}
+.page-hero--tall{padding:70px 0 84px}
+.page-hero::before{
+  content:"";position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);
+  background-size:58px 58px;mask-image:radial-gradient(circle at 50% 10%,#000,transparent 75%)
+}
+.page-hero>.container{position:relative;z-index:2}
+.page-hero__title{font-size:clamp(28px,4.6vw,46px);margin-top:6px}
+.page-hero__sub{color:#B9C4E4;font-size:17px;margin-top:14px;max-width:680px}
+.page-hero.center .page-hero__sub,.page-hero .center .page-hero__sub{margin-left:auto;margin-right:auto}
+.hero__cta--center{justify-content:center}
+
+/* ================= BREADCRUMBS ================= */
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:9px;font-size:13px;color:#9FADD4;margin-bottom:12px;font-weight:600}
+.crumbs a{color:#C7D2EE}
+.crumbs a:hover{color:var(--gold-2)}
+.crumbs__sep{opacity:.5}
+.crumbs [aria-current="page"]{color:#fff}
+
+/* ================= CONTENT TYPOGRAPHY ================= */
+.container--narrow{max-width:860px}
+.section--flush{padding:48px 0}
+.entry__media{margin:0 0 26px;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.entry__meta{display:flex;flex-wrap:wrap;gap:14px;font-size:13.5px;color:var(--muted);font-weight:700;margin-bottom:14px}
+.entry__meta a{color:var(--royal)}
+.entry-content{font-size:17px;color:#33436B}
+.entry-content>*+*{margin-top:22px}
+.entry-content h2{font-size:clamp(24px,3.2vw,32px);margin-top:42px;color:var(--ink)}
+.entry-content h3{font-size:21px;margin-top:32px;color:var(--ink)}
+.entry-content h4{font-size:18px;margin-top:26px;color:var(--ink)}
+.entry-content p{margin:0}
+.entry-content a{color:var(--royal);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.entry-content a:hover{color:var(--color-accent-text)}
+.entry-content ul,.entry-content ol{padding-left:22px;display:grid;gap:10px}
+.entry-content ul{list-style:disc}
+.entry-content ol{list-style:decimal}
+.entry-content li::marker{color:var(--gold)}
+.entry-content img,.entry-content iframe,.entry-content video{border-radius:var(--r);max-width:100%}
+.entry-content blockquote{
+  margin:0;padding:18px 22px;background:var(--surface);border-left:4px solid var(--gold);
+  border-radius:0 14px 14px 0;font-size:17.5px;color:#3B4A6B
+}
+.entry-content blockquote cite{display:block;margin-top:8px;font-size:14px;color:var(--muted);font-style:normal}
+.entry-content code,.entry-content kbd{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:14.5px}
+.entry-content pre{background:var(--night);color:#DCE4FA;padding:18px 20px;border-radius:14px;overflow:auto}
+.entry-content pre code{background:none;border:0;color:inherit;padding:0}
+.entry-content hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+.entry-content table{min-width:0;font-size:15px}
+.entry-content table th,.entry-content table td{padding:12px 14px}
+.entry-content figcaption,.wp-caption-text{font-size:13.5px;color:var(--muted);text-align:center;margin-top:8px}
+.entry-content .alignwide{width:min(1080px,92vw);margin-left:50%;transform:translateX(-50%);max-width:none}
+.entry-content .alignfull{width:100vw;margin-left:50%;transform:translateX(-50%);max-width:none;border-radius:0}
+.entry-content .alignleft{float:left;margin:6px 24px 18px 0}
+.entry-content .alignright{float:right;margin:6px 0 18px 24px}
+.entry-content .aligncenter{margin-left:auto;margin-right:auto;display:block}
+.entry-content .wp-block-button__link{border-radius:var(--r-pill)}
+.entry__tags{display:flex;flex-wrap:wrap;gap:9px;margin-top:30px}
+.entry__tags a{font-size:12.5px;font-weight:800;padding:6px 13px;border-radius:var(--r-pill);background:var(--surface);border:1px solid var(--line);color:#3A4A70}
+.entry__tags a:hover{background:var(--night);color:#fff;border-color:var(--night)}
+.entry__footer{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);font-size:14px}
+.entry__edit a{color:var(--royal);font-weight:700}
+.page-links{margin-top:24px;font-weight:700;font-size:14px;display:flex;gap:10px}
+
+/* ================= POST LISTINGS ================= */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.pcard{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;transition:transform .22s,box-shadow .22s,border-color .22s}
+.pcard:hover{transform:translateY(-6px);box-shadow:var(--sh);border-color:#C9D5EE}
+.pcard__thumb{display:block;aspect-ratio:16/10;background:var(--grad-royal);overflow:hidden}
+.pcard__thumb img{width:100%;height:100%;object-fit:cover}
+.pcard__ph{display:grid;place-items:center;width:100%;height:100%;color:#fff;font-family:var(--dis);font-weight:800;font-size:44px}
+.pcard__body{padding:22px;display:flex;flex-direction:column;gap:10px;flex:1}
+.pcard__title{font-size:19px;line-height:1.3}
+.pcard__title a:hover{color:var(--royal)}
+.pcard__ex{font-size:14.8px;color:var(--muted)}
+.pcard__more{margin-top:auto;font-family:var(--dis);font-weight:800;font-size:14.5px;color:var(--royal)}
+.pcard__more:hover{color:var(--color-accent-text)}
+
+/* ================= PAGINATION & POST NAV ================= */
+.mbag-pagination{margin-top:40px}
+.mbag-pagination .nav-links{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.mbag-pagination .page-numbers{
+  display:grid;place-items:center;min-width:42px;height:42px;padding:0 14px;border-radius:var(--r-pill);
+  background:#fff;border:1px solid var(--line);font-family:var(--dis);font-weight:800;font-size:14.5px;color:#3A4A70
+}
+.mbag-pagination .page-numbers:hover{border-color:var(--night);color:var(--night)}
+.mbag-pagination .page-numbers.current{background:var(--night);border-color:var(--night);color:#fff}
+.mbag-pagination .dots{border:0;background:none}
+.pnav{margin-top:44px;padding-top:26px;border-top:1px solid var(--line)}
+.pnav .nav-links{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.pnav .nav-next{text-align:right}
+.pnav a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:var(--r);background:#fff;transition:border-color .2s,box-shadow .2s}
+.pnav a:hover{border-color:#C9D5EE;box-shadow:var(--sh)}
+.pnav__label{display:block;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:5px}
+.pnav__title{font-family:var(--dis);font-weight:800;font-size:15.5px;color:var(--ink)}
+
+/* ================= SEARCH & EMPTY STATES ================= */
+.sform{display:flex;gap:10px;max-width:560px}
+.sform__input{
+  flex:1;padding:13px 16px;border:1.5px solid var(--line);border-radius:var(--r-pill);background:#fff;font-size:15px
+}
+.sform__input:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 4px rgba(42,59,150,.12)}
+.search-bar{margin-bottom:30px;display:flex;justify-content:center}
+.e404__search{display:flex;justify-content:center;margin:24px 0 6px}
+.e404__search .sform__input{background:rgba(255,255,255,.95);border-color:transparent}
+.empty{max-width:640px;margin:0 auto;text-align:center;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:44px 28px}
+.empty h2{font-size:24px;margin-bottom:10px}
+.empty p{color:var(--muted)}
+.empty .sform{margin:22px auto 0}
+.empty__cta{margin-top:22px}
+
+/* ================= COMMENTS ================= */
+.comments{margin-top:52px;padding-top:34px;border-top:1px solid var(--line)}
+.comments__title{font-size:23px;margin-bottom:22px}
+.comments__list,.comments__list .children{list-style:none;margin:0;padding:0;display:grid;gap:18px}
+.comments__list .children{margin-top:18px;padding-left:22px;border-left:2px solid var(--line)}
+.comments__list .comment-body{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:20px 22px}
+.comments__list .comment-author{display:flex;align-items:center;gap:11px;font-family:var(--dis);font-weight:800;font-size:15px}
+.comments__list .comment-author img{border-radius:50%}
+.comments__list .comment-metadata{font-size:12.5px;color:var(--muted);margin:6px 0 12px}
+.comments__list .reply{margin-top:10px;font-size:13.5px;font-weight:800}
+.comments__list .reply a{color:var(--royal)}
+.comment-respond{margin-top:34px}
+.comment-reply-title{font-family:var(--dis);font-size:21px;font-weight:800;margin-bottom:12px}
+.comment-form{display:grid;gap:14px}
+.comment-form label{font-size:12.5px;font-weight:800;color:#3A4A70;font-family:var(--dis);display:block;margin-bottom:5px}
+.comment-form input[type="text"],.comment-form input[type="email"],.comment-form input[type="url"],.comment-form textarea{
+  width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:#FAFBFE;font-size:15px;font-family:inherit
+}
+.comment-form textarea{min-height:150px;resize:vertical}
+.comment-form input:focus,.comment-form textarea:focus{outline:none;border-color:var(--royal);background:#fff;box-shadow:0 0 0 4px rgba(42,59,150,.12)}
+.comment-form .form-submit{margin:0}
+.comment-form input[type="submit"]{cursor:pointer;border:0}
+.comments__closed{margin-top:18px;color:var(--muted);font-size:14.5px}
+
+/* ================= THANK YOU PAGE ================= */
+.ty__check{
+  width:78px;height:78px;margin:0 auto 20px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(56,224,138,.14);border:2px solid rgba(56,224,138,.55);color:#38E08A;font-size:38px;font-weight:800;
+  animation:tyPop .6s cubic-bezier(.2,.8,.3,1) both
+}
+@keyframes tyPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+.ty .pill{margin-bottom:16px}
+.ty__hint{margin-top:18px;font-size:13.5px;color:#9FADD4}
+.ty__next .feat{display:block}
+.ty__next .feat:hover{border-color:#C9D5EE}
+.is-thankyou .ticker{display:none}
+.ctaband{padding:64px 0}
+
+/* ================= WORDPRESS CORE CLASSES ================= */
+.sticky-post{border-color:var(--gold)}
+.bypostauthor>.comment-body{border-color:#C9D5EE}
+.wp-caption{max-width:100%}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.gallery-item{margin:0}
+
+/* ================= RESPONSIVE — INNER PAGES ================= */
+@media (max-width:1024px){
+  .pgrid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:900px){
+  .navtoggle{display:grid}
+  .header__right{display:none}
+  .nav{
+    position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;
+    background:#0E1740;border-top:1px solid rgba(255,255,255,.08);box-shadow:0 20px 40px rgba(0,0,0,.35);
+    padding:14px 20px 20px;display:none
+  }
+  .nav-open .nav{display:flex}
+  .nav__list{flex-direction:column;align-items:stretch;gap:0;font-size:16px}
+  .nav__list li{border-bottom:1px solid rgba(255,255,255,.07)}
+  .nav__list a{display:block;padding:14px 2px}
+  .nav__list .sub-menu{display:block;position:static;background:none;border:0;box-shadow:none;padding:0 0 8px 14px}
+  .nav__list .sub-menu a{color:#AFBBDD;padding:9px 2px}
+  .nav__cta{display:grid;gap:10px;margin-top:16px}
+  .nav__cta .btn{width:100%}
+}
+@media (max-width:760px){
+  .page-hero{padding:38px 0 44px}
+  .page-hero--tall{padding:48px 0 60px}
+  .pgrid{grid-template-columns:1fr}
+  .pnav .nav-links{grid-template-columns:1fr}
+  .pnav .nav-next{text-align:left}
+  .entry-content{font-size:16px}
+  .entry-content .alignleft,.entry-content .alignright{float:none;margin:0 0 18px}
+  .sform{flex-direction:column}
+  .gallery{grid-template-columns:repeat(2,1fr)}
+  .comments__list .children{padding-left:12px}
+}
+
+/* =========================================================================
+   ICONS — Font Awesome 6 Free
+
+   Loaded from cdnjs in functions.php as core + solid + brands. Every icon
+   in the templates comes from mbag_icon(), which emits an <i class="fa-…
+   mbag-i" aria-hidden="true">, so the rules below only need to handle
+   size, colour and alignment — never the glyph itself.
+
+   Icons here are decorative: each one sits beside a text label, and is
+   hidden from assistive tech. Sizes use em so an icon tracks the font
+   size of whatever it sits in.
+   ========================================================================= */
+.mbag-i{display:inline-block;line-height:1;vertical-align:-.06em}
+
+/* Buttons and inline links */
+.btn .mbag-i{font-size:.94em}
+.pcard__more .mbag-i,.crumbs .mbag-i{font-size:.85em;margin-left:2px}
+.mbag-pagination .mbag-i{font-size:.8em}
+
+/* Feature / benefit tiles */
+.fico .mbag-i{font-size:21px}
+
+/* Checklist ticks */
+.tick .mbag-i{font-size:10.5px}
+
+/* Star rating */
+.stars{display:inline-flex;align-items:center;gap:3px;letter-spacing:0}
+.stars .mbag-i{font-size:14px;color:var(--color-accent)}
+
+/* Countdown chip and the secure/privacy line under each form */
+.timer .mbag-i{font-size:14px;color:#8A5200}
+.secure .mbag-i{font-size:12px;color:var(--color-text-muted)}
+.final .secure .mbag-i{color:var(--ink-300)}
+
+/* Success panel on the static forms */
+.ok .ok__i{font-size:17px;color:var(--color-success);margin-top:2px;flex:none}
+
+/* Floating WhatsApp button */
+.wa .mbag-i{font-size:27px}
+
+/* Thank You page confirmation mark */
+.ty__check .mbag-i{font-size:34px}
+
+/* An icon that fails to load must never collapse the layout it sits in. */
+.fico .mbag-i,.tick .mbag-i,.ty__check .mbag-i{min-width:1em;text-align:center}
+
+/* =========================================================================
+   UNIVERSITY LOGOS
+
+   With a logo file present PHP passes its URL to the front end and the
+   tile becomes a white plate holding the image. With no file the slot is
+   not rendered at all, so a card without a logo reads as a clean heading
+   rather than as a placeholder.
+
+   Logos arrive at every possible aspect ratio, so the image is contained
+   rather than cropped and the plate keeps a fixed square footprint —
+   a wide logo and a square one still line the cards up.
+   ========================================================================= */
+.ulogo--img,.mlogo__mark--img{
+  background:var(--white);
+  background-image:none;
+  border:1px solid var(--color-border);
+  padding:5px;
+  overflow:hidden
+}
+.ulogo--img img,.mlogo__mark--img img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block
+}
+.mlogo__mark--img{padding:3px}
+
+/* A logo that fails to load leaves the plate empty rather than showing a
+   broken-image glyph inside the card. */
+.ulogo--img img[alt]{color:transparent;font-size:0}
+
+/* =========================================================================
+   LEAD POPUP
+
+   The dialog ships in the page hidden, so the Contact Form 7 markup, its
+   nonce and the theme's phone-field handling are all live before it opens.
+   [hidden] is enforced with !important because the layout rules below would
+   otherwise win over the attribute.
+   ========================================================================= */
+.mbag-modal{position:fixed;inset:0;z-index:var(--z-modal);display:grid;place-items:center;padding:20px}
+.mbag-modal[hidden]{display:none!important}
+.mbag-modal__overlay{
+  position:absolute;inset:0;background:rgba(7,12,36,.72);
+  backdrop-filter:blur(3px);opacity:0;transition:opacity var(--dur) var(--ease)
+}
+.mbag-modal__dialog{
+  position:relative;width:100%;max-width:480px;
+  max-height:calc(100vh - 40px);
+  max-height:calc(100dvh - 40px);   /* dvh: excludes the mobile browser toolbar */
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  opacity:0;transform:translateY(18px) scale(.98);
+  transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease)
+}
+.mbag-modal.is-open .mbag-modal__overlay{opacity:1}
+.mbag-modal.is-open .mbag-modal__dialog{opacity:1;transform:none}
+
+.mbag-modal__close{
+  position:absolute;top:12px;right:12px;z-index:2;
+  width:42px;height:42px;border-radius:50%;border:0;cursor:pointer;
+  background:rgba(255,255,255,.18);color:#fff;font-size:26px;line-height:1;
+  display:grid;place-items:center;transition:background var(--dur) var(--ease)
+}
+.mbag-modal__close:hover{background:rgba(255,255,255,.32)}
+
+/* The dialog reuses .card, so its head keeps room for the close button. */
+.mbag-modal .card__head{padding-right:60px}
+
+/* Page behind a modal must not scroll under it. */
+.mbag-noscroll{overflow:hidden}
+
+@media (max-width:520px){
+  .mbag-modal{padding:12px}
+  .mbag-modal__dialog{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px)}
+  .mbag-modal .card__body{padding:20px}
+}
+
+/* =========================================================================
+   LEFT CTA RAIL
+
+   Two vertical tabs pinned to the left edge, mid-screen. Deliberately on
+   the opposite edge from the WhatsApp button and clear of the mobile
+   bottom bar, so the three sets of CTAs never stack on each other.
+
+   Reading direction: writing-mode turns the text on its side and the 180°
+   rotation makes it read bottom-to-top, which is the convention for a
+   left-edge tab. That rotation also swaps the corners, so the radius is
+   declared on the LEFT pair to render on the right — the side facing the
+   page. Change one, change the other.
+   ========================================================================= */
+.rail{
+  position:fixed;left:0;top:50%;transform:translateY(-50%);
+  z-index:var(--z-wa);display:grid;gap:10px
+}
+.rail__btn{
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:20px 12px;border:0;cursor:pointer;
+  font-family:var(--dis);font-weight:800;font-size:14px;letter-spacing:.01em;
+  border-radius:12px 0 0 12px;   /* renders on the right — see note above */
+  box-shadow:0 8px 24px rgba(11,18,53,.28);
+  transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease),filter var(--dur) var(--ease)
+}
+.rail__btn--call{background:var(--grad-hot);color:var(--color-on-accent)}
+.rail__btn--brochure{background:var(--grad-royal);color:var(--white)}
+.rail__btn:hover{
+  /* Rotation lives in the same property, so the nudge has to keep it. */
+  transform:rotate(180deg) translateY(3px);
+  box-shadow:0 14px 32px rgba(11,18,53,.4);
+  filter:brightness(1.06)
+}
+.rail__btn .mbag-i{font-size:14px}
+
+/* On a phone the rail would overlap the left edge of the content, and the
+   bottom bar already carries all four CTAs — so the rail is desktop/tablet
+   only. To bring it back, delete this rule. */
+@media (max-width:760px){
+  .rail{display:none}
+}
+
+/* Very short viewports: the rail would cover most of the screen edge, and
+   the mobile bottom bar already carries Call and WhatsApp. */
+@media (max-height:520px){
+  .rail{display:none}
+}
+
+/* =========================================================================
+   POPUP / CF7 FORM STYLING
+
+   Contact Form 7 markup varies with whoever built the form — the theme's
+   own .field / .row classes, a plugin's .dxm-* classes, or nothing at all.
+   These rules are scoped to .mbag-form and target the ELEMENTS rather than
+   the wrappers, so the form looks right whichever markup it arrives in.
+
+   CF7 also runs the form through wpautop, which sprinkles <p> and <br>
+   through it. Those are neutralised here rather than fought in the form
+   editor, where an author would have to remember the trick every time.
+   ========================================================================= */
+
+/* Layout ---------------------------------------------------------------- */
+.mbag-form p{margin:0}
+.mbag-form br{display:none}
+.mbag-form .dxm-form{display:grid;gap:13px}
+.mbag-form .dxm-field{display:grid;gap:5px}
+
+/* Two fields side by side. The pair sits inside one wpautop <p>, so the
+   grid goes on that <p>, not on the row wrapper. */
+.mbag-form .dxm-row>p{display:grid;grid-template-columns:1fr 1fr;gap:13px;align-items:start}
+
+/* Labels ---------------------------------------------------------------- */
+.mbag-form .dxm-label{
+  display:block;font-family:var(--dis);font-weight:800;
+  font-size:12.5px;color:var(--ink-600)
+}
+.mbag-form .dxm-req{color:var(--pink-500)}
+
+/* Controls -------------------------------------------------------------- */
+.mbag-form input[type="text"],
+.mbag-form input[type="email"],
+.mbag-form input[type="tel"],
+.mbag-form input[type="url"],
+.mbag-form input[type="number"],
+.mbag-form input[type="date"],
+.mbag-form select,
+.mbag-form textarea{
+  width:100%;padding:13px 14px;
+  border:1.5px solid var(--color-border);border-radius:var(--r-sm);
+  background:#FAFBFE;color:var(--color-text);
+  font-family:inherit;font-size:15px;line-height:1.4;
+  transition:border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease),background var(--dur) var(--ease)
+}
+.mbag-form textarea{min-height:110px;resize:vertical}
+.mbag-form input::placeholder,.mbag-form textarea::placeholder{color:#9FADC7}
+.mbag-form input:focus,.mbag-form select:focus,.mbag-form textarea:focus{
+  outline:none;border-color:var(--color-primary);background:var(--white);box-shadow:var(--sh-focus)
+}
+
+/* Native select arrows differ per browser and per OS. Replacing it with an
+   inline SVG keeps every select on the page identical. */
+.mbag-form select{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  padding-right:38px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%235C6A8A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center
+}
+
+/* Submit ---------------------------------------------------------------- */
+/* CF7 renders a bare <input type="submit"> unless the form author adds
+   classes, so the button is styled by type instead of by class. */
+.mbag-form input[type="submit"],
+.mbag-form .wpcf7-submit{
+  width:100%;cursor:pointer;border:0;
+  margin-top:4px;padding:17px 32px;border-radius:var(--r-pill);
+  background:var(--grad-hot);color:var(--color-on-accent);
+  font-family:var(--dis);font-weight:800;font-size:16.5px;
+  box-shadow:0 12px 30px rgba(255,138,60,.42);
+  transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease)
+}
+.mbag-form input[type="submit"]:hover,
+.mbag-form .wpcf7-submit:hover{transform:translateY(-3px);box-shadow:0 18px 40px rgba(255,138,60,.55)}
+.mbag-form input[type="submit"]:disabled{opacity:.6;cursor:progress;transform:none}
+
+/* Reassurance line ------------------------------------------------------ */
+.mbag-form .dxm-secure{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  font-size:12px;font-weight:600;color:var(--color-text-muted);text-align:center
+}
+.mbag-form .dxm-secure::before{
+  font-family:"Font Awesome 6 Free";font-weight:900;content:"\f023";
+  font-size:11px;color:var(--color-text-muted)
+}
+
+/* Consent checkboxes, if the form has any. */
+.mbag-form .wpcf7-list-item{margin:0}
+.mbag-form .wpcf7-list-item-label{font-size:13.5px;color:var(--color-text-soft)}
+.mbag-form input[type="checkbox"],.mbag-form input[type="radio"]{
+  accent-color:var(--color-primary);width:auto;margin-right:7px
+}
+
+/* Dark sections (the final CTA band) invert the label colour. */
+.final .mbag-form .dxm-label{color:#CBD4F2}
+.final .mbag-form .dxm-secure,
+.final .mbag-form .dxm-secure::before{color:var(--ink-300)}
+
+@media (max-width:520px){
+  .mbag-form .dxm-row>p{grid-template-columns:1fr}
+}
+
+/* =========================================================================
+   SITE LOGO
+
+   The logo is transparent with a dark navy wordmark, so on the dark bars it
+   is served as the 'light' variant (images/logo-light.png) with that
+   wordmark in white. It therefore needs no plate behind it — it sits
+   directly on the bar.
+
+   Supplying a new logo: drop images/logo.<svg|webp|png> in, and if it has
+   dark elements add images/logo-light.<ext> too. Without the light file the
+   standard one is used on both bars.
+   ========================================================================= */
+.brand--img{display:inline-flex;align-items:center;flex:none}
+.brand__logo{display:block;height:46px;width:auto}
+.brand--footer .brand__logo{height:40px}
+
+/* A Customizer logo (Site Identity) is sized to match. */
+.header .custom-logo,.footer .custom-logo{height:46px;width:auto;max-height:46px}
+
+@media (max-width:760px){
+  .brand__logo{height:38px}
+  .header .custom-logo{height:38px}
+}

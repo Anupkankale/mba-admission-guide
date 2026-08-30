@@ -1,0 +1,21 @@
+# WSL / Windows metadata that appears next to files copied from Windows.
+# These have turned up in this theme repeatedly.
+*:Zone.Identifier
+Thumbs.db
+.DS_Store
+
+# Editors
+*.swp
+*~
+.idea/
+.vscode/
+
+# Dependencies and build output, if the theme ever gains a build step
+node_modules/
+vendor/
+
+# Local artefacts
+*.log
+.env
+.env.*
+*.zip
