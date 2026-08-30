@@ -24,10 +24,24 @@ var FAQ=[
  ["What is the admission process?","Apply online on the university portal, upload your documents (degree certificate, marksheets, ID proof, photograph), and pay the fee once your application is accepted. We help you at each step."],
  ["Are Online MBA degrees recognized?","Recognition depends on the university's approvals for that specific programme and intake. Always verify current recognition from official university sources before paying any fee — we'll show you where to check."]
 ];
+/* PLACEHOLDER testimonials — invented copy, not real customers. Replace each
+   entry with a genuine quote (with that person's consent) before relying on
+   this section: publishing invented reviews is a consumer-protection issue,
+   and India's CCPA framework on fake reviews covers exactly this. Format is
+   [name, "Specialization \u00b7 City", quote]. */
 var T=[
- ["Priya Sharma","Marketing · Pune","I was comparing four universities on my own and getting nowhere. The counsellor cut it down to two that actually matched my budget and shift timings."],
- ["Rahul Verma","Business Analytics · Noida","Straight answers on eligibility and documents. I applied in a week instead of overthinking it for three months."],
- ["Anjali Nair","Finance · Kochi","I'm a working mother, so weekend study was non-negotiable. They pointed me to the format that fit and helped with the paperwork."]
+ ["Karthik Subramanian","IT / Information Systems \u00b7 Chennai","I had shortlisted five universities from Google and was more confused than when I started. One call narrowed it to two that actually fit my work hours."],
+ ["Divya Ramesh","Business Analytics \u00b7 Bengaluru","They explained the difference between the online and distance formats properly, which no university website had made clear to me."],
+ ["Anjali Nair","Finance \u00b7 Kochi","I'm a working mother, so weekend study was non-negotiable. They pointed me to the format that fit and helped with the paperwork."],
+ ["Sai Kiran Reddy","Marketing \u00b7 Hyderabad","I asked about fees and got a straight answer with the EMI options, not a sales pitch. That is why I went ahead."],
+ ["Lakshmi Priya","Operations Management \u00b7 Coimbatore","My degree was from 2014 and I assumed I had missed the window. The counsellor checked the eligibility norms and told me exactly which documents to arrange."],
+ ["Naveen Varma","International Business \u00b7 Visakhapatnam","I travel for work most weeks. They filtered out the programmes with fixed live classes and left me with the ones I could actually finish."],
+ ["Chaitra Hegde","Human Resource Management \u00b7 Mysuru","Follow-up came on WhatsApp, which suited me far better than calls during office hours."],
+ ["Arun Menon","IT / Information Systems \u00b7 Thiruvananthapuram","I asked the same recognition question three times and got a patient answer each time, with a link to check it myself."],
+ ["Vignesh Balaji","Finance \u00b7 Madurai","The comparison table saved me a week. Fees, duration and eligibility for every university on one screen."],
+ ["Sravani Chowdary","Marketing \u00b7 Vijayawada","No pressure to decide on the call. They sent the details and let me take two weeks to think it over."],
+ ["Manjunath Rao","Operations Management \u00b7 Mangaluru","My application was stuck at the document upload step and someone walked me through it on the phone the same evening."],
+ ["Deepa Pillai","Business Analytics \u00b7 Kozhikode","I wanted a specialization that matched my current role rather than a generic MBA. They mapped the options against what I already do."]
 ];
 var TICK=["Online MBA Admission 2026 — Applications Open","Free counselling for working professionals","Compare 7 universities in one call","Limited counselling slots today","EMI options available on most programmes"];
 var NAMES=["Rohit from Delhi","Sneha from Mumbai","Arjun from Bengaluru","Kavita from Jaipur","Imran from Hyderabad","Neha from Lucknow","Vikram from Pune"];
@@ -153,8 +167,9 @@ var tg=document.getElementById("tgrid");
 if(tg){
   T.forEach(function(t){
     var d=document.createElement("div");d.className="tcard rv";
-    d.innerHTML='<div class="stars">★★★★★</div><p>"'+t[2]+'"</p>'+
-      '<div class="twho"><div class="av">'+t[0].charAt(0)+'</div><div><b>'+t[0]+'</b><span>'+t[1]+'</span></div></div>';
+    var stars=(window.mbagSettings&&window.mbagSettings.starIcon)||"";
+    d.innerHTML='<div class="stars" role="img" aria-label="Rated 5 out of 5">'+stars.repeat(5)+'</div><p>"'+esc(t[2])+'"</p>'+
+      '<div class="twho"><div class="av" aria-hidden="true">'+esc(t[0].charAt(0))+'</div><div><b>'+esc(t[0])+'</b><span>'+esc(t[1])+'</span></div></div>';
     tg.appendChild(d);
   });
 }

@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MBAG_VERSION', '1.21.1' );
+define( 'MBAG_VERSION', '1.22.0' );
 
 /**
  * Theme setup.
@@ -85,6 +85,9 @@ function mbag_scripts() {
 		'isFront'    => is_front_page(),
 		'uniLogos'   => mbag_university_logos(),
 		'uniLogoPlaceholder' => mbag_university_logo_placeholder(),
+		// One source for the star glyph, so the hero rating and the
+		// testimonial cards cannot end up using different marks.
+		'starIcon'   => mbag_get_icon( 'star' ),
 		'popup'      => array(
 			'delay'  => mbag_popup_active() ? (int) mbag_popup_settings()['delay'] : 0,
 			'scroll' => mbag_popup_active() ? (int) mbag_popup_settings()['scroll'] : 0,
