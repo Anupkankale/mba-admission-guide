@@ -5,7 +5,7 @@ Author: Anup Kankale
 Author URI: https://anupkankale.com
 Description: Online MBA Admission counselling & comparison theme. Landing page front end plus full WordPress template hierarchy — pages, posts, archives, search, 404 and a dedicated Thank You (lead confirmation) page template.
 Tags: education, landing-page, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
-Version: 1.23.0
+Version: 1.24.0
 Requires at least: 6.0
 Requires PHP: 7.4
 License: GNU General Public License v2 or later
@@ -401,6 +401,18 @@ tbody td:first-child{color:var(--ink);font-weight:800;white-space:nowrap;font-fa
 .tnav--next{right:-18px}
 .tnav[disabled]{opacity:.35;cursor:default}
 .tnav[disabled]:hover{background:var(--white);border-color:var(--color-border);color:var(--color-primary)}
+
+/* Pagination dots. One per page of cards, so the count follows the
+   breakpoint rather than being fixed — 4 dots at three-up, 12 at one-up. */
+.tdots{display:flex;justify-content:center;gap:9px;margin-top:22px}
+.tdot{
+  width:10px;height:10px;padding:0;border-radius:50%;cursor:pointer;
+  background:var(--color-border);border:0;
+  transition:background var(--dur) var(--ease),width var(--dur) var(--ease)
+}
+.tdot:hover{background:var(--ink-300)}
+.tdot[aria-current="true"]{width:26px;border-radius:var(--r-pill);background:var(--grad-hot)}
+.tdot:focus-visible{outline:3px solid var(--color-focus);outline-offset:3px}
 
 @media (max-width:1024px){
   .tgrid>.tcard{flex-basis:calc((100% - 22px)/2)}   /* 2 across */

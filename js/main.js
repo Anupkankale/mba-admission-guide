@@ -187,9 +187,52 @@ if(tg){
     }
     function atStart(){return tg.scrollLeft<=2;}
     function atEnd(){return tg.scrollLeft+tg.clientWidth>=tg.scrollWidth-2;}
+
+    /* One dot per page of cards. The count is derived from the track rather
+       than hard-coded, so it follows the breakpoint on its own: four dots
+       when three cards are in view, twelve when one is. */
+    var dots=document.getElementById("tDots");
+    function pageCount(){
+      if(!tg.clientWidth)return 1;
+      return Math.max(1,Math.round(tg.scrollWidth/tg.clientWidth));
+    }
+    function currentPage(){
+      if(!tg.clientWidth)return 0;
+      return Math.min(pageCount()-1,Math.round(tg.scrollLeft/tg.clientWidth));
+    }
+    function buildDots(){
+      if(!dots)return;
+      var n=pageCount();
+      if(dots.children.length===n)return;   /* nothing to redraw */
+      dots.innerHTML="";
+      for(var i=0;i<n;i++){
+        var b=document.createElement("button");
+        b.type="button";
+        b.className="tdot";
+        b.setAttribute("aria-label","Go to story page "+(i+1)+" of "+n);
+        b.dataset.page=i;
+        dots.appendChild(b);
+      }
+    }
+    if(dots){
+      dots.addEventListener("click",function(e){
+        var b=e.target.closest(".tdot");
+        if(!b)return;
+        tg.scrollTo({left:(+b.dataset.page)*tg.clientWidth,behavior:"smooth"});
+      });
+    }
+
     function sync(){
       prev.disabled=atStart();
       next.disabled=atEnd();
+      buildDots();
+      if(dots){
+        var cur=currentPage();
+        Array.prototype.forEach.call(dots.children,function(d,i){
+          if(i===cur)d.setAttribute("aria-current","true");
+          else d.removeAttribute("aria-current");
+        });
+      }
     }
 
     prev.addEventListener("click",function(){tg.scrollBy({left:-step(),behavior:"smooth"});});
@@ -226,6 +269,7 @@ if(tg){
     });
     prev.addEventListener("click",pause);
     next.addEventListener("click",pause);
+    if(dots)dots.addEventListener("click",pause);
     play();
   })();
 }

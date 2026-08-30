@@ -219,6 +219,7 @@ get_header();
       <button class="tnav tnav--prev" type="button" id="tPrev" aria-label="Previous stories"><?php mbag_icon( 'arrow-left' ); ?></button>
       <button class="tnav tnav--next" type="button" id="tNext" aria-label="Next stories"><?php mbag_icon( 'arrow-right' ); ?></button>
     </div>
+    <div class="tdots" id="tDots" aria-label="<?php esc_attr_e( 'Story pages', 'mba-admission-guide' ); ?>"></div>
   </div>
 </section>
 
