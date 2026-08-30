@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MBAG_VERSION', '1.12.0' );
+define( 'MBAG_VERSION', '1.13.0' );
 
 /**
  * Theme setup.
@@ -82,6 +82,7 @@ function mbag_scripts() {
 		'thankYou'   => mbag_thank_you_url(),
 		'isFront'    => is_front_page(),
 		'uniLogos'   => mbag_university_logos(),
+		'uniLogoPlaceholder' => mbag_university_logo_placeholder(),
 		'popup'      => array(
 			'delay'  => mbag_popup_active() ? (int) mbag_popup_settings()['delay'] : 0,
 			'scroll' => mbag_popup_active() ? (int) mbag_popup_settings()['scroll'] : 0,
@@ -912,6 +913,32 @@ function mbag_university_logo_locations() {
 }
 
 /**
+ * The placeholder shown for a university with no logo file yet.
+ *
+ * Replace it per-university by dropping <slug>.<ext> into
+ * wp-content/uploads/university-logos/ — the real file wins automatically.
+ *
+ * @return string Empty string when no placeholder file exists.
+ */
+function mbag_university_logo_placeholder() {
+	foreach ( mbag_university_logo_locations() as $location ) {
+		foreach ( array( 'svg', 'avif', 'webp', 'png', 'jpg', 'jpeg' ) as $ext ) {
+			$path = trailingslashit( $location['dir'] ) . 'placeholder.' . $ext;
+
+			if ( file_exists( $path ) ) {
+				return add_query_arg(
+					'v',
+					(string) filemtime( $path ),
+					trailingslashit( $location['url'] ) . 'placeholder.' . $ext
+				);
+			}
+		}
+	}
+
+	return '';
+}
+
+/**
  * Resolve slug => logo URL for every logo actually present on disk.
  *
  * Each directory is read once with a single glob() rather than probing
@@ -929,7 +956,7 @@ function mbag_university_logos() {
 			continue;
 		}
 
-		$files = glob( trailingslashit( $location['dir'] ) . '*.{svg,png,webp,jpg,jpeg}', GLOB_BRACE );
+		$files = glob( trailingslashit( $location['dir'] ) . '*.{svg,avif,webp,png,jpg,jpeg}', GLOB_BRACE );
 
 		if ( ! $files ) {
 			continue;
@@ -939,6 +966,7 @@ function mbag_university_logos() {
 			$slug = pathinfo( $file, PATHINFO_FILENAME );
 
 			// Only known universities, and never overwrite a higher-priority hit.
+			// ('placeholder' is handled separately and is not a university.)
 			if ( ! isset( $slugs[ $slug ] ) || isset( $logos[ $slug ] ) ) {
 				continue;
 			}

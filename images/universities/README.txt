@@ -13,7 +13,7 @@ the next page load — no code change, no admin setting.
   gla.png               GLA University Online
   dayananda-sagar.png   Dayananda Sagar University Online
 
-Accepted extensions: .svg .png .webp .jpg .jpeg  (checked in that order)
+Accepted extensions: .svg .avif .webp .png .jpg .jpeg (checked in that order)
 
 WHERE TO PUT THEM
 Prefer  wp-content/uploads/university-logos/
@@ -24,9 +24,13 @@ FILE GUIDANCE
 - Square-ish, transparent PNG or SVG, at least 120x120px.
 - Logos are contained, never cropped, so a wide logo will letterbox
   inside the square plate rather than being cut.
-- A university with no file here simply shows no logo — the card is the
-  name and its tag. So you can add logos one at a time without any card
-  looking half-finished.
+- A university with no file of its own falls back to placeholder.png in
+  this folder — a neutral building mark, so the row of cards stays even
+  while logos are still arriving. Drop in <slug>.<ext> and the real logo
+  takes over automatically; nothing else to change.
+- placeholder.png ships with the theme. Per-university logos should go in
+  wp-content/uploads/university-logos/ instead, because a theme update
+  replaces this folder.
 
 ADDING OR REMOVING A UNIVERSITY
 Two places, and they must match:

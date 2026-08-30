@@ -37,7 +37,8 @@ var NAMES=["Rohit from Delhi","Sneha from Mumbai","Arjun from Bengaluru","Kavita
    mbag_university_logos in functions.php). A university with no file shows
    no logo slot at all — the card is just the name and its tag. Nothing is
    invented to fill the space. */
-var LOGOS=(window.mbagSettings&&window.mbagSettings.uniLogos)||{};
+var LOGOS=(window.mbagSettings&&window.mbagSettings.uniLogos)||{},
+    PLACEHOLDER=(window.mbagSettings&&window.mbagSettings.uniLogoPlaceholder)||"";
 
 function esc(v){
   return String(v).replace(/&/g,"&amp;").replace(/"/g,"&quot;")
@@ -48,7 +49,9 @@ function esc(v){
    @param cls  Class for the wrapper element.
    @param alt  Alt text. Empty string = decorative (the name is beside it). */
 function uniLogo(u,cls,alt){
-  var src=LOGOS[u.slug];
+  /* A university with no logo yet falls back to the shared placeholder, so
+     the row of cards stays visually even while logos are still arriving. */
+  var src=LOGOS[u.slug]||PLACEHOLDER;
   if(src){
     return '<span class="'+cls+' '+cls+'--img"><img src="'+esc(src)+'" alt="'+esc(alt)+'"'+
            ' loading="lazy" decoding="async" width="120" height="120"></span>';
