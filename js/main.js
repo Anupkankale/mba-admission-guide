@@ -82,7 +82,18 @@ if(g&&tb&&us){
     c.innerHTML='<div class="uni__top">'+uniLogo(u,"ulogo",u.n+" logo")+'<div><h3>'+esc(u.n)+'</h3>'+
       '<span class="tag'+(u.w?" warn":"")+'">'+u.t+'</span></div></div>'+
       '<ul>'+u.p.map(function(p){return "<li>"+p+"</li>";}).join("")+'</ul>'+
-      '<button class="btn btn--line" type="button" data-uni="'+u.n+'">Get Details →</button>';
+      '<div class="uni__cta">'+
+        /* Low commitment: scrolls to the on-page form with this university
+           already selected. */
+        '<button class="btn btn--line" type="button" data-uni="'+esc(u.n)+'">Get Details</button>'+
+        /* High intent: opens the popup, carrying the university with it so
+           the lead says which one was clicked. */
+        '<button class="btn btn--hot" type="button" data-mbag-popup'+
+          ' data-mbag-popup-title="'+esc("Apply — "+u.n)+'"'+
+          ' data-mbag-popup-sub="'+esc("Share your details and a counsellor will take you through eligibility, fees and the application.")+'"'+
+          ' data-mbag-source="'+esc("Apply — "+u.n)+'"'+
+          ' data-mbag-university="'+esc(u.n)+'">Apply Now</button>'+
+      '</div>';
     g.appendChild(c);
 
     var tr=document.createElement("tr");
