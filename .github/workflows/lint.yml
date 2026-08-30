@@ -1,0 +1,51 @@
+name: Lint
+
+# Catches the three things that have actually broken this theme before:
+# a PHP parse error, a JS syntax error, and an unbalanced brace in style.css
+# (which silently kills every rule after it).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+
+      - name: PHP syntax check
+        run: |
+          find . -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: JS syntax check
+        run: node --check js/main.js
+
+      - name: CSS brace balance
+        run: |
+          python3 - <<'PY'
+          css = open('style.css').read()
+          o, c = css.count('{'), css.count('}')
+          print(f'{o} open, {c} close')
+          if o != c:
+              raise SystemExit(f'style.css braces unbalanced ({o} vs {c}) — rules after the break are dropped by the browser')
+          PY
+
+      - name: Theme version must be bumped
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          old=$(git show origin/${{ github.base_ref }}:style.css | grep -m1 '^Version:' || echo 'Version: none')
+          new=$(grep -m1 '^Version:' style.css)
+          echo "base: $old"
+          echo "head: $new"
+          if [ "$old" = "$new" ]; then
+            echo "::error::Version in style.css is unchanged. Update hosts detect new versions by this header, so a deploy without a bump is ignored."
+            exit 1
+          fi
