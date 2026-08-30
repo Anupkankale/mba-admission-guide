@@ -5,8 +5,8 @@
 var U=[
  {n:"Amity University Online",s:"AU",slug:"amity",t:"Online / Distance",p:["Multiple specializations","Fully online learning format"]},
  {n:"Manipal University Jaipur",s:"MUJ",slug:"manipal-jaipur",t:"Online / Distance",p:["Online classes and study material","Specialization choices"]},
- {n:"Sikkim Manipal University",s:"SMU",slug:"sikkim-manipal",t:"MBA programme offered",p:["Distance / online learning mode","Specialization options"]},
- {n:"VIT University",s:"VIT",slug:"vit",t:"MBA programme offered",p:["Established university option","Confirm current MBA mode with us"]},
+ {n:"Sikkim Manipal University",s:"SMU",slug:"sikkim-manipal",t:"Online / Distance",p:["Distance / online learning mode","Specialization options"]},
+ {n:"VIT University",s:"VIT",slug:"vit",t:"Online / Distance",p:["Established university option","Confirm current MBA mode with us"]},
  {n:"NMIMS Online",s:"NMIMS",slug:"nmims",t:"Online / Distance",p:["Online learning platform","Multiple specializations"]},
  {n:"GLA University Online",s:"GLA",slug:"gla",t:"Online / Distance",p:["Online learning platform","Multiple specializations"]},
  {n:"Dayananda Sagar University Online",s:"DSU",slug:"dayananda-sagar",t:"Online / Distance",p:["Online delivery format","Guidance on eligibility"]}
