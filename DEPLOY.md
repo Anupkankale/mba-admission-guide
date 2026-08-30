@@ -1,132 +1,187 @@
-# Deploying this theme with git
+# Deploying this theme
 
-No more zip uploads. Push to GitHub, the site pulls.
+The site runs paid ads, so the rule this workflow is built around is:
+
+> **Pushing to GitHub must never change the live site. Only a deliberate
+> Deploy click does.**
+
+Host is **Hostinger / hPanel**, which has a built-in Git tool. No plugin, no
+FTP, no credentials stored in GitHub.
 
 ---
 
-## 0. One-time: create the private repo
+## 0. One-time: publish the repo privately
 
-`gh` is installed but not logged in. Run these yourself — the login step is
-interactive, so type it into this session with a leading `!`:
+`gh` is installed but not logged in. The login is interactive, so run these
+yourself (in this session, prefix with `!`):
 
 ```bash
-gh auth login                       # choose GitHub.com → HTTPS → browser
+gh auth login                       # GitHub.com → HTTPS → browser
 gh repo create mba-admission-guide --private --source=. --remote=origin --push
+git push -u origin production
 ```
 
-Or without `gh`: create the repo on github.com, then
+Without `gh`: create the repo on github.com, then
 
 ```bash
-git remote add origin https://github.com/<you>/mba-admission-guide.git
+git remote add origin git@github.com:<you>/mba-admission-guide.git
 git push -u origin main
+git push -u origin production
 ```
 
-If your GitHub username is not `Anupkankale`, update the `GitHub Theme URI`
-line in `style.css` to match — the update plugins read it.
+If your GitHub username is not `Anupkankale`, update the `GitHub Theme URI:`
+line in `style.css` to match.
 
 ---
 
-## 1. Pick how the site pulls
+## 1. Two branches
 
-You chose a plugin and a **private** repo. Those two do not combine for free:
+| Branch | Role |
+|---|---|
+| `main` | day-to-day work. Pushing here **never** touches live. |
+| `production` | exactly what the server runs. |
 
-| Plugin | Private repos | Cost |
-|---|---|---|
-| **Git Updater** | **yes**, with a GitHub token | free |
-| WP Pusher | paid tiers only | free tier is public repos only |
-
-**Recommended: Git Updater** — free, and private repos work with a personal
-access token.
-
-### Git Updater setup
-
-1. Download the latest release zip from
-   `https://github.com/afragen/git-updater/releases` and install it under
-   **Plugins → Add New → Upload Plugin**. Activate.
-2. On GitHub: **Settings → Developer settings → Personal access tokens →
-   Fine-grained tokens**. Create one with **Contents: Read-only**, scoped to
-   just this repository. Copy it.
-3. In WordPress: **Settings → Git Updater → GitHub**, paste the token, Save.
-4. **Settings → Git Updater → Install Theme**, enter
-   `https://github.com/<you>/mba-admission-guide`, branch `main`, Install.
-
-From then on the theme appears under **Dashboard → Updates** whenever the
-version changes, and updates like any other theme.
-
-### If you would rather use WP Pusher
-
-Same idea, but either make the repo public or buy a licence. Install the
-plugin, connect your GitHub token, then **WP Pusher → Install Theme**.
+Both already exist locally. This separation is the whole safety mechanism —
+without it, `main` and the live site are the same thing and every push is a
+deploy.
 
 ---
 
-## 2. The everyday loop
+## 2. One-time: configure hPanel → Advanced → GIT
+
+- **Repository:** `git@github.com:<you>/mba-admission-guide.git`
+- **Branch:** `production`
+- **Directory:** `public_html/wp-content/themes/mba-admission-guide`
+- hPanel shows an SSH key — paste it into GitHub → your repo →
+  **Settings → Deploy keys**. Read-only access is enough.
+- **Leave "Auto deployment" / the webhook OFF.**
+
+That last toggle is the difference between this workflow and a typo reaching
+paid traffic within seconds. If you ever switch it on, you have opted back
+into push-equals-deploy.
+
+**Before the very first deploy:** back up the current theme folder (hPanel →
+Files → Backups, or download it from File Manager). The Git tool writes into
+that directory and may clear it first, so anything present on the server but
+absent from the repo is lost.
+
+`wp-content/uploads/university-logos/` sits outside the theme and is never
+touched by a deploy — which is exactly why per-university logo overrides
+belong there.
+
+---
+
+## 3. The everyday loop
 
 ```bash
 cd wp-content/themes/mba-admission-guide
 
-git checkout -b fix/popup-copy      # branch per change
-# ... edit files ...
+git checkout main
+git checkout -b fix/whatever          # optional; small changes can go on main
 
-# bump BOTH, or the site will never see the update:
-#   style.css     Version: 1.12.0 → 1.12.1
-#   functions.php MBAG_VERSION    → '1.12.1'
+# ... edit ...
+# bump BOTH, every time:
+#   style.css     Version: 1.26.0 → 1.26.1
+#   functions.php MBAG_VERSION    → '1.26.1'
 
-git add -A
-git commit -m "Reword the popup sub-heading"
-git push -u origin fix/popup-copy
+git commit -am "Describe the change"
+git push
 ```
 
-Open a pull request, let the Lint action pass, merge to `main`. Then in
-WordPress: **Dashboard → Updates → Update Theme**.
+Nothing has happened to the live site yet. Check the work locally:
 
-Working solo and happy to skip the PR? Commit straight to `main` and push.
-The version bump still matters.
+```bash
+php -S localhost:8090 -t /home/anup/projects/Wordpress
+# then open http://localhost:8090/
+```
 
-### Why the version bump is not optional
+## 4. Release
 
-Both plugins detect a new release by comparing the `Version:` header in
-`style.css` against what is installed. Push without bumping it and the site
-sees no change — the code is on GitHub and the site keeps serving the old
-theme, with nothing to tell you why. The Lint workflow fails a pull request
-that forgets it.
+```bash
+git checkout production
+git merge --ff-only main
+git push
+git tag -a v1.26.1 -m "Release 1.26.1" && git push origin v1.26.1
+```
+
+Then **hPanel → GIT → Deploy**.
+
+Tag every release. The tag is what rollback aims at; without tags you are
+reading commit hashes under pressure.
+
+## 5. Rollback — two commands and a click
+
+```bash
+git checkout production
+git reset --hard v1.26.0            # the last tag known to be good
+git push --force-with-lease
+```
+
+Then **hPanel → GIT → Deploy**.
+
+`--force-with-lease`, not `--force`: it refuses if someone else has pushed in
+the meantime rather than silently discarding their work.
+
+**Practise this once, deliberately, while nothing is broken.** A rollback you
+have never run is not a rollback plan.
 
 ---
 
-## 3. What the CI does
+## 6. Why the version bump is not optional
 
-`.github/workflows/lint.yml` runs on every push and PR:
+Hostinger serves this site through its own CDN (`hcdn`), which caches CSS and
+JS. The `?ver=` string on those files comes from `Version:` in `style.css` and
+`MBAG_VERSION` in `functions.php`.
 
-- `php -l` on every PHP file
-- `node --check` on `js/main.js`
-- brace balance on `style.css` — an unbalanced brace silently kills every
-  rule after it, which is exactly how a stylesheet "stops working" with no
-  error anywhere
-- on PRs only: fails if `Version:` was not bumped
-
----
-
-## 4. Before the first pull, back up what is live
-
-The live site currently has a zip-uploaded copy. If anyone edited it there
-(Appearance → Theme File Editor, or over FTP), the first pull overwrites
-those edits. Download the live theme folder once, diff it against this repo,
-and carry over anything that only exists on the server.
+Deploy without bumping them and the CDN keeps serving the old assets: the code
+is on the server, the site looks unchanged, and nothing anywhere explains why.
+`.github/workflows/lint.yml` fails a pull request that forgets.
 
 ---
 
-## 5. What is deliberately not in the repo
+## 7. Check `.git` is not readable
 
-`.gitignore` excludes `*:Zone.Identifier` (WSL metadata that keeps appearing
-beside files copied from Windows), `node_modules/`, `*.log`, `.env*` and
-`*.zip`.
+The Git tool clones into the web root, so `.git/` ends up inside
+`public_html`. An exposed `.git` hands over the entire source history.
 
-Not in the repo either:
+Hostinger currently blocks that path at server level (it returns 403 even
+before the directory exists). Confirm again right after the first deploy, when
+the file is actually there:
 
-- `images/universities/*.png` — university logos you drop in. Put those in
-  `wp-content/uploads/university-logos/` instead; that folder survives theme
-  updates, and a pull will not remove them.
-- `logo-original.png` — kept outside the theme at `~/projects/`.
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' \
+  https://onlinembacourses.co.in/wp-content/themes/mba-admission-guide/.git/config
+```
 
-**A theme update replaces the whole folder.** Anything you add to the theme
-directory on the server, but not to this repo, is gone on the next pull.
+Anything other than 403/404 means it is readable. Fix by adding a theme-root
+`.htaccess`:
+
+```apache
+RedirectMatch 404 /\.git
+```
+
+---
+
+## 8. After every deploy, check these four
+
+The universities, comparison table, testimonials and FAQ are all rendered by
+`js/main.js`. A JS error does not show as an error — it shows as **empty
+sections**, which is precisely the failure mode that has bitten this theme
+before.
+
+1. `curl -s https://onlinembacourses.co.in/ | grep -o 'style.css?ver=[0-9.]*'`
+   shows the version you just released.
+2. University cards and the comparison table have content.
+3. The testimonial carousel scrolls and its dots respond.
+4. Submit the hero form; confirm it arrives by email **and** in Flamingo.
+
+---
+
+## 9. Never edit theme files on the server
+
+A deploy replaces the folder. Anything changed through Appearance → Theme File
+Editor or File Manager is gone at the next Deploy, with no warning and no copy.
+
+Customizer settings, menus, pages and Contact Form 7 forms live in the
+database, not in the theme — those are safe, and are meant to be edited in
+wp-admin.
