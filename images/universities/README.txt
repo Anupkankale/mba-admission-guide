@@ -21,9 +21,11 @@ Files in this theme folder are DELETED when the theme is re-uploaded or
 updated. The uploads folder survives. Both work; uploads is checked first.
 
 FILE GUIDANCE
-- Square-ish, transparent PNG or SVG, at least 120x120px.
-- Logos are contained, never cropped, so a wide logo will letterbox
-  inside the square plate rather than being cut.
+- The card plate is 2:1 and the logo is contained inside it, so a wide
+  wordmark (roughly 400x200, like the ones already in place) fills it best.
+  A square logo still works — it centres and shows at plate height.
+- Logos are contained, never cropped, and never upscaled past their own
+  size — so a small file looks small rather than fuzzy.
 - A university with no file of its own falls back to placeholder.png in
   this folder — a neutral building mark, so the row of cards stays even
   while logos are still arriving. Drop in <slug>.<ext> and the real logo

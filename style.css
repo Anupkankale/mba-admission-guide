@@ -5,7 +5,7 @@ Author: Anup Kankale
 Author URI: https://anupkankale.com
 Description: Online MBA Admission counselling & comparison theme. Landing page front end plus full WordPress template hierarchy — pages, posts, archives, search, 404 and a dedicated Thank You (lead confirmation) page template.
 Tags: education, landing-page, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
-Version: 1.13.0
+Version: 1.14.0
 Requires at least: 6.0
 Requires PHP: 7.4
 License: GNU General Public License v2 or later
@@ -283,8 +283,15 @@ button,input,select{font:inherit;color:inherit}
 .uni::after{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--grad-hot);transform:scaleX(0);transform-origin:left;transition:transform .3s}
 .uni:hover{transform:translateY(-6px);box-shadow:var(--sh);border-color:#C9D5EE}
 .uni:hover::after{transform:scaleX(1)}
-.uni__top{display:flex;gap:14px}
-.ulogo{width:50px;height:50px;flex:none;border-radius:14px;display:grid;place-items:center}
+.uni__top{display:block}
+/* The supplied logos are 2:1 wordmarks. Matching the plate to that ratio is
+   what lets them run the full width of the card and stay readable; a square
+   or short tile shrinks them to the height and wastes the width.
+   The fixed height is the fallback for browsers without aspect-ratio. */
+.ulogo{width:100%;height:150px;border-radius:14px;display:grid;place-items:center;margin-bottom:14px}
+@supports (aspect-ratio:2/1){
+  .ulogo{height:auto;aspect-ratio:2/1}
+}
 .uni h3{font-size:18px;line-height:1.25}
 .tag{display:inline-block;margin-top:6px;font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:var(--r-pill);background:#E9FBF1;color:#0B7A45}
 .tag.warn{background:#FFF3DF;color:#A2610C}
@@ -775,16 +782,28 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   background:var(--white);
   background-image:none;
   border:1px solid var(--color-border);
-  padding:5px;
   overflow:hidden
 }
-.ulogo--img img,.mlogo__mark--img img{
+.ulogo--img{padding:12px 18px}
+.ulogo--img img{
+  /* max-* rather than width:100% so a small logo is never upscaled past its
+     natural size and left fuzzy. */
+  max-width:100%;
+  max-height:100%;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  display:block;
+  margin:0 auto
+}
+.mlogo__mark--img img{
   width:100%;
   height:100%;
   object-fit:contain;
   display:block
 }
 .mlogo__mark--img{padding:3px}
+
 
 /* A logo that fails to load leaves the plate empty rather than showing a
    broken-image glyph inside the card. */
