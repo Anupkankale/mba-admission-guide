@@ -5,7 +5,7 @@ Author: Anup Kankale
 Author URI: https://anupkankale.com
 Description: Online MBA Admission counselling & comparison theme. Landing page front end plus full WordPress template hierarchy — pages, posts, archives, search, 404 and a dedicated Thank You (lead confirmation) page template.
 Tags: education, landing-page, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
-Version: 1.20.0
+Version: 1.20.1
 Requires at least: 6.0
 Requires PHP: 7.4
 License: GNU General Public License v2 or later
@@ -374,11 +374,11 @@ tbody td:first-child{color:var(--ink);font-weight:800;white-space:nowrap;font-fa
 .faq{max-width:840px;margin:0 auto;display:grid;gap:12px}
 .fitem{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:box-shadow .2s,border-color .2s}
 .fitem.open{box-shadow:var(--sh);border-color:#C9D5EE}
-.fq{width:100%;background:none;border:0;cursor:pointer;text-align:left;padding:19px 52px 19px 20px;position:relative;font-family:var(--dis);font-size:17px;font-weight:700}
+.fq{width:100%;background:none;border:0;cursor:pointer;text-align:left;padding:19px 52px 19px 20px;position:relative;font-family:var(--dis);font-size:17.5px;font-weight:800;letter-spacing:-.02em;line-height:1.35;color:var(--color-text)}
 .fq::after{font-family:"Font Awesome 6 Free";font-weight:900;content:"\2b";position:absolute;right:18px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;background:var(--surface);color:var(--royal);display:grid;place-items:center;font-size:15px;line-height:1}
 .fitem.open .fq::after{content:"\f068";background:var(--grad-hot);color:var(--color-on-accent)}
 .fa{max-height:0;overflow:hidden;transition:max-height .3s ease}
-.fa p{padding:0 52px 20px 20px;color:var(--muted);font-size:15.3px}
+.fa p{padding:0 52px 20px 20px;color:var(--muted);font-size:15px;line-height:1.7}
 
 /* ================= FINAL ================= */
 .final{position:relative;background:var(--night);color:#fff;padding:82px 0;overflow:hidden;text-align:center}
