@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MBAG_VERSION', '1.16.0' );
+define( 'MBAG_VERSION', '1.17.0' );
 
 /**
  * Theme setup.
@@ -868,6 +868,26 @@ add_action( 'after_setup_theme', 'mbag_editor_palette', 11 );
  */
 
 /**
+ * Slug => display name, used for the Customizer labels only.
+ *
+ * The card copy (tag line, bullets) still lives in the U array at the top of
+ * js/main.js. Keep the names here in step with that array.
+ *
+ * @return array<string,string>
+ */
+function mbag_universities() {
+	return apply_filters( 'mbag_universities', array(
+		'amity'           => 'Amity University Online',
+		'manipal-jaipur'  => 'Manipal University Jaipur',
+		'sikkim-manipal'  => 'Sikkim Manipal University',
+		'vit'             => 'VIT University',
+		'nmims'           => 'NMIMS Online',
+		'gla'             => 'GLA University Online',
+		'dayananda-sagar' => 'Dayananda Sagar University Online',
+	) );
+}
+
+/**
  * Slugs for the universities listed in js/main.js.
  *
  * Keep these in sync with the `slug` field of the U array in main.js —
@@ -876,15 +896,7 @@ add_action( 'after_setup_theme', 'mbag_editor_palette', 11 );
  * @return string[]
  */
 function mbag_university_slugs() {
-	return apply_filters( 'mbag_university_slugs', array(
-		'amity',
-		'manipal-jaipur',
-		'sikkim-manipal',
-		'vit',
-		'nmims',
-		'gla',
-		'dayananda-sagar',
-	) );
+	return apply_filters( 'mbag_university_slugs', array_keys( mbag_universities() ) );
 }
 
 /**
@@ -950,6 +962,20 @@ function mbag_university_logo_placeholder() {
 function mbag_university_logos() {
 	$slugs = array_flip( mbag_university_slugs() );
 	$logos = array();
+
+	// 1. Anything picked in Appearance > Customize > University Logos wins.
+	//    This is the no-FTP, no-redeploy way to swap a single logo.
+	foreach ( array_keys( $slugs ) as $slug ) {
+		$id = (int) get_theme_mod( 'mbag_uni_logo_' . $slug, 0 );
+
+		if ( $id > 0 ) {
+			$src = wp_get_attachment_image_src( $id, 'medium' );
+
+			if ( $src ) {
+				$logos[ $slug ] = $src[0];
+			}
+		}
+	}
 
 	foreach ( mbag_university_logo_locations() as $location ) {
 		if ( ! is_dir( $location['dir'] ) ) {
@@ -1372,3 +1398,35 @@ function mbag_brand( $context = 'header' ) {
 		esc_html__( 'Online MBA 2026', 'mba-admission-guide' )
 	);
 }
+
+/**
+ * Customizer: pick a logo for any university straight from the Media Library.
+ *
+ * This is the path that needs no FTP and no redeploy — the setting overrides
+ * both the uploads folder and the file bundled with the theme.
+ */
+function mbag_customize_university_logos( $wp_customize ) {
+	$wp_customize->add_section( 'mbag_uni_logos', array(
+		'title'       => __( 'University Logos', 'mba-admission-guide' ),
+		'priority'    => 32,
+		'description' => __( 'Replace any university logo without touching files. Leave one empty to use the logo shipped with the theme, or the placeholder if there is none. Wide logos (about 2:1) fit the card best.', 'mba-admission-guide' ),
+	) );
+
+	foreach ( mbag_universities() as $slug => $name ) {
+		$setting = 'mbag_uni_logo_' . $slug;
+
+		$wp_customize->add_setting( $setting, array(
+			'default'           => 0,
+			'sanitize_callback' => 'absint',
+		) );
+
+		$wp_customize->add_control(
+			new WP_Customize_Media_Control( $wp_customize, $setting, array(
+				'label'     => $name,
+				'section'   => 'mbag_uni_logos',
+				'mime_type' => 'image',
+			) )
+		);
+	}
+}
+add_action( 'customize_register', 'mbag_customize_university_logos' );

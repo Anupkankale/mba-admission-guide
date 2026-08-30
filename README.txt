@@ -57,6 +57,12 @@ browser session and never on the Thank You page. Timings, heading and
 on/off are in Appearance > Customize > Lead Forms. See CF7-SETUP.md
 section 7.
 
+UNIVERSITY CARDS AND LOGOS
+Replace any university logo from Appearance > Customize > University
+Logos - one image picker per university, no files, survives updates.
+Card text (name, tag, bullets) lives in the U array at the top of
+js/main.js. Full guide in UNIVERSITIES.md.
+
 UNIVERSITY LOGOS
 The university cards and the scrolling logo strip show a real logo image
 when one is available, and nothing at all when it is not — so you can add
