@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MBAG_VERSION', '1.18.0' );
+define( 'MBAG_VERSION', '1.19.0' );
 
 /**
  * Theme setup.
@@ -182,19 +182,56 @@ function mbag_form_slots() {
 }
 
 /**
- * Default CF7 form ID for a slot.
+ * The form ID every slot falls back to.
  *
- * Only the popup has one: it is the slot most likely to be left unset, and
- * an unset popup is an empty popup. The three inline slots fall back to the
- * theme's own static markup instead, so a blank default is correct there.
+ * @return string
+ */
+function mbag_default_form_id() {
+	return (string) apply_filters( 'mbag_default_form_id', '570b038' );
+}
+
+/**
+ * The CF7 form ID to render in a slot.
+ *
+ * Resolution order:
+ *   1. the ID set for this slot in the Customizer
+ *   2. the ID set for the popup slot — so configuring ONE form drives the
+ *      whole site instead of asking for the same ID four times
+ *   3. the theme's default form ID
+ *
+ * This is what keeps the same form on the hero, the middle section, the
+ * final CTA and the popup. Set a slot explicitly only when you deliberately
+ * want a different form there (a shorter one in the footer, say).
+ *
+ * @param string $slot Slot key.
+ * @return string
+ */
+function mbag_form_slot_id( $slot ) {
+	$id = trim( (string) get_theme_mod( 'mbag_cf7_' . $slot, '' ) );
+
+	if ( '' !== $id ) {
+		return $id;
+	}
+
+	if ( 'popup' !== $slot ) {
+		$shared = trim( (string) get_theme_mod( 'mbag_cf7_popup', '' ) );
+
+		if ( '' !== $shared ) {
+			return $shared;
+		}
+	}
+
+	return mbag_default_form_id();
+}
+
+/**
+ * Back-compat wrapper.
  *
  * @param string $slot Slot key.
  * @return string
  */
 function mbag_form_slot_default( $slot ) {
-	$defaults = array( 'popup' => '570b038' );
-
-	return isset( $defaults[ $slot ] ) ? $defaults[ $slot ] : '';
+	return mbag_default_form_id();
 }
 
 /**
@@ -247,7 +284,7 @@ function mbag_lead_form( $slot ) {
 		return false;
 	}
 
-	$id = trim( (string) get_theme_mod( 'mbag_cf7_' . $slot, mbag_form_slot_default( $slot ) ) );
+	$id = mbag_form_slot_id( $slot );
 	if ( '' === $id || ! mbag_cf7_form_exists( $id ) ) {
 		return false;
 	}
@@ -271,7 +308,7 @@ function mbag_customize_forms( $wp_customize ) {
 	$wp_customize->add_section( 'mbag_forms', array(
 		'title'       => __( 'Lead Forms', 'mba-admission-guide' ),
 		'priority'    => 31,
-		'description' => __( 'Paste the Contact Form 7 form ID for each slot. Find the ID in Contact > Forms - it is the value inside id="..." in the shortcode column. Leave a slot blank to keep the built-in static form.', 'mba-admission-guide' ),
+		'description' => __( 'Paste one Contact Form 7 form ID into the Popup slot and every slot uses it — hero, middle, final CTA and popup. Fill another slot only if you want a different form there. Find the ID in Contact > Forms, inside id="..." in the shortcode column.', 'mba-admission-guide' ),
 	) );
 
 	foreach ( mbag_form_slots() as $slot => $label ) {
@@ -1081,7 +1118,7 @@ function mbag_popup_active() {
 	}
 
 	// Nothing to show if the slot has no form assigned, or the form is gone.
-	if ( ! mbag_cf7_form_exists( get_theme_mod( 'mbag_cf7_popup', mbag_form_slot_default( 'popup' ) ) ) ) {
+	if ( ! mbag_cf7_form_exists( mbag_form_slot_id( 'popup' ) ) ) {
 		return false;
 	}
 
