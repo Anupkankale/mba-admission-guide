@@ -53,7 +53,7 @@ Contact → Add New. Name it `Hero — Free Counselling`. Paste this into the **
   </div>
   <div class="field">
     <label>Specialization <span class="req">*</span></label>
-    [select* spec include_blank "Marketing" "Finance" "Human Resource Management" "Business Analytics" "Operations Management" "International Business" "IT / Information Systems" "Not decided yet"]
+    [select* specialization first_as_label "Select specialization" "Marketing Management" "Digital Marketing" "Banking &amp; Finance Management" "Human Resource Management" "Business Analytics" "Data Science" "Artificial Intelligence" "Operations &amp; Supply Chain" "Project Management" "Healthcare Management" "Executive Management" "Leadership &amp; Strategy" "International Business" "IT / Information Systems" "Not decided yet"]
   </div>
 </div>
 
@@ -317,3 +317,25 @@ Either field name works: `university` or `universities`.
 It makes "Any / help me choose" a placeholder with an empty value, so an
 untouched select submits blank instead of silently sending the first
 university as though the visitor chose it.
+
+
+---
+
+## 10. Keeping the specialization list in step
+
+The chips under **Popular Online MBA Specializations** pre-select the chosen
+specialization in the form. That only works if the form offers an option
+whose text matches exactly — a chip with no matching option now leaves the
+field alone rather than blanking it, but the visitor loses the shortcut.
+
+The list lives in the `SPEC` array at the top of `js/main.js`. Paste the
+matching select into every form that has a specialization field:
+
+```
+[select* specialization first_as_label "Select specialization" "Marketing Management" "Digital Marketing" "Banking &amp; Finance Management" "Human Resource Management" "Business Analytics" "Data Science" "Artificial Intelligence" "Operations &amp; Supply Chain" "Project Management" "Healthcare Management" "Executive Management" "Leadership &amp; Strategy" "International Business" "IT / Information Systems" "Not decided yet"]
+```
+
+`&amp;` is required inside a CF7 form tag wherever the label contains an
+ampersand — a bare `&` breaks the tag.
+
+Either field name works: `specialization` or `spec`.

@@ -11,7 +11,23 @@ var U=[
  {n:"GLA University Online",s:"GLA",slug:"gla",t:"Online MBA available",p:["Online learning platform","Multiple specializations"]},
  {n:"Dayananda Sagar University Online",s:"DSU",slug:"dayananda-sagar",t:"Online MBA available",p:["Online delivery format","Guidance on eligibility"]}
 ];
-var SPEC=["Marketing","Finance","Human Resource Management","Business Analytics","Operations Management","International Business","IT / Information Systems","Not decided yet"];
+var SPEC=[
+ "Marketing Management",
+ "Digital Marketing",
+ "Banking & Finance Management",
+ "Human Resource Management",
+ "Business Analytics",
+ "Data Science",
+ "Artificial Intelligence",
+ "Operations & Supply Chain",
+ "Project Management",
+ "Healthcare Management",
+ "Executive Management",
+ "Leadership & Strategy",
+ "International Business",
+ "IT / Information Systems",
+ "Not decided yet"
+];
 var FAQ=[
  ["What is an Online MBA?","An Online MBA is a two-year postgraduate management degree delivered through a university's digital learning platform. Lectures, study material and assessments are accessed online, so you cover the same core subjects — finance, marketing, operations, strategy — without attending a campus."],
  ["Is an Online MBA suitable for working professionals?","Yes. Sessions are usually recorded and study material stays available, so you can study around shifts and travel. Most learners on these programmes are already working full time."],
@@ -151,10 +167,15 @@ specSelects().forEach(function(sel){
 });
 var ch=document.getElementById("chips");
 if(ch){
-  SPEC.slice(0,7).forEach(function(s){
+  SPEC.filter(function(s){return s!=="Not decided yet";}).forEach(function(s){
     var b=document.createElement("button");b.type="button";b.className="chip";b.textContent=s;
     b.addEventListener("click",function(){
-      specSelects().forEach(function(sel){sel.value=s;});
+      specSelects().forEach(function(sel){
+        var match=Array.prototype.filter.call(sel.options,function(o){
+          return o.value===s||o.textContent.trim()===s;
+        })[0];
+        if(match)sel.value=match.value;
+      });
       go(document.getElementById("talk"));
       flash(document.getElementById("t-spec")||document.querySelector('.mbag-cf7--talk select'));
     });
