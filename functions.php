@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MBAG_VERSION', '1.20.1' );
+define( 'MBAG_VERSION', '1.21.0' );
 
 /**
  * Theme setup.
@@ -58,7 +58,9 @@ function mbag_scripts() {
 	// Google Fonts.
 	wp_enqueue_style(
 		'mbag-fonts',
-		'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap',
+		// Manrope only. Weight 800 is included because the headings use it —
+		// without it the browser synthesises a fake bold, which looks smeared.
+		'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap',
 		array(),
 		null
 	);

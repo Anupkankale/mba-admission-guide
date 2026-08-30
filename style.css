@@ -5,7 +5,7 @@ Author: Anup Kankale
 Author URI: https://anupkankale.com
 Description: Online MBA Admission counselling & comparison theme. Landing page front end plus full WordPress template hierarchy — pages, posts, archives, search, 404 and a dedicated Thank You (lead confirmation) page template.
 Tags: education, landing-page, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
-Version: 1.20.1
+Version: 1.21.0
 Requires at least: 6.0
 Requires PHP: 7.4
 License: GNU General Public License v2 or later
@@ -132,7 +132,11 @@ Primary Branch: main
   --sh-lg:0 30px 70px rgba(11,18,53,.28);
   --sh-focus:0 0 0 4px rgba(42,59,150,.12);
 
-  --dis:'Plus Jakarta Sans',system-ui,sans-serif;
+  /* One family across the whole site. Both tokens are kept — 28 rules use
+     --dis for headings, buttons and labels — so the display/body split can
+     be reinstated later by pointing --dis at another family and nothing
+     else has to change. */
+  --dis:'Manrope',system-ui,sans-serif;
   --body:'Manrope',system-ui,sans-serif;
 
   /* Motion — one duration and one easing, so nothing feels out of step. */
