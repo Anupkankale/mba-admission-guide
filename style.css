@@ -5,7 +5,7 @@ Author: Anup Kankale
 Author URI: https://anupkankale.com
 Description: Online MBA Admission counselling & comparison theme. Landing page front end plus full WordPress template hierarchy — pages, posts, archives, search, 404 and a dedicated Thank You (lead confirmation) page template.
 Tags: education, landing-page, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
-Version: 1.26.0
+Version: 1.32.0
 Requires at least: 6.0
 Requires PHP: 7.4
 License: GNU General Public License v2 or later
@@ -101,6 +101,20 @@ Primary Branch: main
 
   --color-focus:var(--amber-500);
 
+  /* Secondary "Download Brochure" CTA. Defined once because two components
+     use it — the university cards and the right-hand rail — and they must
+     not drift apart.
+
+     Same solid navy as .btn--dark ("Get Specialization Guidance"), so the
+     secondary CTAs across the page read as one family. Stated as the navy-*
+     primitives rather than the --night/--night-2 legacy aliases, per the
+     note on those aliases above. Contrast on white text: 18.23:1 at rest,
+     16.14:1 hover, 13.21:1 active — all AAA. */
+  --color-brochure-bg:var(--navy-900);
+  --color-brochure-fg:var(--white);
+  --color-brochure-bg-hover:var(--navy-800);
+  --color-brochure-bg-active:var(--navy-700);
+
   /* ---------- 3. LEGACY ALIASES ---------- */
   /* Kept so every component rule written before the token refactor keeps
      resolving. Prefer the semantic names above in anything new. */
@@ -175,7 +189,7 @@ button,input,select{font:inherit;color:inherit}
 /* ================= TICKER ================= */
 .ticker{background:var(--grad-hot);color:#2A1600;font-weight:800;font-size:13.5px;letter-spacing:.02em;overflow:hidden;white-space:nowrap;padding:8px 0}
 .ticker__track{display:inline-flex;gap:44px;animation:slide 26s linear infinite;will-change:transform}
-.ticker span::before{font-family:"Font Awesome 6 Free";font-weight:900;content:"\f005";opacity:.75;margin-right:7px;font-size:11px}
+.ticker span::before{content:"";display:inline-block;width:11px;height:11px;margin-right:7px;opacity:.75;vertical-align:-.06em;background-color:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512'%3E%3Cpath d='M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512'%3E%3Cpath d='M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z'/%3E%3C/svg%3E") center/contain no-repeat}
 @keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
 /* ================= HEADER ================= */
@@ -301,12 +315,36 @@ button,input,select{font:inherit;color:inherit}
 .tag.warn{background:#FFF3DF;color:#A2610C}
 .uni ul{display:grid;gap:8px;font-size:14.5px;color:var(--muted)}
 .uni ul li{display:flex;gap:9px}
-.uni ul li::before{font-family:"Font Awesome 6 Free";font-weight:900;content:"\f00c";color:var(--color-accent);font-size:11px;line-height:1.7;flex:none}
+.uni ul li::before{content:"";width:11px;height:11px;margin-top:5px;flex:none;background-color:var(--color-accent);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath d='M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath d='M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z'/%3E%3C/svg%3E") center/contain no-repeat}
 /* Two CTAs per card. The wrapper takes the auto margin so both buttons sit
    on the card floor and every card in the row lines up regardless of how
    long its bullet list is. */
 .uni__cta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto}
 .uni__cta .btn{padding:12px 10px;font-size:14px;width:100%}
+
+/* The secondary CTA on a university card: "Download Brochure".
+   A soft navy tint rather than the default grey outline, so the two buttons
+   read as a pair while the amber "Enquire Now" beside it keeps the emphasis.
+   Scoped to .uni__cta on purpose — .btn--line is also the header phone
+   button, the mobile sticky bar and the comparison table, and those should
+   not change. Contrast: navy-800 on navy-100 is 11.67:1, and white on the
+   hover gradient is 9.70:1 (royal) to 10.41:1 (violet), all past AAA.
+   Focus is the global gold :focus-visible ring, which stays visible on both
+   the resting tint and the hover gradient. */
+.uni__cta .btn--line{
+  background:var(--color-brochure-bg);
+  color:var(--color-brochure-fg);
+  border-color:transparent
+}
+.uni__cta .btn--line:hover{
+  background:var(--color-brochure-bg-hover);
+  color:var(--color-brochure-fg);
+  border-color:transparent
+}
+.uni__cta .btn--line:active{
+  background:var(--color-brochure-bg-active);
+  color:var(--color-brochure-fg)
+}
 @media (max-width:420px){
   /* Two labels stop fitting side by side on the narrowest phones. */
   .uni__cta{grid-template-columns:1fr}
@@ -435,13 +473,64 @@ tbody td:first-child{color:var(--ink);font-weight:800;white-space:nowrap;font-fa
 .split ul{display:grid;gap:13px;margin-top:26px}
 .split ul li{display:flex;gap:11px;font-size:15.5px;color:#D3DBF2;font-weight:600}
 
+/* ================= CONTACT PAGE =================
+   One card that hands the visitor to a person. No form, so the card can be
+   narrow and centred rather than fighting for width with a form column.
+   ============================================================ */
+.ctacard{
+  max-width:720px;margin:0 auto;text-align:center;
+  background:#fff;border:1px solid var(--color-border);border-radius:var(--r);
+  padding:38px 32px;box-shadow:var(--sh)
+}
+.ctacard .lead{margin:10px auto 0;max-width:52ch}
+.ctacard__actions{
+  display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:26px
+}
+.ctacard__meta{
+  margin-top:26px;padding-top:22px;border-top:1px solid var(--color-border);
+  display:grid;gap:10px;text-align:left;max-width:46ch;margin-inline:auto;
+  font-size:14.5px;color:var(--color-text-soft)
+}
+.ctacard__meta li{display:flex;align-items:flex-start;gap:10px}
+
+@media (max-width:520px){
+  .ctacard{padding:28px 20px}
+  /* Stack the two CTAs so neither is a thin, hard-to-hit target. */
+  .ctacard__actions{flex-direction:column}
+  .ctacard__actions .btn{width:100%}
+}
+
+/* ================= MANIPAL JAIPUR LANDING =================
+   Only the pieces the shared components do not already cover. Everything
+   else on that template reuses .hero, .feat/.fgrid, .chips, .steps and .faq.
+   ========================================================================= */
+.mujfacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.mujfact{
+  background:#fff;border:1px solid var(--color-border);border-radius:var(--r);
+  padding:20px 22px;display:flex;flex-direction:column;gap:6px
+}
+.mujfact span{
+  font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--color-text-muted)
+}
+.mujfact b{font-family:var(--dis);font-size:19px;font-weight:800;color:var(--color-text);line-height:1.3}
+
+/* The standing caveat under the snapshot. Muted on purpose — it must be
+   readable without competing with the figures it qualifies. */
+.mujdisc{margin-top:16px;font-size:13.5px;color:var(--color-text-muted);max-width:70ch}
+
+/* Free prose typed into the page editor. The theme's block styles cover the
+   elements; this only sets the measure so long paragraphs stay readable. */
+.mujprose{max-width:74ch;margin:0 auto}
+.mujprose > * + *{margin-top:16px}
+
 /* ================= FAQ ================= */
 .faq{max-width:840px;margin:0 auto;display:grid;gap:12px}
 .fitem{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:box-shadow .2s,border-color .2s}
 .fitem.open{box-shadow:var(--sh);border-color:#C9D5EE}
 .fq{width:100%;background:none;border:0;cursor:pointer;text-align:left;padding:19px 52px 19px 20px;position:relative;font-family:var(--body);font-size:17.5px;font-weight:800;letter-spacing:-.02em;line-height:1.35;color:var(--color-text)}
-.fq::after{font-family:"Font Awesome 6 Free";font-weight:900;content:"\2b";position:absolute;right:18px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;background:var(--surface);color:var(--royal);display:grid;place-items:center;font-size:15px;line-height:1}
-.fitem.open .fq::after{content:"\f068";background:var(--grad-hot);color:var(--color-on-accent)}
+.fq::after{font-family:var(--dis);font-weight:800;content:"+";position:absolute;right:18px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;background:var(--surface);color:var(--royal);display:grid;place-items:center;font-size:15px;line-height:1}
+.fitem.open .fq::after{content:"\2212";background:var(--grad-hot);color:var(--color-on-accent)}
 .fa{max-height:0;overflow:hidden;transition:max-height .3s ease}
 /* Answers are full paragraphs, not the short captions the muted body scale
    was built for: darker ink for contrast (9.7:1 rather than 5.4:1), a
@@ -522,6 +611,30 @@ tbody td:first-child{color:var(--ink);font-weight:800;white-space:nowrap;font-fa
   .fin{flex-direction:column;align-items:flex-start}
   .card__body{padding:20px}
 }
+/* ================= DECORATIVE ANIMATION GATE =================
+   The ticker, marquee, orbs, button shine and pulse dots all loop forever,
+   and every one of them sits at or above the fold. That has two costs:
+   they compete with the first paint for compositor time, and because the
+   page never visually settles, Lighthouse's Speed Index keeps climbing
+   long after the content is actually readable.
+
+   So they start paused and are released once the page has loaded, by
+   main.js adding .anim-on to <body>. Paused holds each animation on its
+   first frame — ticker at translateX(0), orbs at translate(0,0), shine
+   off-screen — which is exactly the resting state, so nothing looks
+   half-drawn while it waits.
+
+   If JS never runs, the animations simply stay paused and the page is
+   static rather than broken.
+   ============================================================ */
+.ticker__track,.marquee,.pulse-dot,.orb,.toast .dot,.shine::after{animation-play-state:paused}
+body.anim-on .ticker__track,
+body.anim-on .marquee,
+body.anim-on .pulse-dot,
+body.anim-on .orb,
+body.anim-on .toast .dot,
+body.anim-on .shine::after{animation-play-state:running}
+
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
   .rv{opacity:1;transform:none}
@@ -806,18 +919,22 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 
 /* =========================================================================
-   ICONS — Font Awesome 6 Free
+   ICONS — inline SVG
 
-   Loaded from cdnjs in functions.php as core + solid + brands. Every icon
-   in the templates comes from mbag_icon(), which emits an <i class="fa-…
-   mbag-i" aria-hidden="true">, so the rules below only need to handle
-   size, colour and alignment — never the glyph itself.
+   Built in functions.php by mbag_icon(), which emits an
+   <svg class="mbag-i" fill="currentColor" aria-hidden="true">. Nothing is
+   downloaded: the paths ship in the HTML, so there is no icon-font request
+   and no third-party origin in the critical path.
+
+   The base rule sets height:1em, so the sizes below stay expressed as
+   font-size and every icon still tracks the text it sits beside — the same
+   way the old font glyphs did. Colour comes from currentColor, so an icon
+   inherits its parent's colour unless a rule below overrides it.
 
    Icons here are decorative: each one sits beside a text label, and is
-   hidden from assistive tech. Sizes use em so an icon tracks the font
-   size of whatever it sits in.
+   hidden from assistive tech.
    ========================================================================= */
-.mbag-i{display:inline-block;line-height:1;vertical-align:-.06em}
+.mbag-i{display:inline-block;height:1em;width:auto;line-height:1;vertical-align:-.125em;flex:none}
 
 /* Buttons and inline links */
 .btn .mbag-i{font-size:.94em}
@@ -966,12 +1083,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease),filter var(--dur) var(--ease)
 }
 .rail__btn--call{background:var(--grad-hot);color:var(--color-on-accent)}
-.rail__btn--brochure{background:var(--grad-royal);color:var(--white)}
+.rail__btn--brochure{background:var(--color-brochure-bg);color:var(--color-brochure-fg)}
 .rail__btn:hover{
   transform:translateX(-3px);
   box-shadow:0 14px 32px rgba(11,18,53,.4);
   filter:brightness(1.06)
 }
+/* Same treatment as the university-card "Download Brochure", via the shared
+   tokens. Declared after .rail__btn:hover so the background here is not
+   competing on equal specificity with the shared hover rule above. */
+.rail__btn--brochure:hover{background:var(--color-brochure-bg-hover);color:var(--color-brochure-fg)}
+.rail__btn--brochure:active{background:var(--color-brochure-bg-active);color:var(--color-brochure-fg)}
 .rail__btn .mbag-i{font-size:14px}
 
 /* On a phone the rail would overlap the left edge of the content, and the
@@ -1069,8 +1191,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   font-size:12px;font-weight:600;color:var(--color-text-muted);text-align:center
 }
 .mbag-form .dxm-secure::before{
-  font-family:"Font Awesome 6 Free";font-weight:900;content:"\f023";
-  font-size:11px;color:var(--color-text-muted)
+  content:"";width:11px;height:11px;flex:none;background-color:var(--color-text-muted);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath d='M144 144l0 48 160 0 0-48c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192l0-48C80 64.5 144.5 0 224 0s144 64.5 144 144l0 48 16 0c35.3 0 64 28.7 64 64l0 192c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 256c0-35.3 28.7-64 64-64l16 0z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath d='M144 144l0 48 160 0 0-48c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192l0-48C80 64.5 144.5 0 224 0s144 64.5 144 144l0 48 16 0c35.3 0 64 28.7 64 64l0 192c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 256c0-35.3 28.7-64 64-64l16 0z'/%3E%3C/svg%3E") center/contain no-repeat
 }
 
 /* Consent checkboxes, if the form has any. */
