@@ -153,17 +153,22 @@
      brand, then the image itself. The colour underneath matters — it is what
      shows while the image loads and if it ever 404s. */
   background:
-    linear-gradient(100deg,rgba(10,14,35,.92) 0%,rgba(10,14,35,.80) 38%,rgba(10,14,35,.55) 68%,rgba(10,14,35,.42) 100%),
-    radial-gradient(900px 520px at 88% 6%,rgba(238,90,17,.26),transparent 62%),
+    linear-gradient(100deg,rgba(10,14,35,.52) 0%,rgba(10,14,35,.36) 38%,rgba(10,14,35,.20) 68%,rgba(10,14,35,.12) 100%),
+    radial-gradient(900px 520px at 88% 6%,rgba(238,90,17,.16),transparent 62%),
     url("../images/smu/hero-campus.webp") center/cover no-repeat,
     #10142c;
 }
 
-/* Everything in the hero is now on a dark ground. */
+/* Everything in the hero is now on a dark ground.
+   The scrim is deliberately light so the campus reads through it, which means
+   the type sits over photographic detail rather than flat colour. A soft
+   shadow keeps the edges crisp against the busier parts of the building. */
 .smu-hero h1,
-.smu-hero .smu-h-underline{color:#fff}
-.smu-hero .smu-sell{color:rgba(255,255,255,.84)}
-.smu-hero .smu-hero-ticks li{color:rgba(255,255,255,.88)}
+.smu-hero .smu-h-underline{color:#fff;text-shadow:0 2px 18px rgba(6,9,24,.55)}
+.smu-hero .smu-sell,
+.smu-hero .smu-hero-ticks li{text-shadow:0 1px 12px rgba(6,9,24,.5)}
+.smu-hero .smu-sell{color:rgba(255,255,255,.92)}
+.smu-hero .smu-hero-ticks li{color:rgba(255,255,255,.94)}
 
 /* The orange sits on near-black here, where the brand tone reads dull and
    fails contrast. Lifted to a lighter tint that keeps the hue. */
@@ -186,7 +191,7 @@
 @media(max-width:760px){
   .smu-hero{
     background:
-      linear-gradient(180deg,rgba(10,14,35,.90) 0%,rgba(10,14,35,.82) 55%,rgba(10,14,35,.90) 100%),
+      linear-gradient(180deg,rgba(10,14,35,.62) 0%,rgba(10,14,35,.52) 55%,rgba(10,14,35,.66) 100%),
       url("../images/smu/hero-campus.webp") center/cover no-repeat,
       #10142c;
   }
