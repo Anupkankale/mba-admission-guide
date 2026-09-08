@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<ruleset name="MBA Admission Guide">
+	<description>WordPress coding standards for this theme.</description>
+
+	<file>.</file>
+
+	<!-- Third-party and generated files are not ours to restyle. -->
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<exclude-pattern>/node_modules/*</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<arg value="sp"/>
+
+	<rule ref="WordPress">
+		<!--
+		The theme is deliberately written with compact single-line arrays and
+		short assignment blocks. Alignment and array-spacing sniffs would
+		reformat most of the file without changing behaviour, so they are off
+		to keep review diffs meaningful.
+		-->
+		<exclude name="Generic.Formatting.MultipleStatementAlignment"/>
+		<exclude name="WordPress.Arrays.MultipleStatementAlignment"/>
+	</rule>
+
+	<config name="minimum_wp_version" value="6.3"/>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="mba-admission-guide"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="mbag"/>
+				<element value="MBAG"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.Security.EscapeOutput">
+		<properties>
+			<!--
+			mbag_get_icon() builds its markup from a hardcoded viewBox/path map
+			and escapes the two variable parts itself, so its return value is
+			already safe to echo. Declaring it here documents that contract
+			instead of scattering phpcs:ignore comments at each call site.
+			-->
+			<property name="customEscapingFunctions" type="array">
+				<element value="mbag_get_icon"/>
+			</property>
+		</properties>
+	</rule>
+</ruleset>

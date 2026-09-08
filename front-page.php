@@ -30,7 +30,7 @@ get_header();
       </div>
 
       <ul class="usp">
-        <li><span class="tick"><?php mbag_icon( 'check' ); ?></span> 7 university options in one place</li>
+        <li><span class="tick"><?php mbag_icon( 'check' ); ?></span> 8 university options in one place</li>
         <li><span class="tick"><?php mbag_icon( 'check' ); ?></span> Guidance on eligibility &amp; documents</li>
         <li><span class="tick"><?php mbag_icon( 'check' ); ?></span> Specialization shortlisting help</li>
         <li><span class="tick"><?php mbag_icon( 'check' ); ?></span> Support through the admission process</li>

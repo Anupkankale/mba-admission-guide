@@ -4,12 +4,13 @@
 /* ---------- DATA ---------- */
 var U=[
  {n:"Amity University Online",s:"AU",slug:"amity",t:"Online / Distance",p:["Multiple specializations","Fully online learning format"]},
- {n:"Manipal University Jaipur",s:"MUJ",slug:"manipal-jaipur",t:"Online / Distance",p:["Online classes and study material","Specialization choices"]},
- {n:"Sikkim Manipal University",s:"SMU",slug:"sikkim-manipal",t:"Online / Distance",p:["Distance / online learning mode","Specialization options"]},
  {n:"VIT University",s:"VIT",slug:"vit",t:"Online / Distance",p:["Established university option","Confirm current MBA mode with us"]},
+ {n:"Sikkim Manipal University",s:"SMU",slug:"sikkim-manipal",t:"Online / Distance",p:["Distance / online learning mode","Specialization options"]},
+ {n:"Manipal University Jaipur",s:"MUJ",slug:"manipal-jaipur",t:"Online / Distance",p:["Online classes and study material","Specialization choices"]},
  {n:"NMIMS Online",s:"NMIMS",slug:"nmims",t:"Online / Distance",p:["Online learning platform","Multiple specializations"]},
  {n:"GLA University Online",s:"GLA",slug:"gla",t:"Online / Distance",p:["Online learning platform","Multiple specializations"]},
- {n:"Dayananda Sagar University Online",s:"DSU",slug:"dayananda-sagar",t:"Online / Distance",p:["Online delivery format","Guidance on eligibility"]}
+ {n:"Dayananda Sagar University Online",s:"DSU",slug:"dayananda-sagar",t:"Online / Distance",p:["Online delivery format","Guidance on eligibility"]},
+ {n:"Jain Online University",s:"JAIN",slug:"jain",t:"Online / Distance",p:["Online learning platform","Multiple specializations"]}
 ];
 var SPEC=[
  "Marketing Management",
@@ -59,7 +60,7 @@ var T=[
  ["Manjunath Rao","Operations Management \u00b7 Mangaluru","My application was stuck at the document upload step and someone walked me through it on the phone the same evening."],
  ["Deepa Pillai","Business Analytics \u00b7 Kozhikode","I wanted a specialization that matched my current role rather than a generic MBA. They mapped the options against what I already do."]
 ];
-var TICK=["Online MBA Admission 2026 — Applications Open","Free counselling for working professionals","Compare 7 universities in one call","Limited counselling slots today","EMI options available on most programmes"];
+var TICK=["Online MBA Admission 2026 — Applications Open","Free counselling for working professionals","Compare 8 universities in one call","Limited counselling slots today","EMI options available on most programmes"];
 var NAMES=["Rohit from Delhi","Sneha from Mumbai","Arjun from Bengaluru","Kavita from Jaipur","Imran from Hyderabad","Neha from Lucknow","Vikram from Pune"];
 
 /* ---------- UNIVERSITY LOGOS ---------- */
@@ -124,15 +125,17 @@ if(g&&tb){
       '<ul>'+u.p.map(function(p){return "<li>"+p+"</li>";}).join("")+'</ul>'+
       '<div class="uni__cta">'+
         /* Low commitment: scrolls to the on-page form with this university
-           already selected. */
-        '<button class="btn btn--line" type="button" data-uni="'+esc(u.n)+'">Get Details</button>'+
+           already selected. NOTE: labelled "Download Brochure" but it goes to
+           the "Talk to an MBA Counsellor" form — see mbag_brochure_button()
+           in functions.php for the popup that matches this label. */
+        '<button class="btn btn--line" type="button" data-uni="'+esc(u.n)+'">Download Brochure</button>'+
         /* High intent: opens the popup, carrying the university with it so
            the lead says which one was clicked. */
         '<button class="btn btn--hot" type="button" data-mbag-popup'+
-          ' data-mbag-popup-title="'+esc("Apply — "+u.n)+'"'+
-          ' data-mbag-popup-sub="'+esc("Share your details and a counsellor will take you through eligibility, fees and the application.")+'"'+
+          ' data-mbag-popup-title="'+esc("Enquire — "+u.n)+'"'+
+          ' data-mbag-popup-sub="'+esc("Share your details and a counsellor will take you through eligibility, fees and the admission process.")+'"'+
           ' data-mbag-source="'+esc("Apply — "+u.n)+'"'+
-          ' data-mbag-university="'+esc(u.n)+'">Apply Now</button>'+
+          ' data-mbag-university="'+esc(u.n)+'">Enquire Now</button>'+
       '</div>';
     g.appendChild(c);
 
@@ -304,18 +307,24 @@ if(fq){
       '<div class="fa" id="fa'+i+'" role="region"><p>'+f[1]+'</p></div>';
     fq.appendChild(d);
   });
-  fq.addEventListener("click",function(e){
-    var q=e.target.closest(".fq");if(!q)return;
-    var it=q.parentElement,pa=it.querySelector(".fa"),open=it.classList.contains("open");
-    fq.querySelectorAll(".fitem.open").forEach(function(el){
-      el.classList.remove("open");el.querySelector(".fa").style.maxHeight=null;
-      el.querySelector(".fq").setAttribute("aria-expanded","false");
-    });
-    if(!open){it.classList.add("open");pa.style.maxHeight=pa.scrollHeight+"px";q.setAttribute("aria-expanded","true");}
-  });
 }
 
-/* ---------- GET DETAILS ---------- */
+/* Accordion behaviour is delegated from the document and scoped to the
+   nearest .faq, so it drives both the JS-built list above and the static
+   .faq markup that page templates write out. Each .faq stays independent:
+   opening one does not close an item in another. */
+document.addEventListener("click",function(e){
+  var q=e.target.closest(".fq");if(!q)return;
+  var wrap=q.closest(".faq");if(!wrap)return;
+  var it=q.parentElement,pa=it.querySelector(".fa"),open=it.classList.contains("open");
+  wrap.querySelectorAll(".fitem.open").forEach(function(el){
+    el.classList.remove("open");el.querySelector(".fa").style.maxHeight=null;
+    el.querySelector(".fq").setAttribute("aria-expanded","false");
+  });
+  if(!open){it.classList.add("open");pa.style.maxHeight=pa.scrollHeight+"px";q.setAttribute("aria-expanded","true");}
+});
+
+/* ---------- DOWNLOAD BROCHURE ---------- */
 document.addEventListener("click",function(e){
   var b=e.target.closest("[data-uni]");if(!b)return;
   var sel=talkUniSelect(),name=b.getAttribute("data-uni");
@@ -603,7 +612,7 @@ document.addEventListener("wpcf7mailsent",function(){
      because menu items accept a CSS class but not a data attribute, so it
      is the only way to trigger the popup from Appearance > Menus.
 
-     Not included: the per-university "Get Details" buttons and the
+     Not included: the per-university "Download Brochure" buttons and the
      specialization chips. Those pre-fill the university or specialization
      into the inline form, and a generic popup would throw that away. */
   document.addEventListener("click",function(e){
@@ -635,4 +644,23 @@ document.addEventListener("wpcf7mailsent",function(){
   document.addEventListener("wpcf7mailsent",function(e){
     if(modal.contains(e.target))window.setTimeout(close,600);
   },false);
+})();
+
+/* ---------- DECORATIVE ANIMATION GATE ----------
+   style.css starts the looping decorations (ticker, marquee, orbs, shine,
+   pulse dots) paused. Release them once the page has loaded, so they are
+   not competing with the first paint and the page can visually settle —
+   a page that never settles reports a much worse Speed Index than it
+   actually delivers.
+
+   The rAF pair waits for the first frame after load, so the release never
+   lands inside the same frame as the load handler's own work. */
+(function(){
+  function release(){
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ document.body.classList.add("anim-on"); });
+    });
+  }
+  if(document.readyState==="complete")release();
+  else window.addEventListener("load",release,{once:true});
 })();

@@ -73,7 +73,7 @@ because the editor cannot read CSS custom properties.
 
 ---
 
-## 2. Icons — Font Awesome 6 Free
+## 2. Icons — inline SVG
 
 ### Using one
 
@@ -84,9 +84,10 @@ because the editor cannot read CSS custom properties.
 <?php mbag_icon( 'search', '', 'Search' ); ?>         // meaningful, not decorative
 ```
 
-Output is `<i class="fa-solid fa-phone-volume mbag-i" aria-hidden="true">`.
+Output is an inline `<svg class="mbag-i" viewBox="0 0 512 512"
+fill="currentColor" aria-hidden="true">` with a single `<path>`.
 
-### Why a helper instead of writing `<i class="fa-solid fa-phone">`
+### Why a helper instead of pasting `<svg>` into templates
 
 - **Swapping icon sets is one function, not fifty templates.**
 - **Names are intent-based** — `'secure'`, `'flexible'`, `'anywhere'` —
@@ -98,53 +99,74 @@ Output is `<i class="fa-solid fa-phone-volume mbag-i" aria-hidden="true">`.
 
 ### Adding an icon
 
-Add one line to `mbag_icon_map()` in `functions.php`:
+Add one line to `mbag_icon_map()` in `functions.php` — the viewBox and the
+path `d`, both copied from the source SVG:
 
 ```php
-'documents' => 'fa-solid fa-file-lines',
+'documents' => array( '0 0 384 512', 'M64 0C28.7 0 0 28.7…' ),
 ```
 
 Then call `mbag_icon( 'documents' )`. A name that isn't in the map
 returns an empty string rather than broken markup.
 
-### How it loads, and why not `all.min.css`
+The shapes shipped here come from Font Awesome Free 6.7.2 (CC BY 4.0).
+To pull the path for a new one without adding a build step:
 
-`functions.php` enqueues **three split files** from cdnjs — core, solid,
-brands — instead of `all.min.css`. The theme uses no "regular" weight and
-no v4 shims, and skipping them saves roughly 40% of the payload. A
-`preconnect` hint to cdnjs is added alongside.
-
-**If a plugin already ships Font Awesome** (Elementor, WPForms, and many
-themes do), `mbag_load_font_awesome()` detects its handle and stands
-down — two copies of Font Awesome is 200KB of duplicate CSS and a
-specificity fight. To force it off yourself:
-
-```php
-add_filter( 'mbag_load_font_awesome', '__return_false' );
+```bash
+npm pack @fortawesome/fontawesome-free@6.7.2
+tar xzf fortawesome-fontawesome-free-6.7.2.tgz
+cat package/svgs/solid/file-lines.svg
 ```
+
+### Why inline, and not an icon font
+
+The theme used to load Font Awesome as three CSS files from cdnjs.
+Lighthouse measured that at **~2,550 ms of render-blocking time** — three
+round trips to a third-party origin, which then pulled two webfonts
+(`fa-solid-900` + `fa-brands-400`, ~260 KB) before a single icon could
+paint. All of it to draw 21 icons.
+
+Those 21 icons are ~8 KB of path data. Inline, they cost **no request at
+all**, and because the same few icons repeat down the page they gzip to
+roughly 3 KB. There is no third-party origin left in the critical path.
+
+The trade is that icons now live in the HTML rather than a cached shared
+file, so they are re-sent on every page. At 3 KB gzipped that is far
+cheaper than the handshake it replaced.
+
+### Sizing and colour
+
+`.mbag-i` sets `height:1em; width:auto`, so **sizes are still expressed as
+`font-size`** and an icon tracks the text beside it exactly as the font
+glyphs did:
+
+```css
+.btn .mbag-i{font-size:.94em}
+```
+
+Colour comes from `fill="currentColor"`, so an icon inherits its parent's
+colour unless a rule overrides it.
 
 ### Icons in CSS pseudo-elements
 
-Three decorative marks are drawn from the font in CSS rather than markup
-(ticker star, university list bullets, FAQ open/close toggle):
+Four decorative marks are drawn in CSS rather than markup. The two that are
+real shapes (ticker star, university list bullets, and the CF7 lock) use a
+CSS `mask` with an inline `data:` SVG, so they stay tintable:
 
 ```css
-.fq::after{font-family:"Font Awesome 6 Free";font-weight:900;content:"\2b"}
+.uni ul li::before{
+  content:"";width:11px;height:11px;flex:none;
+  background-color:var(--color-accent);
+  mask:url("data:image/svg+xml,%3Csvg…") center/contain no-repeat
+}
 ```
 
-**`font-weight:900` is mandatory** — Font Awesome Free Solid only renders
-at weight 900; at any other weight you get a blank box. And check the
-codepoint against the version you actually load: FA 6 remapped `fa-plus`
-from `\f067` to `\2b`, so a codepoint copied from an FA 5 answer online
-renders as tofu. Verify before shipping:
+`background-color` is what you change to recolour one — the mask only
+supplies the shape.
 
-```bash
-curl -s https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/fontawesome.min.css \
-  | grep -oE '\.fa-plus\{[^}]*\}'
-```
-
-Codepoints currently used: `\f005` star, `\f00c` check, `\2b` plus,
-`\f068` minus — all verified against 6.7.2.
+The FAQ toggle needs no icon at all: it is now the plain characters `+`
+and `\2212` (a true minus sign, not a hyphen) in the theme's own display
+font.
 
 ---
 

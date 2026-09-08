@@ -78,7 +78,7 @@ Three places, and they must agree:
 2. **`functions.php`** — add `'slug' => 'Display Name'` to `mbag_universities()`.
    That drives the Customizer label and the logo lookup.
 3. **The CF7 popup form** — add the name to the `[select university …]` list
-   so the "Apply Now" and "Check Current Fee" buttons can pre-select it.
+   so the "Enquire Now" and "Check Current Fee" buttons can pre-select it.
    The option text must match the name in the `U` array exactly.
 
 Then add a logo by any of the three routes above.
@@ -89,8 +89,8 @@ Then add a logo by any of the three routes above.
 
 | Button | Action |
 |---|---|
-| **Get Details** | Scrolls to the middle form with that university selected |
-| **Apply Now** | Opens the lead popup, carrying that university and a per-university source line |
+| **Download Brochure** | Scrolls to the middle form with that university selected |
+| **Enquire Now** | Opens the lead popup, carrying that university and a per-university source line |
 | **Check Current Fee** (in the table) | Opens the popup with a fee-specific heading |
 
 All three record which university produced the lead, provided the popup form

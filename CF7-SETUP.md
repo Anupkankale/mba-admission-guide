@@ -200,7 +200,7 @@ The inline hero, middle and final forms still sit on the landing page and
 still work; they are now reached by scrolling rather than by the buttons.
 
 Two front-page controls are left alone on purpose: the per-university
-**Get Details** buttons and the **specialization chips**. Both pre-fill the
+**Download Brochure** buttons and the **specialization chips**. Both pre-fill the
 university or specialization into the inline form, and a generic popup
 would throw that context away. (Each university card also has an **Apply
 Now** button that *does* open the popup, carrying that university with it —
