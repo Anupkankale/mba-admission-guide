@@ -240,12 +240,6 @@
 @media(max-width:520px){.smu-hero-ticks{grid-template-columns:1fr}}
 
 /* ================= ACCREDITATIONS ================= */
-.smu-creds{background:var(--smu-surface-alt);border-top:1px solid var(--smu-line);border-bottom:1px solid var(--smu-line);padding:26px 0}
-.smu-creds-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
-.smu-cred{text-align:center;padding:8px 6px;border-right:1px solid var(--smu-line)}
-.smu-cred:last-child{border-right:0}
-.smu-cred b{display:block;color:var(--smu-navy);font-weight:800;font-size:1.05rem;line-height:1.35}
-@media(max-width:900px){.smu-cred{border-right:0}}
 
 /* ================= PROGRAMME ================= */
 /* Intro on the left, the specialization picker as a panel on the right.
@@ -912,3 +906,45 @@
 .smu-prog .smu-chips{gap:10px}
 .smu-prog .smu-chip{justify-content:center;text-align:center;min-width:0;padding:.6rem .9rem}
 
+
+/* ================= RANKINGS & ACCREDITATIONS ================= */
+.smu-ranks-grid{
+  list-style:none;margin:44px 0 0;padding:0;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:18px;
+}
+.smu-rank{
+  background:#fff;border:1px solid var(--smu-line);border-radius:var(--smu-r-md);
+  padding:26px 16px 22px;text-align:center;
+  box-shadow:var(--smu-shadow);
+  transition:box-shadow .22s,transform .22s;
+}
+.smu-rank:hover{box-shadow:var(--smu-shadow-lift);transform:translateY(-3px)}
+
+/* The badges are square JPEG-sourced artwork on a white ground, so they need
+   a white plate of their own to sit on — on the tinted band they would
+   otherwise show a visible square edge against the section behind them. */
+.smu-rank__badge{
+  display:grid;place-items:center;width:76px;height:76px;margin:0 auto 14px;
+  background:#fff;border-radius:50%;overflow:hidden;
+}
+.smu-rank__badge img{width:100%;height:100%;object-fit:contain}
+
+.smu-rank b{
+  display:block;font-family:var(--smu-f);font-weight:800;font-size:1rem;
+  color:var(--smu-navy);line-height:1.3;
+}
+.smu-rank span{
+  display:block;margin-top:5px;font-size:.78rem;line-height:1.45;color:var(--smu-text-2);
+}
+
+.smu-ranks-note{
+  margin-top:22px;font-size:.8rem;font-style:italic;line-height:1.7;
+  color:var(--smu-text-2);max-width:80ch;
+}
+.smu-center + .smu-ranks-grid{margin-top:40px}
+
+@media(max-width:520px){
+  .smu-ranks-grid{grid-template-columns:repeat(2,1fr);gap:14px}
+  .smu-rank{padding:20px 12px 18px}
+  .smu-rank__badge{width:62px;height:62px}
+}

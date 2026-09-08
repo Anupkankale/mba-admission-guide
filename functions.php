@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MBAG_VERSION', '1.35.0' );
+define( 'MBAG_VERSION', '1.36.0' );
 
 /**
  * Theme setup.
@@ -2614,4 +2614,53 @@ add_filter( 'frontpage_template', 'mbag_front_page_template' );
  */
 function mbag_smu_default_form_id() {
 	return (string) apply_filters( 'mbag_smu_default_form_id', 'a28fde8' );
+}
+
+/**
+ * Badges for the Rankings & Accreditations section.
+ *
+ * Each caption names the awarding body and, at most, what the badge artwork
+ * itself already states — NAAC's grade is on its seal, so it is repeated
+ * here. No position or score is asserted anywhere: "NIRF ranked 42nd" is a
+ * claim that goes stale every year and that this file cannot verify, while
+ * "participates in NIRF" stays true. Add a rank only when you can point at
+ * the current published table.
+ *
+ * Filterable, so the list can be changed without editing this file.
+ *
+ * @return array[] Each entry: file (in images/smu/rankings/), name, note.
+ */
+function mbag_smu_rankings() {
+	return apply_filters( 'mbag_smu_rankings', array(
+		array(
+			'file' => 'naac.webp',
+			'name' => __( 'NAAC A+', 'mba-admission-guide' ),
+			'note' => __( 'Accredited grade', 'mba-admission-guide' ),
+		),
+		array(
+			'file' => 'ugc.webp',
+			'name' => __( 'UGC', 'mba-admission-guide' ),
+			'note' => __( 'University Grants Commission', 'mba-admission-guide' ),
+		),
+		array(
+			'file' => 'nirf.webp',
+			'name' => __( 'NIRF', 'mba-admission-guide' ),
+			'note' => __( 'National Institutional Ranking Framework', 'mba-admission-guide' ),
+		),
+		array(
+			'file' => 'iirf.webp',
+			'name' => __( 'IIRF', 'mba-admission-guide' ),
+			'note' => __( 'Indian Institutional Ranking Framework', 'mba-admission-guide' ),
+		),
+		array(
+			'file' => 'qs.webp',
+			'name' => __( 'QS', 'mba-admission-guide' ),
+			'note' => __( 'QS World University Rankings', 'mba-admission-guide' ),
+		),
+		array(
+			'file' => 'wes.webp',
+			'name' => __( 'WES', 'mba-admission-guide' ),
+			'note' => __( 'World Education Services', 'mba-admission-guide' ),
+		),
+	) );
 }

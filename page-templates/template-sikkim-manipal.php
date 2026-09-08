@@ -291,15 +291,42 @@ if ( $mbag_smu_courses ) :
 </section>
 <?php endif; ?>
 
-<?php if ( $mbag_smu_approvals ) : ?>
-<!-- ========== ACCREDITATIONS ========== -->
-<div class="smu-creds">
-  <div class="smu-shell smu-creds-in">
-    <?php foreach ( $mbag_smu_approvals as $mbag_smu_approval ) : ?>
-      <div class="smu-cred"><b><?php echo esc_html( $mbag_smu_approval ); ?></b></div>
-    <?php endforeach; ?>
+<?php
+$mbag_smu_rankings = mbag_smu_rankings();
+
+if ( $mbag_smu_rankings ) :
+?>
+<!-- ========== RANKINGS & ACCREDITATIONS ========== -->
+<section class="smu-section smu-ranks<?php echo esc_attr( $mbag_smu_bg() ); ?>" id="rankings">
+  <div class="smu-shell">
+    <div class="smu-center">
+      <span class="smu-eyebrow"><?php esc_html_e( 'Recognition', 'mba-admission-guide' ); ?></span>
+      <h2><?php esc_html_e( 'Rankings &amp;', 'mba-admission-guide' ); ?> <span class="smu-h-orange smu-h-orange--inline smu-em"><?php esc_html_e( 'Accreditations', 'mba-admission-guide' ); ?></span></h2>
+      <div class="smu-gold-bar"></div>
+      <p class="smu-lede"><?php esc_html_e( 'The bodies that accredit, rank and evaluate the university — the things worth checking before you pay any fee.', 'mba-admission-guide' ); ?></p>
+    </div>
+
+    <ul class="smu-ranks-grid">
+      <?php foreach ( $mbag_smu_rankings as $mbag_smu_rank ) : ?>
+        <?php $mbag_smu_rank_img = mbag_smu_img( 'rankings/' . $mbag_smu_rank['file'] ); ?>
+        <li class="smu-rank">
+          <?php if ( '' !== $mbag_smu_rank_img ) : ?>
+            <span class="smu-rank__badge">
+              <img src="<?php echo esc_url( $mbag_smu_rank_img ); ?>" width="104" height="104"
+                alt="<?php echo esc_attr( $mbag_smu_rank['name'] ); ?>" decoding="async" loading="lazy">
+            </span>
+          <?php endif; ?>
+          <b><?php echo esc_html( $mbag_smu_rank['name'] ); ?></b>
+          <?php if ( '' !== $mbag_smu_rank['note'] ) : ?>
+            <span><?php echo esc_html( $mbag_smu_rank['note'] ); ?></span>
+          <?php endif; ?>
+        </li>
+      <?php endforeach; ?>
+    </ul>
+
+    <p class="smu-ranks-note"><?php esc_html_e( 'Accreditation and ranking status changes between cycles. Ask a counsellor to confirm the position for the current intake in writing before you apply.', 'mba-admission-guide' ); ?></p>
   </div>
-</div>
+</section>
 <?php endif; ?>
 
 <!-- ========== 1 · PROGRAMME ========== -->
