@@ -323,8 +323,6 @@ if ( $mbag_smu_rankings ) :
         </li>
       <?php endforeach; ?>
     </ul>
-
-    <p class="smu-ranks-note"><?php esc_html_e( 'Accreditation and ranking status changes between cycles. Ask a counsellor to confirm the position for the current intake in writing before you apply.', 'mba-admission-guide' ); ?></p>
   </div>
 </section>
 <?php endif; ?>
