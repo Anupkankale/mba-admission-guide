@@ -861,6 +861,17 @@
   color:var(--smu-text-2);
 }
 
+/* The legal line. It takes the border that used to sit on the copyright row
+   and the copyright row gives it up, so the two close the footer as one
+   block instead of stacking two rules a few pixels apart. */
+.smu-foot__disc{
+  margin:0;padding:18px 0 14px;
+  border-top:1px solid var(--smu-line);
+  font-size:.74rem;line-height:1.7;color:var(--smu-text-2);
+}
+.smu-foot__disc strong{color:var(--smu-navy);font-weight:600}
+.smu-foot__disc + .smu-foot__bot{border-top:0;padding-top:0}
+
 .smu-foot :focus-visible{outline-color:var(--smu-orange)}
 
 /* ================= CAROUSEL MARQUEE ================= */

@@ -73,6 +73,16 @@ $mbag_smu_f_reply = mbag_response_time();
 
     </div>
 
+    <p class="smu-foot__disc">
+      <?php
+      printf(
+        /* translators: %s: name of the university the landing page is about. */
+        esc_html__( 'Disclaimer: We act as a marketing service partner only. %s holds full rights to request change or removal of any non-relevant content. Images used are for illustrative purposes and do not directly represent the respective colleges or universities.', 'mba-admission-guide' ),
+        '<strong>' . esc_html__( 'Sikkim Manipal University', 'mba-admission-guide' ) . '</strong>'
+      );
+      ?>
+    </p>
+
     <div class="smu-foot__bot">
       <span>&copy; <?php echo esc_html( wp_date( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?></span>
       <span><?php esc_html_e( 'Independent counselling platform — not affiliated with the university', 'mba-admission-guide' ); ?></span>
