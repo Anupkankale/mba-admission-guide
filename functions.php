@@ -2562,3 +2562,29 @@ add_action( 'wp', 'mbag_smu_contact_overrides' );
 function mbag_smu_default_phone() {
 	return (string) apply_filters( 'mbag_smu_default_phone', '+91 96067 02758' );
 }
+
+/**
+ * Let a static front page keep its own page template.
+ *
+ * WordPress checks front-page.php before the template assigned in Page
+ * Attributes, so a page promoted to "Your homepage" silently loses its
+ * template and renders the generic front page instead. That is fine while
+ * the homepage is the default one; it is wrong the moment the homepage is
+ * meant to be a landing page.
+ *
+ * Returning '' here makes template-loader.php fall through its remaining
+ * conditions to is_page(), which honours the assigned template. front-page.php
+ * still wins whenever the front page has no template of its own, so nothing
+ * changes for a site that has not opted in.
+ *
+ * @param string $template Path front-page.php resolved to.
+ * @return string
+ */
+function mbag_front_page_template( $template ) {
+	if ( get_page_template_slug( get_queried_object_id() ) ) {
+		return '';
+	}
+
+	return $template;
+}
+add_filter( 'frontpage_template', 'mbag_front_page_template' );
