@@ -12,8 +12,15 @@
  * @package MBA_Admission_Guide
  */
 
-/* ================= TOKENS ================= */
-.smu{
+/* ================= TOKENS =================
+   Declared on the body class as well as .smu. header-landing.php and
+   footer-landing.php render OUTSIDE the .smu wrapper — that div opens inside
+   <main> — so tokens scoped to .smu alone resolved to nothing up there. Every
+   var() in the header and footer was invalid, which is why the hamburger bars
+   (background:var(--smu-navy)) drew nothing and the button looked empty.
+   body_class() adds .smu-landing in header-landing.php. */
+.smu,
+.smu-landing{
   --smu-navy:#151A3A;
   --smu-navy-2:#0C1230;
   --smu-orange:#EE5A11;
@@ -51,7 +58,9 @@
 
   --smu-shell:1240px;
   --smu-f:"Poppins",-apple-system,'Segoe UI',sans-serif;
+}
 
+.smu{
   font-family:var(--smu-f);
   font-size:15.5px;
   font-weight:400;
@@ -60,11 +69,22 @@
   background:#fff;
 }
 
+/* The landing header and footer are outside .smu, so they set their own
+   typeface rather than inheriting the theme's. */
+.smu-head,
+.smu-foot{font-family:var(--smu-f)}
+
 .smu *,.smu *::before,.smu *::after{box-sizing:border-box}
 .smu img{max-width:100%;display:block}
 .smu p{margin:0}
 
-.smu-shell{width:100%;max-width:var(--smu-shell);margin:0 auto;padding:0 26px}
+/* 80% of the viewport, so the page keeps a visible margin either side rather
+   than running to the edges. The max-width still caps it on very wide screens,
+   and narrow screens go near-full-width — 80% of a phone is too narrow to
+   read comfortably. */
+.smu-shell{width:80%;max-width:var(--smu-shell);margin:0 auto;padding:0}
+@media(max-width:900px){.smu-shell{width:92%}}
+@media(max-width:560px){.smu-shell{width:100%;padding:0 18px}}
 .smu-section{padding:var(--smu-pad) 0}
 
 /* Alternating bands.
@@ -162,20 +182,54 @@
 @media(max-width:900px){.smu-cred{border-right:0}}
 
 /* ================= PROGRAMME ================= */
-/* Single column, full container width now that the fact cards are gone. */
-.smu-prog-grid{display:block}
-.smu-prog-grid > div{max-width:none}
-.smu-prog h2{font-size:clamp(2rem,3.6vw,2.9rem);line-height:1.14}
-.smu-prog .smu-lede{margin-top:26px;line-height:1.85;max-width:none}
-.smu-spec-h{font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--smu-orange);margin:34px 0 14px}
-.smu-chips{display:flex;flex-wrap:wrap;gap:10px}
+/* Intro on the left, the specialization picker as a panel on the right.
+   The picker was previously a loose row of pills between two paragraphs,
+   which read as a stray control rather than the section's main interaction. */
+.smu-prog-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(36px,5vw,72px);align-items:start}
+.smu-prog__intro{max-width:56ch}
+.smu-prog .smu-lede{margin-top:24px;line-height:1.85;max-width:none}
+.smu-prog .smu-btn{margin-top:32px}
+
+/* Key facts as a definition list — each one drops out when its Customizer
+   field is empty, so this never shows a label with nothing beside it. */
+.smu-prog__meta{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:20px 28px;margin:32px 0 0;padding:24px 0 0;
+  border-top:1px solid var(--smu-line);
+}
+.smu-prog__meta dt{
+  font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--smu-text-2);margin-bottom:5px;
+}
+.smu-prog__meta dd{margin:0;font-size:.95rem;font-weight:600;color:var(--smu-navy);line-height:1.45}
+
+/* The picker panel. */
+.smu-picker{
+  background:#fff;border:1px solid var(--smu-line);
+  border-radius:var(--smu-r-lg);padding:clamp(24px,3vw,34px);
+  box-shadow:var(--smu-shadow);
+}
+.smu-band--alt .smu-picker{background:#fff}
+.smu-picker__head h3{font-size:1.15rem}
+.smu-picker__head p{margin-top:6px;font-size:.9rem;color:var(--smu-text-2)}
+.smu-picker .smu-chips{margin-top:22px}
+.smu-picker__foot{
+  margin-top:18px;font-size:.83rem;line-height:1.65;color:var(--smu-text-2);
+}
+
+@media(max-width:960px){
+  .smu-prog-grid{grid-template-columns:1fr}
+  .smu-prog__intro{max-width:none}
+}
+
+.smu-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
 .smu-chip{
   font-family:var(--smu-f);padding:.6rem 1.25rem;border:1.5px solid var(--smu-pink-line);border-radius:99px;
   background:#fff;font-size:.9rem;font-weight:500;color:var(--smu-chip-text);cursor:pointer;transition:.18s;
 }
 .smu-chip:hover{border-color:var(--smu-orange);color:var(--smu-orange)}
 .smu-chip.is-on{background:var(--smu-orange);border-color:var(--smu-orange);color:#fff}
-.smu-spec-box{margin-top:18px;padding:16px 20px;background:var(--smu-cream);border-left:4px solid var(--smu-gold);border-radius:0 10px 10px 0}
+.smu-spec-box{margin-top:18px;padding:18px 22px;background:var(--smu-cream);border:1px solid var(--smu-cream-line);border-left:4px solid var(--smu-gold);border-radius:0 var(--smu-r-sm) var(--smu-r-sm) 0;min-height:112px}
 .smu-spec-box b{display:block;color:var(--smu-navy);font-weight:700;margin-bottom:2px}
 .smu-spec-box p{font-size:.93rem}
 .smu-prog .smu-btn{margin-top:30px}
@@ -274,16 +328,33 @@
 .smu-step-card{background:var(--smu-surface-alt);border:1px solid var(--smu-line);border-radius:var(--smu-r-md);padding:32px 26px 30px;text-align:center}
 .smu-step-card .smu-ic{width:52px;height:52px;border-radius:14px;background:var(--smu-pink);display:grid;place-items:center;margin:0 auto 20px}
 .smu-step-card .smu-ic svg{width:23px;height:23px;fill:var(--smu-orange)}
+.smu-step-card__n{display:none}
 .smu-step-card h3{font-size:1.02rem;margin-bottom:.55rem}
 .smu-step-card p{font-size:.875rem;line-height:1.75}
 .smu-steps-foot{margin-top:56px;display:flex;flex-direction:column;align-items:center;gap:14px}
 .smu-steps-foot small{font-size:.89rem;color:var(--smu-text-2)}
 @media(max-width:900px){
-  .smu-timeline{grid-template-columns:repeat(2,1fr);gap:30px}
-  .smu-timeline::before{display:none}
-  .smu-step-cards{grid-template-columns:repeat(2,1fr)}
+  /* The timeline and the cards are two separate grids that only line up
+     while both are four across. Once they wrap they decouple — every number
+     first, then every card — so below this width the timeline is dropped and
+     each card carries its own step label instead. */
+  .smu-timeline{display:none}
+  .smu-step-cards{grid-template-columns:repeat(2,1fr);margin-top:44px}
+
+  .smu-step-card{text-align:left;padding:26px 24px 24px;position:relative}
+  .smu-step-card .smu-ic{margin:0 0 16px}
+
+  .smu-step-card__n{
+    display:inline-block;margin-bottom:14px;
+    font-size:.67rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--smu-orange);background:var(--smu-pink);
+    border:1px solid var(--smu-pink-line);
+    padding:.3rem .85rem;border-radius:99px;
+  }
 }
-@media(max-width:540px){.smu-timeline{grid-template-columns:1fr;gap:22px}.smu-step-cards{grid-template-columns:1fr}}
+@media(max-width:560px){
+  .smu-step-cards{grid-template-columns:1fr;gap:16px}
+}
 
 /* ================= DEGREE ================= */
 .smu-degree{border-top:1px solid var(--smu-line);border-bottom:1px solid var(--smu-line)}
@@ -437,8 +508,15 @@
   .smu-nav__list li:last-child a{border-bottom:0}
 }
 @media(max-width:520px){
-  .smu-head__phone span{display:none}
-  .smu-head__brand img{height:32px}
+  /* The number stays visible: it is the fastest conversion path on a phone,
+     where tapping to call costs one tap. The "Counsellor on call" line above
+     it is the part that goes, since the icon already says it is a phone. */
+  .smu-head__in{gap:12px}
+  .smu-head__phone small{display:none}
+  .smu-head__phone span{font-size:.84rem;white-space:nowrap}
+  .smu-head__phone{flex:0 0 auto}
+  .smu-head__brand{min-width:0}
+  .smu-head__brand img{height:30px;max-width:34vw}
 }
 
 /* ================= SUPPLIED IMAGERY ================= */
@@ -661,9 +739,9 @@
   padding:0;
 }
 .smu-head__in{
-  max-width:var(--smu-shell);
-  margin:0 auto;
-  padding:0 26px;
+  /* Width and gutters come from .smu-shell, which this row also carries.
+     Setting them again here would indent the logo and phone relative to
+     every section below. */
   min-height:74px;
   background:none;
   border:0;
@@ -673,24 +751,24 @@
           backdrop-filter:none;
 }
 
-/* The nav takes the space between the logo and the phone rather than
-   sitting in its natural width, so the links spread across the bar. */
-.smu-nav{flex:1 1 auto;display:flex;justify-content:center}
-.smu-nav__list{gap:clamp(18px,2.6vw,40px)}
+/* Desktop only, and deliberately inside a min-width query.
+   Unscoped, these two rules sit later in the file than the mobile block
+   above and carry the same specificity, so they won over it: .smu-nav went
+   back to display:flex below 1080px, which left the menu permanently open
+   and the hamburger doing nothing. */
+@media(min-width:1081px){
+  /* The nav takes the space between the logo and the phone rather than
+     sitting in its natural width, so the links spread across the bar. */
+  .smu-nav{flex:1 1 auto;display:flex;justify-content:center}
+  .smu-nav__list{gap:clamp(18px,2.6vw,40px)}
+}
 
 .smu [id]{scroll-margin-top:92px}
 
 @media(max-width:1080px){
-  .smu-head__in{padding:8px 20px;min-height:62px}
-  /* Full-bleed dropdown: it spans the strip, not just the container. */
-  .smu-nav{
-    flex:0 0 100%;justify-content:flex-start;
-    margin:0 -20px -8px;padding:12px 20px 14px;
-  }
-}
-@media(max-width:520px){
-  .smu-head__in{padding:8px 16px}
-  .smu-nav{margin:0 -16px -8px;padding:12px 16px 14px}
+  .smu-head__in{padding-top:8px;padding-bottom:8px;min-height:62px}
+  /* display stays with the mobile block above: none, or block when open. */
+  .smu-nav{flex:0 0 100%;padding:12px 0 14px}
 }
 
 /* ================= LIGHT FOOTER ================= */
@@ -761,21 +839,10 @@
 }
 .smu-course-toggle[aria-pressed="true"] span::after{display:none}
 
-/* ================= PROGRAMME — FULL WIDTH ================= */
-/* The section lost its right-hand fact column, so everything in it now uses
-   the full container rather than sitting in the old left column's width. */
-.smu-prog .smu-chips{gap:12px}
-.smu-prog .smu-chip{flex:1 1 auto;justify-content:center;text-align:center;min-width:150px}
+/* ================= PROGRAMME — CHIP SIZING ================= */
+/* The chips are grid items now, so no flex sizing and no min-width: a
+   min-width larger than the grid's own track minimum would push the panel
+   wider than its column on a narrow screen. */
+.smu-prog .smu-chips{gap:10px}
+.smu-prog .smu-chip{justify-content:center;text-align:center;min-width:0;padding:.6rem .9rem}
 
-/* The detail panel spans the row under the chips it belongs to. */
-.smu-prog .smu-spec-box{
-  border-radius:0 var(--smu-r-md) var(--smu-r-md) 0;
-  padding:20px 26px;
-}
-
-/* Very wide screens: a single line of body copy past roughly 95 characters
-   gets hard to track back from, so the intro splits into two columns
-   instead of being held to a narrow measure. */
-@media(min-width:1180px){
-  .smu-prog .smu-lede{columns:2;column-gap:56px}
-}

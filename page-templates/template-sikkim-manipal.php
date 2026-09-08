@@ -305,32 +305,38 @@ if ( $mbag_smu_courses ) :
 <!-- ========== 1 · PROGRAMME ========== -->
 <section class="smu-section smu-prog<?php echo esc_attr( $mbag_smu_bg() ); ?>" id="programme">
   <div class="smu-shell smu-prog-grid">
-    <div>
-      <h2><?php esc_html_e( 'Online MBA from', 'mba-admission-guide' ); ?><br><span class="smu-h-orange"><span class="smu-h-underline"><?php echo esc_html( $mbag_smu_name ); ?></span></span></h2>
+
+    <div class="smu-prog__intro">
+      <span class="smu-eyebrow"><?php esc_html_e( 'The programme', 'mba-admission-guide' ); ?></span>
+      <h2><?php esc_html_e( 'Online MBA from', 'mba-admission-guide' ); ?><br><span class="smu-h-orange"><?php echo esc_html( $mbag_smu_name ); ?></span></h2>
       <div class="smu-gold-bar"></div>
 
       <p class="smu-lede"><?php
         printf(
           /* translators: %s: university name. */
-          esc_html__( 'The online Master of Business Administration with dual specialisation from %s is designed to equip working professionals with the business and management skills a corporate role asks for. Learners build expertise across two domains by choosing any two specialisations from the list below.', 'mba-admission-guide' ),
+          esc_html__( 'A Master of Business Administration built for people who cannot stop working to study. You choose two specialisations rather than one, so the degree maps to the role you are aiming at next — not just the field you are in now.', 'mba-admission-guide' ),
           esc_html( $mbag_smu_name )
         );
       ?></p>
 
-      <?php if ( $mbag_smu_specs ) : ?>
-      <p class="smu-spec-h"><?php esc_html_e( 'Choose your specialization', 'mba-admission-guide' ); ?></p>
-      <div class="smu-chips" data-smu-chips>
-        <?php foreach ( $mbag_smu_specs as $mbag_smu_i => $mbag_smu_spec ) : ?>
-          <button class="smu-chip<?php echo 0 === $mbag_smu_i ? ' is-on' : ''; ?>" type="button"
-            aria-pressed="<?php echo 0 === $mbag_smu_i ? 'true' : 'false'; ?>"
-            data-smu-title="<?php echo esc_attr( $mbag_smu_spec['name'] ); ?>"
-            data-smu-desc="<?php echo esc_attr( $mbag_smu_spec['desc'] ); ?>"><?php echo esc_html( $mbag_smu_spec['name'] ); ?></button>
-        <?php endforeach; ?>
-      </div>
-      <div class="smu-spec-box" data-smu-specbox aria-live="polite">
-        <b><?php echo esc_html( $mbag_smu_specs[0]['name'] ); ?></b>
-        <p><?php echo esc_html( $mbag_smu_specs[0]['desc'] ); ?></p>
-      </div>
+      <?php
+      /* Only the facts the site owner has actually entered. Each is dropped
+         rather than guessed at, the same rule the rest of the page follows. */
+      $mbag_smu_meta = array_filter( array(
+        __( 'Duration', 'mba-admission-guide' )      => $mbag_smu_duration,
+        __( 'Mode', 'mba-admission-guide' )          => $mbag_smu_mode,
+        __( 'Eligibility', 'mba-admission-guide' )   => $mbag_smu_eligibility,
+      ) );
+      ?>
+      <?php if ( $mbag_smu_meta ) : ?>
+        <dl class="smu-prog__meta">
+          <?php foreach ( $mbag_smu_meta as $mbag_smu_k => $mbag_smu_v ) : ?>
+            <div>
+              <dt><?php echo esc_html( $mbag_smu_k ); ?></dt>
+              <dd><?php echo esc_html( $mbag_smu_v ); ?></dd>
+            </div>
+          <?php endforeach; ?>
+        </dl>
       <?php endif; ?>
 
       <button type="button" class="smu-btn smu-btn-orange" data-mbag-popup
@@ -339,25 +345,34 @@ if ( $mbag_smu_courses ) :
         data-mbag-source="<?php esc_attr_e( 'SMU programme — Explore', 'mba-admission-guide' ); ?>"
         data-mbag-university="<?php echo esc_attr( $mbag_smu_name ); ?>"><?php esc_html_e( 'Explore Programme', 'mba-admission-guide' ); ?> <span class="smu-arr" aria-hidden="true">&rarr;</span></button>
     </div>
+
+    <?php if ( $mbag_smu_specs ) : ?>
+    <div class="smu-picker">
+      <div class="smu-picker__head">
+        <h3><?php esc_html_e( 'Choose your specialization', 'mba-admission-guide' ); ?></h3>
+        <p><?php esc_html_e( 'Pick any two. Tap one to see where it leads.', 'mba-admission-guide' ); ?></p>
+      </div>
+
+      <div class="smu-chips" data-smu-chips>
+        <?php foreach ( $mbag_smu_specs as $mbag_smu_i => $mbag_smu_spec ) : ?>
+          <button class="smu-chip<?php echo 0 === $mbag_smu_i ? ' is-on' : ''; ?>" type="button"
+            aria-pressed="<?php echo 0 === $mbag_smu_i ? 'true' : 'false'; ?>"
+            data-smu-title="<?php echo esc_attr( $mbag_smu_spec['name'] ); ?>"
+            data-smu-desc="<?php echo esc_attr( $mbag_smu_spec['desc'] ); ?>"><?php echo esc_html( $mbag_smu_spec['name'] ); ?></button>
+        <?php endforeach; ?>
+      </div>
+
+      <div class="smu-spec-box" data-smu-specbox aria-live="polite">
+        <b><?php echo esc_html( $mbag_smu_specs[0]['name'] ); ?></b>
+        <p><?php echo esc_html( $mbag_smu_specs[0]['desc'] ); ?></p>
+      </div>
+
+      <p class="smu-picker__foot"><?php esc_html_e( 'Not sure which pair fits your background? A counsellor will talk it through with you.', 'mba-admission-guide' ); ?></p>
+    </div>
+    <?php endif; ?>
+
   </div>
 </section>
-
-<?php
-// Anything typed into the page editor renders here, or nothing at all.
-while ( have_posts() ) :
-	the_post();
-
-	if ( '' !== trim( get_the_content() ) ) :
-		?>
-		<section class="smu-section<?php echo esc_attr( $mbag_smu_bg() ); ?>">
-		  <div class="smu-shell">
-		    <div class="smu-prose"><?php the_content(); ?></div>
-		  </div>
-		</section>
-		<?php
-	endif;
-endwhile;
-?>
 
 <!-- ========== 2 · ADVANTAGES ========== -->
 <section class="smu-section smu-adv<?php echo esc_attr( $mbag_smu_bg() ); ?>" id="advantages">
@@ -588,27 +603,36 @@ endwhile;
       <?php endfor; ?>
     </div>
 
+    <?php
+    /* One source for the four steps, so the number shown inside each card on
+       mobile cannot drift from the number on the timeline above it. */
+    $mbag_smu_steps = array(
+      array( 'laptop', __( 'Choose a Programme', 'mba-admission-guide' ), __( 'Pick the programme and register by filling in your basic details.', 'mba-admission-guide' ) ),
+      array( 'documents', __( 'Provide Educational Details', 'mba-admission-guide' ), __( 'Fill in your education and work experience details.', 'mba-admission-guide' ) ),
+      array( 'chart', __( 'Pay the Programme Fee', 'mba-admission-guide' ), __( 'Pay the admission fee for the first semester or for the full programme.', 'mba-admission-guide' ) ),
+      array( 'download', __( 'Upload Documents', 'mba-admission-guide' ), __( 'Upload the supporting documents and submit your application to complete the process.', 'mba-admission-guide' ) ),
+    );
+    ?>
     <div class="smu-step-cards">
-      <div class="smu-step-card">
-        <span class="smu-ic"><?php mbag_icon( 'laptop' ); ?></span>
-        <h3><?php esc_html_e( 'Choose a Programme', 'mba-admission-guide' ); ?></h3>
-        <p><?php esc_html_e( 'Pick the programme and register by filling in your basic details.', 'mba-admission-guide' ); ?></p>
-      </div>
-      <div class="smu-step-card">
-        <span class="smu-ic"><?php mbag_icon( 'documents' ); ?></span>
-        <h3><?php esc_html_e( 'Provide Educational Details', 'mba-admission-guide' ); ?></h3>
-        <p><?php esc_html_e( 'Fill in your education and work experience details.', 'mba-admission-guide' ); ?></p>
-      </div>
-      <div class="smu-step-card">
-        <span class="smu-ic"><?php mbag_icon( 'chart' ); ?></span>
-        <h3><?php esc_html_e( 'Pay the Programme Fee', 'mba-admission-guide' ); ?></h3>
-        <p><?php esc_html_e( 'Pay the admission fee for the first semester or for the full programme.', 'mba-admission-guide' ); ?></p>
-      </div>
-      <div class="smu-step-card">
-        <span class="smu-ic"><?php mbag_icon( 'download' ); ?></span>
-        <h3><?php esc_html_e( 'Upload Documents', 'mba-admission-guide' ); ?></h3>
-        <p><?php esc_html_e( 'Upload the supporting documents and submit your application to complete the process.', 'mba-admission-guide' ); ?></p>
-      </div>
+      <?php foreach ( $mbag_smu_steps as $mbag_smu_i => $mbag_smu_step ) : ?>
+        <div class="smu-step-card">
+          <?php
+          /* Real text, not a CSS counter: below 900px the timeline is hidden
+             and this becomes the only thing carrying the step order, so it
+             has to reach assistive tech too. */
+          ?>
+          <span class="smu-step-card__n"><?php
+            printf(
+              /* translators: %s: step number. */
+              esc_html__( 'Step %s', 'mba-admission-guide' ),
+              esc_html( number_format_i18n( $mbag_smu_i + 1 ) )
+            );
+          ?></span>
+          <span class="smu-ic"><?php mbag_icon( $mbag_smu_step[0] ); ?></span>
+          <h3><?php echo esc_html( $mbag_smu_step[1] ); ?></h3>
+          <p><?php echo esc_html( $mbag_smu_step[2] ); ?></p>
+        </div>
+      <?php endforeach; ?>
     </div>
 
     <div class="smu-steps-foot">

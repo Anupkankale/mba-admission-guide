@@ -2502,7 +2502,15 @@ function mbag_smu_contact_overrides() {
 		return;
 	}
 
+	/* Defaults live in code, not only in the database. A theme mod set through
+	   the Customizer exists on one install; this page's number has to be right
+	   the moment the theme is deployed anywhere, so the constant below is the
+	   fallback and the Customizer field overrides it. */
 	$phone = mbag_smu_field( 'phone' );
+
+	if ( '' === $phone ) {
+		$phone = mbag_smu_default_phone();
+	}
 
 	if ( '' !== $phone ) {
 		add_filter( 'theme_mod_mbag_phone', static function () use ( $phone ) {
@@ -2539,3 +2547,18 @@ function mbag_smu_contact_overrides() {
 	}
 }
 add_action( 'wp', 'mbag_smu_contact_overrides' );
+
+/**
+ * The landing page's own phone number.
+ *
+ * Kept here rather than left to a Customizer value alone so the number is
+ * correct on a fresh deploy, before anyone opens the Customizer. The
+ * "Landing page phone number" field still wins when it is filled in.
+ *
+ * WhatsApp derives from this unless a separate WhatsApp number is set.
+ *
+ * @return string
+ */
+function mbag_smu_default_phone() {
+	return (string) apply_filters( 'mbag_smu_default_phone', '+91 96067 02758' );
+}
