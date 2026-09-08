@@ -167,7 +167,7 @@
 .smu-hero .smu-h-underline{color:#fff;text-shadow:0 2px 18px rgba(6,9,24,.55)}
 .smu-hero .smu-sell,
 .smu-hero .smu-hero-ticks li{text-shadow:0 1px 12px rgba(6,9,24,.5)}
-.smu-hero .smu-sell{color:rgba(255,255,255,.92)}
+.smu-hero .smu-sell{color:#fff}
 .smu-hero .smu-hero-ticks li{color:rgba(255,255,255,.94)}
 
 /* The orange sits on near-black here, where the brand tone reads dull and
@@ -197,7 +197,9 @@
   }
 }
 .smu-hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:1.06fr .94fr;gap:56px;align-items:start}
-.smu-hero .smu-sell{color:var(--smu-text);font-size:1.06rem;max-width:52ch;margin-top:1.4rem}
+/* Colour is set with the rest of the hero's dark-ground rules above; this
+   rule sits later in the file and would otherwise win and re-darken it. */
+.smu-hero .smu-sell{font-size:1.06rem;max-width:52ch;margin-top:1.4rem}
 .smu-hero-btns{display:flex;flex-wrap:wrap;gap:14px;margin-top:2.2rem}
 .smu-hero-ticks{list-style:none;margin:2.4rem 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:13px 24px;max-width:540px}
 .smu-hero-ticks li{position:relative;padding-left:31px;font-size:.94rem;color:var(--smu-text)}
