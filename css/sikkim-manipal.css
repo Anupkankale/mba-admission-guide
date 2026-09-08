@@ -513,7 +513,7 @@
 /* ================= LANDING HEADER ================= */
 .smu-head{
   position:sticky;top:0;z-index:60;background:#fff;
-  border-bottom:1px solid var(--smu-line);box-shadow:0 2px 16px rgba(21,26,58,.07);
+  border-bottom:1px solid var(--smu-line);
 }
 .smu-head__in{display:flex;align-items:center;justify-content:space-between;gap:22px;min-height:76px}
 .smu-head__brand{display:flex;align-items:center;flex:0 0 auto}
@@ -790,8 +790,11 @@
   background:rgba(255,255,255,.96);
   -webkit-backdrop-filter:saturate(180%) blur(12px);
           backdrop-filter:saturate(180%) blur(12px);
+  /* No shadow. The bar is sticky, so its shadow tracked down the page and
+     fell across whatever sat under it — read as a shadow crossing the cards
+     rather than as depth on the header. The hairline border still separates
+     it from the content behind. */
   border-bottom:1px solid var(--smu-line);
-  box-shadow:0 2px 18px rgba(21,26,58,.07);
   padding:0;
 }
 .smu-head__in{
@@ -864,10 +867,10 @@
 /* Applied by JS once the loop is built, so none of this affects a visitor
    whose carousel stays manual (reduced motion, or too few cards). */
 .smu-course-track.is-marquee{
+  /* No edge mask. It faded the cards out as they entered and left, which on
+     a moving track reads as a shadow crossing them rather than as a soft
+     edge. Cards now simply clip at the container. */
   scrollbar-width:none;
-  /* Fade both edges so cards enter and leave rather than being cut off. */
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
-          mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
 }
 .smu-course-track.is-marquee::-webkit-scrollbar{height:0}
 
