@@ -464,10 +464,10 @@
   flex:0 0 300px;
   display:flex;flex-direction:column;
   background:#fff;border:1px solid var(--smu-line);border-radius:16px;
-  padding:22px;box-shadow:0 2px 14px rgba(21,26,58,.05);
-  transition:box-shadow .22s,transform .22s,border-color .22s;
+  padding:22px;
+  transition:transform .22s,border-color .22s;
 }
-.smu-course-card:hover{box-shadow:0 16px 40px rgba(21,26,58,.12);transform:translateY(-3px);border-color:var(--smu-pink-line)}
+.smu-course-card:hover{transform:translateY(-3px);border-color:var(--smu-orange)}
 
 .smu-course-badges{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
 .smu-course-badge{
@@ -614,9 +614,9 @@
   border-radius:var(--smu-r-md);
 }
 .smu-leadcard,.smu-adv-card{border-radius:var(--smu-r-lg)}
-.smu-money-card,.smu-course-card,.smu-placement-strip,.smu-cert{box-shadow:var(--smu-shadow)}
+.smu-money-card,.smu-placement-strip,.smu-cert{box-shadow:var(--smu-shadow)}
 .smu-adv-card{box-shadow:var(--smu-shadow)}
-.smu-adv-card:hover,.smu-course-card:hover{box-shadow:var(--smu-shadow-lift)}
+.smu-adv-card:hover{box-shadow:var(--smu-shadow-lift)}
 
 /* On the tinted band, white cards need an edge or they float. */
 .smu-band--alt .smu-adv-card,
