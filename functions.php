@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MBAG_VERSION', '1.34.2' );
+define( 'MBAG_VERSION', '1.35.0' );
 
 /**
  * Theme setup.
@@ -2244,10 +2244,13 @@ function mbag_smu_assets() {
 		return;
 	}
 
-	// The ported design is set in Poppins; the theme itself ships Manrope.
+	/* The ported design is set in Poppins; the theme itself ships Manrope.
+	   Playfair Display comes with it in one italic weight only — it is used
+	   for a handful of accent phrases, not for running text, so asking for
+	   the upright faces would download files nothing renders. */
 	wp_enqueue_style(
 		'mbag-smu-fonts',
-		'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap',
+		'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,700&display=swap',
 		array(),
 		null
 	);

@@ -150,7 +150,7 @@ $mbag_smu_has_cert = has_post_thumbnail();
     <div>
       <span class="smu-eyebrow"><?php esc_html_e( 'Online Programme', 'mba-admission-guide' ); ?></span>
 
-      <h1><?php echo esc_html( $mbag_smu_name ); ?> <span class="smu-h-orange"><?php esc_html_e( 'Takes The Online Stage!', 'mba-admission-guide' ); ?></span></h1>
+      <h1><?php echo esc_html( $mbag_smu_name ); ?> <span class="smu-h-orange smu-em"><?php esc_html_e( 'Takes The Online Stage!', 'mba-admission-guide' ); ?></span></h1>
 
       <p class="smu-sell"><?php esc_html_e( 'An online MBA with dual specialisation, built for people who cannot stop working to study. Understand the programme, eligibility and fees — and get independent guidance before you apply.', 'mba-admission-guide' ); ?></p>
 
@@ -424,7 +424,7 @@ if ( $mbag_smu_courses ) :
 <section class="smu-section smu-impact"><?php $mbag_smu_bg(); ?>
   <div class="smu-shell">
     <div class="smu-center">
-      <h2><?php esc_html_e( 'Academic Excellence,', 'mba-admission-guide' ); ?> <span class="smu-h-orange smu-h-orange--inline"><?php esc_html_e( 'Global Impact.', 'mba-admission-guide' ); ?></span></h2>
+      <h2><?php esc_html_e( 'Academic Excellence,', 'mba-admission-guide' ); ?> <span class="smu-h-orange smu-h-orange--inline smu-em"><?php esc_html_e( 'Global Impact.', 'mba-admission-guide' ); ?></span></h2>
       <div class="smu-gold-bar"></div>
     </div>
 
@@ -699,7 +699,7 @@ if ( $mbag_smu_courses ) :
       <div class="smu-cta__body">
         <span class="smu-cta__eyebrow"><?php esc_html_e( 'Free counselling', 'mba-admission-guide' ); ?></span>
 
-        <h2><?php esc_html_e( 'Still deciding between specialisations?', 'mba-admission-guide' ); ?></h2>
+        <h2><span class="smu-em"><?php esc_html_e( 'Still deciding', 'mba-admission-guide' ); ?></span> <?php esc_html_e( 'between specialisations?', 'mba-admission-guide' ); ?></h2>
 
         <p><?php esc_html_e( 'That is exactly what a counselling call is for. Fifteen minutes, no obligation, and you will know whether this programme fits your plan.', 'mba-admission-guide' ); ?></p>
 

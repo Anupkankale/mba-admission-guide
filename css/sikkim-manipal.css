@@ -58,6 +58,10 @@
 
   --smu-shell:1240px;
   --smu-f:"Poppins",-apple-system,'Segoe UI',sans-serif;
+  /* Editorial accent. One italic weight, used on short phrases only — see
+     .smu-em below. Georgia is the fallback because it is the serif most
+     likely to already be on the machine and it sets at a similar width. */
+  --smu-f-display:"Playfair Display",Georgia,"Times New Roman",serif;
 }
 
 .smu{
@@ -108,6 +112,21 @@
 .smu h1{font-size:clamp(2rem,4.4vw,3.2rem)}
 .smu h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .smu h3{font-size:1.12rem;font-weight:700;letter-spacing:-.012em}
+
+/* Editorial accent.
+   Poppins carries every heading; this is for the short phrase inside one that
+   is meant to feel written rather than set. Deliberately opt-in — a serif
+   italic applied to whole headings stops being an accent and just becomes a
+   second body font. The optical size of Playfair runs small against Poppins
+   at the same em, so it is nudged up, and the negative tracking the sans
+   headings use is removed because it closes up a serif italic badly. */
+.smu-em{
+  font-family:var(--smu-f-display);
+  font-style:italic;
+  font-weight:700;
+  font-size:1.06em;
+  letter-spacing:0;
+}
 
 .smu-h-orange{color:var(--smu-orange);display:block}
 .smu-h-orange--inline{display:inline}
