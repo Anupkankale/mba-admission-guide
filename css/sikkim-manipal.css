@@ -1,0 +1,848 @@
+/**
+ * Sikkim Manipal landing page.
+ *
+ * Loaded only on page-templates/template-sikkim-manipal.php.
+ *
+ * Every selector is namespaced under .smu and every class carries the smu-
+ * prefix. That is not decoration: this page's design uses names the theme
+ * already owns — hero, card, btn, chip, fact, step, pill, lead, eyebrow,
+ * timeline, modal — and an unprefixed port would silently restyle the
+ * header, the footer, the CF7 forms and every other page on the site.
+ *
+ * @package MBA_Admission_Guide
+ */
+
+/* ================= TOKENS =================
+   Declared on the body class as well as .smu. header-landing.php and
+   footer-landing.php render OUTSIDE the .smu wrapper — that div opens inside
+   <main> — so tokens scoped to .smu alone resolved to nothing up there. Every
+   var() in the header and footer was invalid, which is why the hamburger bars
+   (background:var(--smu-navy)) drew nothing and the button looked empty.
+   body_class() adds .smu-landing in header-landing.php. */
+.smu,
+.smu-landing{
+  --smu-navy:#151A3A;
+  --smu-navy-2:#0C1230;
+  --smu-orange:#EE5A11;
+  --smu-orange-2:#D44E0C;
+  --smu-gold:#C9A227;
+  --smu-gold-2:#DDA23A;
+  --smu-cream:#FDF8EA;
+  --smu-cream-line:#F3E7C9;
+  --smu-pink:#FDE9E4;
+  --smu-pink-line:#F7D9D0;
+  --smu-maroon:#9B2242;
+  --smu-chip-text:#5C2B2B;
+  --smu-text:#4E4E58;
+  --smu-text-2:#6B6B77;
+  --smu-map:#93A9C4;
+  --smu-pin:#FF2A17;
+  --smu-line:#E4E8F1;
+  --smu-paper:var(--smu-surface-alt); /* small insets: chips, meta, logo cells */
+  /* Surfaces. Two light tones and one dark — the page previously used four
+     near-identical off-whites (#F9F9FB, #F6F7FC, #F7F7FB, #FAFAFC), which
+     reads as drift rather than rhythm. */
+  --smu-surface:#fff;
+  --smu-surface-alt:#F4F6FB;
+  --smu-surface-deep:#141A38;
+
+  /* One radius and shadow scale, so cards stop each inventing their own. */
+  --smu-r-sm:10px;
+  --smu-r-md:16px;
+  --smu-r-lg:20px;
+  --smu-shadow:0 1px 2px rgba(21,26,58,.04),0 8px 24px rgba(21,26,58,.06);
+  --smu-shadow-lift:0 18px 44px rgba(21,26,58,.13);
+
+  /* Vertical rhythm: one value, fluid, so every band matches. */
+  --smu-pad:clamp(58px,6.5vw,96px);
+
+  --smu-shell:1240px;
+  --smu-f:"Poppins",-apple-system,'Segoe UI',sans-serif;
+}
+
+.smu{
+  font-family:var(--smu-f);
+  font-size:15.5px;
+  font-weight:400;
+  line-height:1.75;
+  color:var(--smu-text);
+  background:#fff;
+}
+
+/* The landing header and footer are outside .smu, so they set their own
+   typeface rather than inheriting the theme's. */
+.smu-head,
+.smu-foot{font-family:var(--smu-f)}
+
+.smu *,.smu *::before,.smu *::after{box-sizing:border-box}
+.smu img{max-width:100%;display:block}
+.smu p{margin:0}
+
+/* 80% of the viewport, so the page keeps a visible margin either side rather
+   than running to the edges. The max-width still caps it on very wide screens,
+   and narrow screens go near-full-width — 80% of a phone is too narrow to
+   read comfortably. */
+.smu-shell{width:80%;max-width:var(--smu-shell);margin:0 auto;padding:0}
+@media(max-width:900px){.smu-shell{width:92%}}
+@media(max-width:560px){.smu-shell{width:100%;padding:0 18px}}
+.smu-section{padding:var(--smu-pad) 0}
+
+/* Alternating bands.
+   The class is assigned in PHP as the page renders, not by :nth-of-type,
+   because three of these sections hide themselves when their Customizer
+   fields are empty. A CSS rule counting siblings would alternate over the
+   sections that *exist in the file*; the PHP counter alternates over the
+   ones that actually render, which is the only version that survives an
+   empty fee block or a hidden impact band. */
+.smu-band{background:var(--smu-surface)}
+.smu-band--alt{background:var(--smu-surface-alt)}
+
+/* The sticky landing header would otherwise cover the top of any section
+   an in-page anchor jumps to. */
+.smu [id]{scroll-margin-top:96px}
+
+.smu h1,.smu h2,.smu h3,.smu h4{
+  margin:0;font-family:var(--smu-f);color:var(--smu-navy);
+  font-weight:800;line-height:1.18;letter-spacing:-.025em;
+}
+.smu h1{font-size:clamp(2rem,4.4vw,3.2rem)}
+.smu h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
+.smu h3{font-size:1.12rem;font-weight:700;letter-spacing:-.012em}
+
+.smu-h-orange{color:var(--smu-orange);display:block}
+.smu-h-orange--inline{display:inline}
+.smu-h-underline{display:inline-block;border-bottom:3px solid var(--smu-orange);padding-bottom:6px}
+
+.smu-gold-bar{width:62px;height:5px;background:var(--smu-gold);border-radius:3px;margin:20px 0 0}
+.smu-center .smu-gold-bar{margin-left:auto;margin-right:auto}
+.smu-center{text-align:center}
+.smu-center .smu-lede{margin-left:auto;margin-right:auto}
+
+.smu-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.74rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--smu-orange);background:var(--smu-pink);border:1px solid var(--smu-pink-line);
+  padding:.44rem 1.05rem;border-radius:99px;margin-bottom:1.4rem;
+}
+.smu-eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--smu-orange)}
+
+
+.smu-lede{font-size:1rem;font-weight:400;color:var(--smu-text);max-width:70ch;line-height:1.8}
+
+/* ================= BUTTONS ================= */
+.smu-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.65rem;
+  font-family:var(--smu-f);font-weight:700;font-size:.97rem;
+  padding:1rem 1.9rem;border-radius:8px;border:2px solid transparent;
+  transition:background .2s,color .2s,border-color .2s;cursor:pointer;
+  text-decoration:none;
+}
+.smu-btn-orange{background:var(--smu-orange);color:#fff}
+.smu-btn-orange:hover,.smu-btn-orange:focus{background:var(--smu-orange-2);color:#fff}
+.smu-btn-line-navy{border-color:var(--smu-navy);color:var(--smu-navy);background:transparent}
+.smu-btn-line-navy:hover,.smu-btn-line-navy:focus{background:var(--smu-navy);color:#fff}
+.smu-btn-pill{border-radius:99px;padding:1.05rem 2.4rem}
+.smu-arr{font-size:1.15rem;line-height:1}
+
+/* ================= HERO ================= */
+.smu-hero{
+  position:relative;overflow:hidden;padding:76px 0 88px;border-bottom:1px solid var(--smu-line);
+  background:radial-gradient(760px 460px at 86% 0%,rgba(238,90,17,.10),transparent 62%),
+             radial-gradient(620px 420px at 0% 100%,rgba(201,162,39,.10),transparent 60%),
+             #fff;
+}
+.smu-hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:1.06fr .94fr;gap:56px;align-items:start}
+.smu-hero .smu-sell{color:var(--smu-text);font-size:1.06rem;max-width:52ch;margin-top:1.4rem}
+.smu-hero-btns{display:flex;flex-wrap:wrap;gap:14px;margin-top:2.2rem}
+.smu-hero-ticks{list-style:none;margin:2.4rem 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:13px 24px;max-width:540px}
+.smu-hero-ticks li{position:relative;padding-left:31px;font-size:.94rem;color:var(--smu-text)}
+.smu-hero-ticks li::before{
+  content:"";position:absolute;left:0;top:3px;width:21px;height:21px;border-radius:50%;
+  background:var(--smu-orange) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512' fill='%23fff'%3E%3Cpath d='M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z'/%3E%3C/svg%3E") center/10px 10px no-repeat;
+}
+
+/* Lead card — wraps the theme's CF7 form, so it only sets the shell. */
+.smu-leadcard{background:#fff;border:1px solid var(--smu-line);border-radius:20px;padding:28px;box-shadow:0 22px 54px rgba(21,26,58,.10)}
+.smu-leadcard h2{font-size:1.4rem}
+.smu-leadcard .smu-sub{font-size:.9rem;margin:.35rem 0 1.1rem;color:var(--smu-text-2)}
+.smu-tick-row{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;font-size:.74rem;font-weight:600;color:var(--smu-navy);margin-bottom:1rem}
+.smu-tick-row span::before{content:"\2713 ";color:#0f9d58}
+.smu-secure{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:14px;font-size:.78rem;color:var(--smu-text-2)}
+.smu-secure svg{width:13px;height:13px;fill:currentColor;flex:0 0 13px}
+
+@media(max-width:940px){.smu-hero-grid{grid-template-columns:1fr;gap:40px}.smu-hero-ticks{max-width:none}}
+@media(max-width:520px){.smu-hero-ticks{grid-template-columns:1fr}}
+
+/* ================= ACCREDITATIONS ================= */
+.smu-creds{background:var(--smu-surface-alt);border-top:1px solid var(--smu-line);border-bottom:1px solid var(--smu-line);padding:26px 0}
+.smu-creds-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.smu-cred{text-align:center;padding:8px 6px;border-right:1px solid var(--smu-line)}
+.smu-cred:last-child{border-right:0}
+.smu-cred b{display:block;color:var(--smu-navy);font-weight:800;font-size:1.05rem;line-height:1.35}
+@media(max-width:900px){.smu-cred{border-right:0}}
+
+/* ================= PROGRAMME ================= */
+/* Intro on the left, the specialization picker as a panel on the right.
+   The picker was previously a loose row of pills between two paragraphs,
+   which read as a stray control rather than the section's main interaction. */
+.smu-prog-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(36px,5vw,72px);align-items:start}
+.smu-prog__intro{max-width:56ch}
+.smu-prog .smu-lede{margin-top:24px;line-height:1.85;max-width:none}
+.smu-prog .smu-btn{margin-top:32px}
+
+/* Key facts as a definition list — each one drops out when its Customizer
+   field is empty, so this never shows a label with nothing beside it. */
+.smu-prog__meta{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:20px 28px;margin:32px 0 0;padding:24px 0 0;
+  border-top:1px solid var(--smu-line);
+}
+.smu-prog__meta dt{
+  font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--smu-text-2);margin-bottom:5px;
+}
+.smu-prog__meta dd{margin:0;font-size:.95rem;font-weight:600;color:var(--smu-navy);line-height:1.45}
+
+/* The picker panel. */
+.smu-picker{
+  background:#fff;border:1px solid var(--smu-line);
+  border-radius:var(--smu-r-lg);padding:clamp(24px,3vw,34px);
+  box-shadow:var(--smu-shadow);
+}
+.smu-band--alt .smu-picker{background:#fff}
+.smu-picker__head h3{font-size:1.15rem}
+.smu-picker__head p{margin-top:6px;font-size:.9rem;color:var(--smu-text-2)}
+.smu-picker .smu-chips{margin-top:22px}
+.smu-picker__foot{
+  margin-top:18px;font-size:.83rem;line-height:1.65;color:var(--smu-text-2);
+}
+
+@media(max-width:960px){
+  .smu-prog-grid{grid-template-columns:1fr}
+  .smu-prog__intro{max-width:none}
+}
+
+.smu-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.smu-chip{
+  font-family:var(--smu-f);padding:.6rem 1.25rem;border:1.5px solid var(--smu-pink-line);border-radius:99px;
+  background:#fff;font-size:.9rem;font-weight:500;color:var(--smu-chip-text);cursor:pointer;transition:.18s;
+}
+.smu-chip:hover{border-color:var(--smu-orange);color:var(--smu-orange)}
+.smu-chip.is-on{background:var(--smu-orange);border-color:var(--smu-orange);color:#fff}
+.smu-spec-box{margin-top:18px;padding:18px 22px;background:var(--smu-cream);border:1px solid var(--smu-cream-line);border-left:4px solid var(--smu-gold);border-radius:0 var(--smu-r-sm) var(--smu-r-sm) 0;min-height:112px}
+.smu-spec-box b{display:block;color:var(--smu-navy);font-weight:700;margin-bottom:2px}
+.smu-spec-box p{font-size:.93rem}
+.smu-prog .smu-btn{margin-top:30px}
+
+
+/* ================= ADVANTAGES ================= */
+.smu-adv{border-top:1px solid var(--smu-line)}
+.smu-adv-grid{display:grid;grid-template-columns:340px 1fr;gap:60px;align-items:start}
+.smu-adv h2{font-size:clamp(2rem,3.4vw,2.9rem)}
+.smu-adv .smu-lede{margin-top:26px;font-size:1rem;max-width:34ch}
+.smu-stats{margin-top:46px;display:flex;flex-direction:column;gap:26px}
+.smu-stat b{display:block;color:var(--smu-orange);font-weight:800;font-size:2.35rem;line-height:1}
+.smu-stat b sup{font-size:.5em;font-weight:700;color:var(--smu-gold-2);vertical-align:baseline;margin-left:2px}
+.smu-stat span{display:block;font-size:.92rem;color:var(--smu-text-2);margin-top:2px}
+
+.smu-adv-cards{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.smu-adv-card{background:#fff;border-radius:20px;padding:34px 32px 36px;box-shadow:0 2px 18px rgba(21,26,58,.05);transition:box-shadow .22s,transform .22s}
+.smu-adv-card:hover{box-shadow:0 18px 44px rgba(21,26,58,.12);transform:translateY(-3px)}
+.smu-adv-card .smu-circle{width:60px;height:60px;border-radius:50%;background:var(--smu-pink);display:grid;place-items:center;margin-bottom:22px}
+.smu-adv-card .smu-circle svg{width:25px;height:25px;fill:var(--smu-maroon)}
+.smu-adv-card h3{margin-bottom:.6rem}
+.smu-adv-card p{font-size:.93rem;line-height:1.8}
+@media(max-width:1000px){.smu-adv-grid{grid-template-columns:1fr;gap:44px}.smu-adv .smu-lede{max-width:none}.smu-stats{flex-direction:row;flex-wrap:wrap;gap:34px}}
+@media(max-width:760px){.smu-adv-cards{grid-template-columns:1fr}}
+
+/* ================= GLOBAL IMPACT ================= */
+
+.smu-impact h2{font-size:clamp(1.9rem,3.6vw,2.9rem)}
+.smu-impact-grid{display:grid;grid-template-columns:210px 1fr 210px;gap:40px;align-items:center;margin-top:56px}
+.smu-imp-col{display:flex;flex-direction:column;gap:46px}
+.smu-imp b{display:block;color:var(--smu-orange);font-weight:800;font-size:2.3rem;line-height:1}
+.smu-imp b sup{font-size:.5em;font-weight:700;color:var(--smu-gold-2);vertical-align:baseline;margin-left:2px}
+.smu-imp span{display:block;font-size:.92rem;color:var(--smu-text-2);line-height:1.45;margin-top:4px}
+.smu-map-wrap{width:100%}
+@media(max-width:980px){
+  .smu-impact-grid{grid-template-columns:1fr;gap:34px}
+  .smu-map-wrap{order:-1}
+  .smu-imp-col{flex-direction:row;flex-wrap:wrap;gap:30px}
+  .smu-imp{flex:1 1 190px}
+}
+
+/* ================= PLACEMENTS ================= */
+.smu-logos{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-top:44px}
+.smu-logo-cell{
+  background:var(--smu-paper);border:1px solid var(--smu-line);border-radius:12px;
+  min-height:78px;display:grid;place-items:center;padding:12px;text-align:center;
+  font-size:.8rem;font-weight:600;color:var(--smu-navy);line-height:1.35;
+}
+.smu-money{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:50px}
+.smu-money-card{background:#fff;border:1px solid var(--smu-line);border-top:4px solid var(--smu-gold);border-radius:16px;padding:28px}
+.smu-money-card h3{margin-bottom:.5rem}
+.smu-money-card p{font-size:.95rem}
+@media(max-width:720px){.smu-money{grid-template-columns:1fr}}
+
+/* ================= FEES ================= */
+.smu-fee-tab{display:inline-flex;align-items:center;gap:9px;font-weight:700;font-size:.95rem;color:var(--smu-orange);padding:0 6px 11px;border-bottom:3px solid var(--smu-orange);margin-top:36px}
+.smu-fee-tab svg{width:16px;height:16px;fill:var(--smu-orange)}
+
+.smu-fee-layout{display:grid;grid-template-columns:.86fr 1.14fr;gap:18px;margin-top:26px}
+.smu-fee-layout--solo{grid-template-columns:1fr;max-width:520px}
+.smu-fee-main{position:relative;overflow:hidden;background:var(--smu-orange);color:#fff;border-radius:12px;padding:34px 34px 30px;display:flex;flex-direction:column;justify-content:center}
+.smu-fee-main::after{content:"";position:absolute;top:-70px;right:-46px;width:230px;height:230px;border-radius:50%;background:rgba(255,255,255,.075)}
+.smu-fee-main .smu-k{font-size:.79rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;position:relative;z-index:2}
+.smu-fee-main .smu-k2{font-size:.87rem;color:rgba(255,255,255,.86);margin-top:3px;position:relative;z-index:2}
+.smu-fee-main .smu-big{font-weight:800;font-size:clamp(2rem,3.4vw,2.7rem);line-height:1;margin-top:30px;position:relative;z-index:2}
+.smu-fee-main .smu-fine{font-size:.76rem;font-style:italic;color:rgba(255,255,255,.82);margin-top:11px;position:relative;z-index:2}
+.smu-badge{position:absolute;top:22px;right:26px;z-index:3;background:var(--smu-gold);color:#2E2405;font-size:.65rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase;padding:.42rem .95rem;border-radius:99px}
+
+.smu-fee-side{display:grid;gap:18px;align-content:stretch}
+.smu-fee-row{border-radius:12px;padding:22px 26px;display:flex;align-items:center;gap:16px;color:#fff}
+.smu-fee-row--navy{background:#1E1C5E}
+.smu-fee-row--gold{background:#C6A233}
+.smu-fee-row .smu-ic{width:44px;height:44px;flex:0 0 44px;border-radius:10px;background:rgba(255,255,255,.17);display:grid;place-items:center}
+.smu-fee-row .smu-ic svg{width:20px;height:20px;fill:#fff}
+.smu-fee-row .smu-k{font-size:.82rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase}
+.smu-fee-row .smu-right{margin-left:auto;text-align:right}
+.smu-fee-row .smu-amt{display:block;font-weight:800;font-size:1.5rem;line-height:1.15}
+.smu-fee-row .smu-fine{display:block;font-size:.71rem;font-style:italic;opacity:.86;margin-top:4px}
+
+.smu-schol-bar{margin-top:20px;background:#fff;border-left:4px solid var(--smu-gold);border-radius:10px;padding:18px 26px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 1px 10px rgba(21,26,58,.05)}
+.smu-schol-bar>svg{width:22px;height:22px;flex:0 0 22px;fill:var(--smu-gold)}
+.smu-schol-bar p{font-size:.95rem}
+.smu-schol-bar b{color:var(--smu-orange);font-weight:700}
+.smu-schol-bar .smu-btn{margin-left:auto;padding:.72rem 1.35rem;font-size:.9rem}
+@media(max-width:940px){.smu-fee-layout{grid-template-columns:1fr}}
+@media(max-width:620px){.smu-fee-row{flex-wrap:wrap}.smu-fee-row .smu-right{margin-left:0;text-align:left;width:100%}.smu-schol-bar .smu-btn{margin-left:0}}
+
+/* ================= ADMISSION ================= */
+.smu-timeline{position:relative;display:grid;grid-template-columns:repeat(4,1fr);margin-top:58px}
+.smu-timeline::before{content:"";position:absolute;top:23px;left:12.5%;right:12.5%;height:3px;z-index:0;background:linear-gradient(90deg,#FF4D00 0%,#F0570D 40%,#D98A1C 75%,#C9A227 100%)}
+.smu-tl{display:flex;flex-direction:column;align-items:center;position:relative;z-index:1}
+.smu-tl-dot{width:46px;height:46px;border-radius:50%;background:var(--smu-orange);color:#fff;font-weight:800;font-size:1.05rem;display:grid;place-items:center;box-shadow:0 0 0 5px #fff,0 6px 16px rgba(238,90,17,.32)}
+.smu-tl-tag{margin-top:16px;font-size:.67rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--smu-orange);background:var(--smu-pink);border:1px solid var(--smu-pink-line);padding:.3rem .85rem;border-radius:99px}
+
+.smu-step-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:28px}
+.smu-step-card{background:var(--smu-surface-alt);border:1px solid var(--smu-line);border-radius:var(--smu-r-md);padding:32px 26px 30px;text-align:center}
+.smu-step-card .smu-ic{width:52px;height:52px;border-radius:14px;background:var(--smu-pink);display:grid;place-items:center;margin:0 auto 20px}
+.smu-step-card .smu-ic svg{width:23px;height:23px;fill:var(--smu-orange)}
+.smu-step-card__n{display:none}
+.smu-step-card h3{font-size:1.02rem;margin-bottom:.55rem}
+.smu-step-card p{font-size:.875rem;line-height:1.75}
+.smu-steps-foot{margin-top:56px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.smu-steps-foot small{font-size:.89rem;color:var(--smu-text-2)}
+@media(max-width:900px){
+  /* The timeline and the cards are two separate grids that only line up
+     while both are four across. Once they wrap they decouple — every number
+     first, then every card — so below this width the timeline is dropped and
+     each card carries its own step label instead. */
+  .smu-timeline{display:none}
+  .smu-step-cards{grid-template-columns:repeat(2,1fr);margin-top:44px}
+
+  .smu-step-card{text-align:left;padding:26px 24px 24px;position:relative}
+  .smu-step-card .smu-ic{margin:0 0 16px}
+
+  .smu-step-card__n{
+    display:inline-block;margin-bottom:14px;
+    font-size:.67rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--smu-orange);background:var(--smu-pink);
+    border:1px solid var(--smu-pink-line);
+    padding:.3rem .85rem;border-radius:99px;
+  }
+}
+@media(max-width:560px){
+  .smu-step-cards{grid-template-columns:1fr;gap:16px}
+}
+
+/* ================= DEGREE ================= */
+.smu-degree{border-top:1px solid var(--smu-line);border-bottom:1px solid var(--smu-line)}
+.smu-deg-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.smu-pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:2rem}
+.smu-pill{background:#fff;color:var(--smu-navy);border:1.5px solid var(--smu-line);border-radius:99px;padding:.5rem 1.15rem;font-size:.86rem;font-weight:500}
+.smu-cert{position:relative;aspect-ratio:4/3;border:1px solid var(--smu-line);border-radius:16px;background:#fff;display:grid;place-items:center;text-align:center;padding:32px;box-shadow:0 2px 16px rgba(21,26,58,.05)}
+.smu-cert img{margin:0 auto;max-height:100%;width:auto;border-radius:8px}
+.smu-cert .smu-seal{width:84px;height:84px;margin:0 auto 18px;border-radius:50%;border:2px solid var(--smu-gold);color:var(--smu-gold);display:grid;place-items:center;font-weight:800;font-size:.82rem;line-height:1.3}
+.smu-cert p{font-size:.85rem;color:var(--smu-text-2)}
+.smu-cert .smu-legacy{position:absolute;right:-16px;bottom:-16px;background:var(--smu-orange);color:#fff;border-radius:12px;padding:.85rem 1.2rem;font-weight:800;line-height:1.15;box-shadow:0 12px 28px rgba(0,0,0,.32)}
+.smu-cert .smu-legacy span{display:block;font-size:.68rem;font-weight:500;opacity:.92}
+@media(max-width:880px){.smu-deg-grid{grid-template-columns:1fr;gap:44px}}
+
+/* ================= PROSE + FINAL ================= */
+.smu-prose{max-width:74ch;margin:0 auto}
+.smu-prose > * + *{margin-top:16px}
+.smu-final{padding:var(--smu-pad) 0}
+
+@media(prefers-reduced-motion:reduce){.smu *{transition:none!important;animation:none!important}}
+
+/* ================= COURSE CAROUSEL ================= */
+.smu-courses-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.smu-courses-head h2{font-size:clamp(1.8rem,3.2vw,2.6rem)}
+
+.smu-course-nav{display:flex;gap:10px;flex:0 0 auto}
+.smu-course-arrow{
+  width:46px;height:46px;border-radius:50%;border:1.5px solid var(--smu-line);
+  background:#fff;color:var(--smu-navy);font-size:1.5rem;line-height:1;
+  display:grid;place-items:center;cursor:pointer;transition:.18s;
+}
+.smu-course-arrow:hover:not(:disabled){background:var(--smu-orange);border-color:var(--smu-orange);color:#fff}
+.smu-course-arrow:disabled{opacity:.35;cursor:default}
+
+.smu-course-track{
+  display:flex;gap:22px;margin-top:34px;padding:6px 4px 22px;
+  overflow-x:auto;
+  /* No scroll-snap and no CSS smooth scrolling: both fight the per-frame
+     scrollLeft the marquee writes. Arrow clicks pass behavior:'smooth'
+     directly, which still animates. */
+  scroll-behavior:auto;
+  scrollbar-width:thin;scrollbar-color:#C9CEDD transparent;
+}
+.smu-course-track::-webkit-scrollbar{height:7px}
+.smu-course-track::-webkit-scrollbar-thumb{background:#C9CEDD;border-radius:4px}
+.smu-course-track::-webkit-scrollbar-track{background:transparent}
+
+.smu-course-card{
+  flex:0 0 300px;
+  display:flex;flex-direction:column;
+  background:#fff;border:1px solid var(--smu-line);border-radius:16px;
+  padding:22px;box-shadow:0 2px 14px rgba(21,26,58,.05);
+  transition:box-shadow .22s,transform .22s,border-color .22s;
+}
+.smu-course-card:hover{box-shadow:0 16px 40px rgba(21,26,58,.12);transform:translateY(-3px);border-color:var(--smu-pink-line)}
+
+.smu-course-badges{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+.smu-course-badge{
+  font-size:.65rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+  background:var(--smu-navy);color:#fff;padding:.3rem .7rem;border-radius:99px;
+}
+.smu-course-badge--hot{background:var(--smu-orange)}
+.smu-course-tag{
+  font-size:.65rem;font-weight:700;letter-spacing:.05em;
+  background:var(--smu-cream);color:var(--smu-chip-text);
+  border:1px solid var(--smu-cream-line);padding:.3rem .7rem;border-radius:99px;
+}
+
+
+.smu-course-card h3{font-size:1.02rem;line-height:1.35;margin-bottom:14px}
+
+.smu-course-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.smu-course-meta span{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.78rem;font-weight:600;color:var(--smu-navy);
+  background:var(--smu-paper);border:1px solid var(--smu-line);
+  padding:.28rem .65rem;border-radius:6px;
+}
+.smu-course-meta svg{width:12px;height:12px;flex:0 0 12px}
+.smu-course-rating svg{fill:var(--smu-gold)}
+.smu-course-dur svg{fill:var(--smu-text-2)}
+
+.smu-course-fee{font-weight:800;font-size:1.28rem;color:var(--smu-navy);line-height:1.2}
+.smu-course-elig{font-size:.8rem;color:var(--smu-text-2);margin-top:4px}
+
+/* Pushes the CTA to the bottom so cards of unequal height still line up. */
+.smu-course-cta{margin-top:auto;padding:.8rem 1.2rem;font-size:.9rem;width:100%}
+.smu-course-card > :not(.smu-course-cta):last-child{margin-bottom:18px}
+
+.smu-course-note{margin-top:14px;font-size:.78rem;font-style:italic;color:var(--smu-text-2);max-width:80ch}
+
+@media(max-width:640px){
+  .smu-course-nav{display:none}
+  .smu-course-card{flex-basis:82%}
+}
+@media(prefers-reduced-motion:reduce){.smu-course-track{scroll-behavior:auto}}
+
+/* ================= LANDING HEADER ================= */
+.smu-head{
+  position:sticky;top:0;z-index:60;background:#fff;
+  border-bottom:1px solid var(--smu-line);box-shadow:0 2px 16px rgba(21,26,58,.07);
+}
+.smu-head__in{display:flex;align-items:center;justify-content:space-between;gap:22px;min-height:76px}
+.smu-head__brand{display:flex;align-items:center;flex:0 0 auto}
+.smu-head__brand img{width:auto;height:40px;max-width:min(330px,44vw);object-fit:contain}
+.smu-head__name{font-weight:800;font-size:1.05rem;color:var(--smu-navy)}
+
+.smu-nav__list{display:flex;align-items:center;gap:26px;list-style:none;margin:0;padding:0}
+.smu-nav__list a{
+  font-size:.9rem;font-weight:500;color:var(--smu-navy);
+  text-decoration:none;position:relative;padding:5px 0;display:block;
+}
+.smu-nav__list a::after{
+  content:"";position:absolute;left:0;bottom:0;height:2px;width:0;
+  background:var(--smu-orange);transition:width .22s;
+}
+.smu-nav__list a:hover::after,.smu-nav__list .current-menu-item > a::after{width:100%}
+
+.smu-head__cta{display:flex;align-items:center;gap:14px;flex:0 0 auto}
+.smu-head__phone{display:flex;align-items:center;gap:9px;color:var(--smu-navy);text-decoration:none}
+.smu-head__phone svg{width:15px;height:15px;fill:var(--smu-orange);flex:0 0 15px}
+.smu-head__phone span{display:block;font-size:.9rem;font-weight:700;line-height:1.2}
+.smu-head__phone small{display:block;font-size:.68rem;font-weight:500;color:var(--smu-text-2)}
+
+.smu-head__toggle{
+  display:none;width:44px;height:44px;border:1px solid var(--smu-line);
+  border-radius:9px;background:#fff;cursor:pointer;
+}
+.smu-head__bars,.smu-head__bars::before,.smu-head__bars::after{
+  display:block;width:19px;height:2px;background:var(--smu-navy);border-radius:2px;
+  margin:0 auto;position:relative;transition:.2s;
+}
+.smu-head__bars::before,.smu-head__bars::after{content:"";position:absolute;left:0}
+.smu-head__bars::before{top:-6px}
+.smu-head__bars::after{top:6px}
+.smu-head__toggle[aria-expanded="true"] .smu-head__bars{background:transparent}
+.smu-head__toggle[aria-expanded="true"] .smu-head__bars::before{top:0;transform:rotate(45deg)}
+.smu-head__toggle[aria-expanded="true"] .smu-head__bars::after{top:0;transform:rotate(-45deg)}
+
+@media(max-width:1080px){
+  .smu-head__toggle{display:grid;place-items:center;order:3}
+  .smu-head__cta{order:2;gap:10px}
+  .smu-nav{
+    order:4;flex-basis:100%;display:none;
+    border-top:1px solid var(--smu-line);padding:12px 0 16px;
+  }
+  .smu-nav.is-open{display:block}
+  .smu-head__in{flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
+  .smu-nav__list{flex-direction:column;align-items:stretch;gap:0}
+  .smu-nav__list a{padding:11px 2px;border-bottom:1px solid var(--smu-line)}
+  .smu-nav__list li:last-child a{border-bottom:0}
+}
+@media(max-width:520px){
+  /* The number stays visible: it is the fastest conversion path on a phone,
+     where tapping to call costs one tap. The "Counsellor on call" line above
+     it is the part that goes, since the icon already says it is a phone. */
+  .smu-head__in{gap:12px}
+  .smu-head__phone small{display:none}
+  .smu-head__phone span{font-size:.84rem;white-space:nowrap}
+  .smu-head__phone{flex:0 0 auto}
+  .smu-head__brand{min-width:0}
+  .smu-head__brand img{height:30px;max-width:34vw}
+}
+
+/* ================= SUPPLIED IMAGERY ================= */
+.smu-course-photo{
+  margin:-22px -22px 16px;border-radius:16px 16px 0 0;overflow:hidden;
+  background:var(--smu-paper);aspect-ratio:378/220;
+}
+.smu-course-photo img{width:100%;height:100%;object-fit:cover;display:block}
+
+.smu-map-wrap img{width:100%;height:auto;max-width:760px;margin:0 auto;display:block}
+
+.smu-placement-strip{
+  margin-top:44px;background:#fff;border:1px solid var(--smu-line);
+  border-radius:16px;padding:22px;box-shadow:0 2px 14px rgba(21,26,58,.05);
+}
+.smu-placement-strip img{width:100%;height:auto;display:block}
+
+.smu-cert img{width:100%;height:auto;max-height:100%;object-fit:contain;border-radius:8px}
+
+/* ================= DESIGN SYSTEM PASS ================= */
+
+/* --- Global Impact as the page's one dark band ---
+   A page of white and one pale tint has rhythm but no focal point. This is
+   the natural place for the contrast: the map art is a light landmass on a
+   transparent ground, so it gains from a dark field, and the statistics are
+   the thing most worth stopping on. */
+.smu-impact{background:var(--smu-surface-deep);color:rgba(255,255,255,.72)}
+.smu-impact h2{color:#fff}
+.smu-impact .smu-imp span{color:rgba(255,255,255,.66)}
+.smu-impact .smu-gold-bar{background:var(--smu-gold-2)}
+.smu-impact .smu-map-wrap img{
+  filter:drop-shadow(0 10px 30px rgba(0,0,0,.35));
+}
+
+/* --- One card treatment, applied everywhere --- */
+.smu-money-card,.smu-course-card,.smu-step-card,.smu-leadcard,
+.smu-adv-card,.smu-placement-strip,.smu-cert,.smu-schol-bar{
+  border-radius:var(--smu-r-md);
+}
+.smu-leadcard,.smu-adv-card{border-radius:var(--smu-r-lg)}
+.smu-money-card,.smu-course-card,.smu-placement-strip,.smu-cert{box-shadow:var(--smu-shadow)}
+.smu-adv-card{box-shadow:var(--smu-shadow)}
+.smu-adv-card:hover,.smu-course-card:hover{box-shadow:var(--smu-shadow-lift)}
+
+/* On the tinted band, white cards need an edge or they float. */
+.smu-band--alt .smu-adv-card,
+.smu-band--alt .smu-money-card{border:1px solid var(--smu-line)}
+
+/* --- Section heads: consistent spacing above the body copy --- */
+.smu-center .smu-lede{margin-top:24px}
+.smu-courses-head h2 + .smu-gold-bar{margin-top:16px}
+
+/* --- Sections that sit on the tinted band need their insets lifted --- */
+.smu-band--alt .smu-step-card{background:#fff;border-color:var(--smu-line)}
+.smu-band--alt .smu-course-photo{background:#EDF0F7}
+
+/* --- Focus visibility, on both surfaces --- */
+.smu :focus-visible{outline:3px solid var(--smu-orange);outline-offset:3px;border-radius:4px}
+.smu-impact :focus-visible{outline-color:var(--smu-gold-2)}
+
+/* --- Respect reduced motion for the card lift --- */
+@media(prefers-reduced-motion:reduce){
+  .smu-adv-card:hover,.smu-course-card:hover{transform:none}
+}
+
+/* ================= CLOSING CTA ================= */
+/* An inset card rather than centred text on a bare band: the last thing on
+   the page should look like a destination, not a footnote. The gradient runs
+   navy into a warm rust so it reads as its own moment and not a second copy
+   of the dark Global Impact band. */
+.smu-cta{
+  position:relative;overflow:hidden;
+  border-radius:calc(var(--smu-r-lg) + 6px);
+  background:
+    radial-gradient(120% 140% at 88% 8%,rgba(238,90,17,.34),transparent 58%),
+    linear-gradient(135deg,#1B1F4A 0%,#2A1B3D 52%,#48221A 100%);
+  padding:clamp(38px,5vw,66px) clamp(24px,4vw,64px);
+  box-shadow:0 26px 60px rgba(21,26,58,.24);
+  text-align:center;
+  isolation:isolate;
+}
+
+/* Soft light bloom behind the heading. */
+.smu-cta__glow{
+  position:absolute;z-index:-1;pointer-events:none;
+  width:520px;height:520px;top:-58%;left:50%;transform:translateX(-50%);
+  background:radial-gradient(circle,rgba(238,90,17,.28),transparent 62%);
+}
+
+.smu-cta__body{position:relative;z-index:1;max-width:640px;margin:0 auto}
+
+.smu-cta__eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:#FFD9C6;background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.20);
+  padding:.42rem 1.05rem;border-radius:99px;margin-bottom:1.3rem;
+}
+.smu-cta__eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--smu-orange)}
+
+.smu-cta h2{color:#fff;font-size:clamp(1.75rem,3.2vw,2.55rem);line-height:1.16}
+.smu-cta p{
+  margin:1.1rem auto 0;max-width:52ch;
+  font-size:1.02rem;line-height:1.75;color:rgba(255,255,255,.82);
+}
+
+.smu-cta__actions{
+  display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:2.1rem;
+}
+.smu-cta__actions .smu-btn{min-width:212px}
+
+/* Secondary action. White on the dark card, so it stays legible where a
+   ghost button on the orange brand colour would not have been. */
+.smu-btn-ghost{
+  border-color:rgba(255,255,255,.42);color:#fff;background:transparent;
+}
+.smu-btn-ghost:hover,.smu-btn-ghost:focus{
+  background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.72);color:#fff;
+}
+.smu-btn-ghost svg{width:15px;height:15px;fill:currentColor;flex:0 0 15px}
+
+.smu-cta__trust{
+  list-style:none;margin:2rem 0 0;padding:0;
+  display:flex;flex-wrap:wrap;gap:10px 26px;justify-content:center;
+}
+.smu-cta__trust li{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.86rem;font-weight:500;color:rgba(255,255,255,.74);
+}
+.smu-cta__trust li::before{
+  content:"";width:17px;height:17px;flex:0 0 17px;border-radius:50%;
+  background:rgba(255,255,255,.13) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512' fill='%2373E8A6'%3E%3Cpath d='M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z'/%3E%3C/svg%3E") center/9px 9px no-repeat;
+}
+
+.smu-cta :focus-visible{outline-color:#FFD9C6}
+
+@media(max-width:560px){
+  .smu-cta__actions{flex-direction:column}
+  .smu-cta__actions .smu-btn{width:100%}
+  .smu-cta__trust{flex-direction:column;align-items:center;gap:9px}
+}
+
+/* ================= LANDING FOOTER ================= */
+/* Deep navy, closing the page on the same dark family as the CTA card that
+   sits above it. The logo is dark artwork on transparency, so it needs a
+   light plate here rather than being dropped onto the navy invisibly. */
+.smu-foot{
+  background:var(--smu-surface-deep);
+  color:rgba(255,255,255,.68);
+  padding:clamp(46px,5vw,72px) 0 0;
+  font-size:.92rem;
+}
+.smu-foot__top{
+  display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:44px;
+  padding-bottom:clamp(34px,4vw,52px);
+}
+.smu-foot__brand p{margin-top:16px;max-width:44ch;line-height:1.8;color:rgba(255,255,255,.62)}
+
+.smu-foot__plate{
+  display:inline-flex;background:#fff;border-radius:var(--smu-r-sm);
+  padding:11px 16px;box-shadow:0 6px 20px rgba(0,0,0,.25);
+}
+.smu-foot__plate img{width:auto;height:34px;max-width:250px;object-fit:contain}
+.smu-foot__name{font-size:1.1rem;font-weight:800;color:#fff}
+
+.smu-foot__col h2{
+  font-size:.76rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:#fff;margin-bottom:1.1rem;
+}
+
+.smu-foot__links{list-style:none;margin:0;padding:0;display:grid;gap:11px}
+.smu-foot__links a{
+  color:rgba(255,255,255,.68);text-decoration:none;transition:color .18s;
+}
+.smu-foot__links a:hover,.smu-foot__links a:focus{color:var(--smu-orange)}
+
+.smu-foot__contact{
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+  color:#fff;font-weight:600;text-decoration:none;transition:color .18s;
+}
+.smu-foot__contact:hover,.smu-foot__contact:focus{color:var(--smu-orange)}
+.smu-foot__contact svg{width:15px;height:15px;flex:0 0 15px;fill:var(--smu-orange)}
+
+.smu-foot__meta{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:9px}
+.smu-foot__meta li{
+  display:flex;align-items:center;gap:9px;
+  font-size:.84rem;color:rgba(255,255,255,.58);
+}
+.smu-foot__meta svg{width:13px;height:13px;flex:0 0 13px;fill:rgba(255,255,255,.45)}
+
+.smu-foot__bot{
+  display:flex;flex-wrap:wrap;gap:10px 26px;justify-content:space-between;
+  padding:20px 0 26px;border-top:1px solid rgba(255,255,255,.11);
+  font-size:.82rem;color:rgba(255,255,255,.5);
+}
+
+.smu-foot :focus-visible{outline-color:#FFD9C6}
+
+@media(max-width:880px){
+  .smu-foot__top{grid-template-columns:1fr 1fr;gap:34px}
+  .smu-foot__brand{grid-column:1 / -1}
+}
+@media(max-width:560px){
+  .smu-foot__top{grid-template-columns:1fr;gap:30px}
+  .smu-foot__bot{flex-direction:column;gap:8px}
+}
+/* The mobile sticky bar sits over the footer's last rows. */
+@media(max-width:760px){.smu-foot__bot{padding-bottom:84px}}
+
+/* ================= FULL-WIDTH NAV BAR ================= */
+/* A full-bleed sticky strip: the bar spans the viewport edge to edge, and
+   only its contents are held to the page container so the logo and the
+   phone number stay in line with every section below. */
+.smu-head{
+  background:rgba(255,255,255,.96);
+  -webkit-backdrop-filter:saturate(180%) blur(12px);
+          backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--smu-line);
+  box-shadow:0 2px 18px rgba(21,26,58,.07);
+  padding:0;
+}
+.smu-head__in{
+  /* Width and gutters come from .smu-shell, which this row also carries.
+     Setting them again here would indent the logo and phone relative to
+     every section below. */
+  min-height:74px;
+  background:none;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  -webkit-backdrop-filter:none;
+          backdrop-filter:none;
+}
+
+/* Desktop only, and deliberately inside a min-width query.
+   Unscoped, these two rules sit later in the file than the mobile block
+   above and carry the same specificity, so they won over it: .smu-nav went
+   back to display:flex below 1080px, which left the menu permanently open
+   and the hamburger doing nothing. */
+@media(min-width:1081px){
+  /* The nav takes the space between the logo and the phone rather than
+     sitting in its natural width, so the links spread across the bar. */
+  .smu-nav{flex:1 1 auto;display:flex;justify-content:center}
+  .smu-nav__list{gap:clamp(18px,2.6vw,40px)}
+}
+
+.smu [id]{scroll-margin-top:92px}
+
+@media(max-width:1080px){
+  .smu-head__in{padding-top:8px;padding-bottom:8px;min-height:62px}
+  /* display stays with the mobile block above: none, or block when open. */
+  .smu-nav{flex:0 0 100%;padding:12px 0 14px}
+}
+
+/* ================= LIGHT FOOTER ================= */
+/* Was deep navy; now a light band so the menu reads in black, as asked.
+   The top border matters: the closing band above can itself land on the
+   tinted surface, and without a rule the two would merge. */
+.smu-foot{
+  background:var(--smu-surface-alt);
+  color:var(--smu-text);
+  border-top:1px solid var(--smu-line);
+}
+.smu-foot__brand p{color:var(--smu-text)}
+
+/* On a light ground the logo needs no plate behind it. */
+.smu-foot__plate{background:none;padding:0;box-shadow:none;border-radius:0}
+.smu-foot__name{color:var(--smu-navy)}
+
+.smu-foot__col h2{color:var(--smu-navy)}
+
+.smu-foot__links a{color:var(--smu-navy)}
+.smu-foot__links a:hover,.smu-foot__links a:focus{color:var(--smu-orange)}
+
+.smu-foot__contact{color:var(--smu-navy)}
+.smu-foot__contact:hover,.smu-foot__contact:focus{color:var(--smu-orange)}
+
+.smu-foot__meta li{color:var(--smu-text-2)}
+.smu-foot__meta svg{fill:var(--smu-text-2)}
+
+.smu-foot__bot{
+  border-top:1px solid var(--smu-line);
+  color:var(--smu-text-2);
+}
+
+.smu-foot :focus-visible{outline-color:var(--smu-orange)}
+
+/* ================= CAROUSEL MARQUEE ================= */
+/* Applied by JS once the loop is built, so none of this affects a visitor
+   whose carousel stays manual (reduced motion, or too few cards). */
+.smu-course-track.is-marquee{
+  scrollbar-width:none;
+  /* Fade both edges so cards enter and leave rather than being cut off. */
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
+}
+.smu-course-track.is-marquee::-webkit-scrollbar{height:0}
+
+/* Clones repeat content that is already announced once. */
+.smu-course-card.is-clone{pointer-events:auto}
+
+/* Pause / resume control, drawn with pseudo-elements so it needs no icon. */
+.smu-course-toggle span{
+  display:block;width:12px;height:12px;position:relative;
+}
+.smu-course-toggle span::before,
+.smu-course-toggle span::after{
+  content:"";position:absolute;top:0;width:3.5px;height:12px;
+  background:currentColor;border-radius:1px;
+}
+.smu-course-toggle span::before{left:1px}
+.smu-course-toggle span::after{right:1px}
+
+/* Pressed = paused, so the button offers "play". */
+.smu-course-toggle[aria-pressed="true"] span::before{
+  left:2px;width:0;height:0;border-radius:0;
+  border-left:9px solid currentColor;
+  border-top:6px solid transparent;
+  border-bottom:6px solid transparent;
+}
+.smu-course-toggle[aria-pressed="true"] span::after{display:none}
+
+/* ================= PROGRAMME — CHIP SIZING ================= */
+/* The chips are grid items now, so no flex sizing and no min-width: a
+   min-width larger than the grid's own track minimum would push the panel
+   wider than its column on a narrow screen. */
+.smu-prog .smu-chips{gap:10px}
+.smu-prog .smu-chip{justify-content:center;text-align:center;min-width:0;padding:.6rem .9rem}
+

@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MBAG_VERSION', '1.26.0' );
+define( 'MBAG_VERSION', '1.32.0' );
 
 /**
  * Theme setup.
@@ -37,8 +37,11 @@ function mbag_setup() {
 	add_image_size( 'mbag-card', 720, 460, true );
 
 	register_nav_menus( array(
-		'primary' => __( 'Primary Menu', 'mba-admission-guide' ),
-		'footer'  => __( 'Footer Menu', 'mba-admission-guide' ),
+		'primary'     => __( 'Primary Menu', 'mba-admission-guide' ),
+		'footer'      => __( 'Footer Menu', 'mba-admission-guide' ),
+		// Used only by header-landing.php. Left unassigned, the landing
+		// header falls back to that page's own section anchors.
+		'smu_landing' => __( 'Landing Page Menu (Sikkim Manipal)', 'mba-admission-guide' ),
 	) );
 }
 add_action( 'after_setup_theme', 'mbag_setup' );
@@ -97,6 +100,284 @@ function mbag_scripts() {
 add_action( 'wp_enqueue_scripts', 'mbag_scripts' );
 
 /**
+ * Warm up the Google Fonts connections.
+ *
+ * Two origins are involved and both need a hint: fonts.googleapis.com serves
+ * the CSS, and the @font-face rules inside it then point at fonts.gstatic.com.
+ * Only gstatic was hinted before, so the stylesheet — the render-blocking half
+ * — still paid a full DNS + TLS handshake before it could start downloading.
+ *
+ * @param array  $urls          URLs to print.
+ * @param string $relation_type The hint type.
+ * @return array
+ */
+function mbag_resource_hints( $urls, $relation_type ) {
+	if ( 'preconnect' === $relation_type ) {
+		$urls[] = array( 'href' => 'https://fonts.googleapis.com' );
+		$urls[] = array( 'href' => 'https://fonts.gstatic.com', 'crossorigin' => 'anonymous' );
+	}
+
+	return $urls;
+}
+add_filter( 'wp_resource_hints', 'mbag_resource_hints', 10, 2 );
+
+/**
+ * ---------------------------------------------------------------
+ * TRIM WHAT CORE ADDS BUT THIS THEME NEVER USES
+ *
+ * WordPress prints these on every page whether or not anything on
+ * the page needs them. None of this theme's templates do.
+ * ---------------------------------------------------------------
+ */
+function mbag_trim_core_assets() {
+	// The emoji polyfill: an inline detection script in <head> plus
+	// wp-emoji-release.min.js. It exists to render emoji on operating
+	// systems that shipped without them, which no browser in this site's
+	// analytics still needs. Real emoji characters keep working — they
+	// are just drawn by the OS font instead of swapped for Twemoji PNGs.
+	remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+	remove_action( 'wp_print_styles', 'print_emoji_styles' );
+	remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
+	remove_action( 'admin_print_styles', 'print_emoji_styles' );
+	remove_filter( 'the_content_feed', 'wp_staticize_emoji' );
+	remove_filter( 'comment_text_rss', 'wp_staticize_emoji' );
+	remove_filter( 'wp_mail', 'wp_staticize_emoji_for_email' );
+
+	// wp-embed.js only powers embedding *other* WordPress posts as cards.
+	// Nothing here does that, and it does not affect YouTube/Vimeo oEmbeds.
+	remove_action( 'wp_head', 'wp_oembed_add_host_js' );
+}
+add_action( 'init', 'mbag_trim_core_assets' );
+
+/**
+ * Stop the emoji plugin from re-adding itself to TinyMCE.
+ *
+ * @param array $plugins TinyMCE plugins.
+ * @return array
+ */
+function mbag_disable_emojis_tinymce( $plugins ) {
+	return is_array( $plugins ) ? array_diff( $plugins, array( 'wpemoji' ) ) : array();
+}
+add_filter( 'tiny_mce_plugins', 'mbag_disable_emojis_tinymce' );
+
+/**
+ * Drop the s.w.org DNS-prefetch the emoji script leaves behind.
+ *
+ * @param array  $urls          URLs to print.
+ * @param string $relation_type The hint type.
+ * @return array
+ */
+function mbag_remove_emoji_dns_prefetch( $urls, $relation_type ) {
+	if ( 'dns-prefetch' === $relation_type ) {
+		$urls = array_filter(
+			$urls,
+			function ( $url ) {
+				return false === strpos( is_array( $url ) ? ( $url['href'] ?? '' ) : $url, 's.w.org' );
+			}
+		);
+	}
+
+	return $urls;
+}
+add_filter( 'wp_resource_hints', 'mbag_remove_emoji_dns_prefetch', 10, 2 );
+
+/**
+ * ---------------------------------------------------------------
+ * SCRIPT LOADING
+ *
+ * Lighthouse showed ten first-party scripts blocking first paint,
+ * most of them from plugins (Contact Form 7, analytics trackers).
+ * A blocking <script> stops HTML parsing until it has downloaded
+ * and run; `defer` lets parsing continue and runs the script after
+ * the document is parsed, in the same order.
+ * ---------------------------------------------------------------
+ */
+
+/**
+ * Drop jQuery Migrate.
+ *
+ * It is a compatibility shim for code written against jQuery 1.x, and it costs
+ * a 1,070ms blocking request in the audit. Nothing in this theme uses jQuery.
+ *
+ * Two steps, because removing it from jQuery's dependency list is not enough
+ * on a site with plugins: any plugin that names 'jquery-migrate' in its own
+ * deps, or enqueues it directly, pulls it back in. Emptying the src is what
+ * actually stops it — core treats a handle with no src as an alias, so it
+ * prints no <script> tag while every dependency on it still resolves.
+ *
+ * If a plugin here genuinely needs it, delete this block rather than working
+ * around it. The symptom is a console error naming jQuery.migrate.
+ *
+ * @param WP_Scripts $scripts Script registry.
+ */
+function mbag_remove_jquery_migrate( $scripts ) {
+	if ( is_admin() ) {
+		return;
+	}
+
+	if ( ! empty( $scripts->registered['jquery'] ) ) {
+		$scripts->registered['jquery']->deps = array_diff(
+			$scripts->registered['jquery']->deps,
+			array( 'jquery-migrate' )
+		);
+	}
+
+	if ( ! empty( $scripts->registered['jquery-migrate'] ) ) {
+		$scripts->registered['jquery-migrate']->src = '';
+	}
+}
+add_action( 'wp_default_scripts', 'mbag_remove_jquery_migrate', 99 );
+
+/**
+ * Map a local asset URL back to a filesystem path.
+ *
+ * Returns '' for anything not served from this install's wp-content or
+ * wp-includes, so a CDN or third-party URL is never touched.
+ *
+ * @param string $url Asset URL.
+ * @return string Absolute path, or '' if the URL is not local.
+ */
+function mbag_local_asset_path( $url ) {
+	$url = strtok( $url, '?' );
+
+	foreach ( array(
+		array( content_url(), WP_CONTENT_DIR ),
+		array( includes_url(), ABSPATH . WPINC ),
+	) as $pair ) {
+		list( $base_url, $base_dir ) = $pair;
+
+		// Compare protocol-relative, so http/https never causes a miss.
+		$needle   = preg_replace( '#^https?:#', '', $base_url );
+		$haystack = preg_replace( '#^https?:#', '', $url );
+
+		if ( 0 === strpos( $haystack, $needle ) ) {
+			return $base_dir . substr( $haystack, strlen( $needle ) );
+		}
+	}
+
+	return '';
+}
+
+/**
+ * Let core inline small stylesheets.
+ *
+ * Every <link rel="stylesheet"> is render-blocking, and on this host a 0.6 KiB
+ * file still cost 1,070ms — the cost is the round trip, not the bytes.
+ *
+ * Core already does this in wp_maybe_inline_styles(), but only for styles that
+ * declare a 'path'. Core's own stylesheets set it; plugin stylesheets almost
+ * never do, which is why they stay render-blocking. So all this does is supply
+ * the missing 'path' for local stylesheets and let core decide the rest:
+ *
+ *   - core keeps a 40KB total budget (filter: styles_inline_size_limit) and
+ *     inlines smallest-first, so it cannot bloat the document;
+ *   - core runs _wp_normalize_relative_css_links(), which rewrites relative
+ *     url() references instead of breaking them;
+ *   - the theme's own style.css is far larger than the budget and stays a
+ *     separate cacheable file, which is what we want for repeat visits.
+ *
+ * Doing it this way rather than filtering style_loader_tag ourselves means
+ * core owns the budget, the URL rewriting and the sourceURL comments.
+ */
+function mbag_inline_small_styles() {
+	$styles = wp_styles();
+
+	foreach ( $styles->queue as $handle ) {
+		if ( ! isset( $styles->registered[ $handle ] ) ) {
+			continue;
+		}
+
+		// Never override a path a plugin or core already set.
+		if ( $styles->get_data( $handle, 'path' ) ) {
+			continue;
+		}
+
+		$src = $styles->registered[ $handle ]->src;
+
+		if ( ! $src || ! is_string( $src ) ) {
+			continue;
+		}
+
+		$path = mbag_local_asset_path( $src );
+
+		if ( '' !== $path && is_readable( $path ) ) {
+			wp_style_add_data( $handle, 'path', $path );
+		}
+	}
+}
+// Priority 1 on wp_head, before core's wp_maybe_inline_styles() at the same hook.
+add_action( 'wp_enqueue_scripts', 'mbag_inline_small_styles', PHP_INT_MAX );
+
+/**
+ * Handles that must keep running during parse.
+ *
+ * jQuery stays blocking because plugins commonly echo a raw
+ * <script>jQuery(...)</script> straight into the footer. Those are invisible
+ * to WP_Scripts, so core's own eligibility check cannot know about them.
+ *
+ * @return string[]
+ */
+function mbag_blocking_scripts() {
+	return apply_filters( 'mbag_blocking_scripts', array( 'jquery', 'jquery-core', 'jquery-migrate' ) );
+}
+
+/**
+ * Ask core to defer front-end scripts.
+ *
+ * Uses the script strategy API added in WP 6.3 rather than rewriting the
+ * <script> tag ourselves. That matters, because core refuses to delay a
+ * script when it would break:
+ *
+ *   - a handle with an inline 'after' script (its inline code runs during
+ *     parse and would hit a global that does not exist yet);
+ *   - a handle whose dependents are not themselves deferred.
+ *
+ * Those are the same rules a hand-rolled filter has to reimplement, and core
+ * already applies them across the whole dependency tree. Anything ineligible
+ * silently stays blocking, which is the safe outcome.
+ */
+function mbag_defer_scripts() {
+	$scripts  = wp_scripts();
+	$blocking = mbag_blocking_scripts();
+
+	foreach ( $scripts->queue as $handle ) {
+		mbag_defer_script_tree( $handle, $blocking, $scripts );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'mbag_defer_scripts', PHP_INT_MAX );
+
+/**
+ * Mark a handle and its dependencies as 'defer'.
+ *
+ * Dependencies are walked because $wp_scripts->queue holds only the handles
+ * that were enqueued directly — wp-hooks and wp-i18n arrive as dependencies
+ * of a plugin script and would otherwise never be marked.
+ *
+ * @param string     $handle   Script handle.
+ * @param string[]   $blocking Handles to leave alone.
+ * @param WP_Scripts $scripts  Script registry.
+ * @param string[]   $seen     Handles already visited, guarding circular deps.
+ */
+function mbag_defer_script_tree( $handle, $blocking, $scripts, &$seen = array() ) {
+	if ( isset( $seen[ $handle ] ) || in_array( $handle, $blocking, true ) ) {
+		return;
+	}
+
+	$seen[ $handle ] = true;
+
+	if ( ! isset( $scripts->registered[ $handle ] ) ) {
+		return;
+	}
+
+	foreach ( $scripts->registered[ $handle ]->deps as $dep ) {
+		mbag_defer_script_tree( $dep, $blocking, $scripts, $seen );
+	}
+
+	// Core validates this and falls back to blocking when deferring is unsafe.
+	wp_script_add_data( $handle, 'strategy', 'defer' );
+}
+
+/**
  * Basic Customizer options for contact details.
  */
 function mbag_customize_register( $wp_customize ) {
@@ -131,9 +412,32 @@ function mbag_customize_register( $wp_customize ) {
 		'sanitize_callback' => 'mbag_sanitize_digits',
 	) );
 	$wp_customize->add_control( 'mbag_whatsapp', array(
-		'label'   => __( 'WhatsApp Number (with country code, no +)', 'mba-admission-guide' ),
-		'section' => 'mbag_contact',
-		'type'    => 'text',
+		'label'       => __( 'WhatsApp Number (with country code, no +)', 'mba-admission-guide' ),
+		'description' => __( 'Used by the floating bubble, the mobile bar, the CTA rail and the Contact page. Changing it here changes all of them.', 'mba-admission-guide' ),
+		'section'     => 'mbag_contact',
+		'type'        => 'text',
+	) );
+
+	$wp_customize->add_setting( 'mbag_hours', array(
+		'default'           => mbag_contact_defaults()['hours'],
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'mbag_hours', array(
+		'label'       => __( 'Counselling hours', 'mba-admission-guide' ),
+		'description' => __( 'Shown on the Contact page. Confirm this matches when someone actually answers.', 'mba-admission-guide' ),
+		'section'     => 'mbag_contact',
+		'type'        => 'text',
+	) );
+
+	$wp_customize->add_setting( 'mbag_response', array(
+		'default'           => mbag_contact_defaults()['response'],
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'mbag_response', array(
+		'label'       => __( 'Response time', 'mba-admission-guide' ),
+		'description' => __( 'Shown on the Contact page, under the hours.', 'mba-admission-guide' ),
+		'section'     => 'mbag_contact',
+		'type'        => 'text',
 	) );
 }
 add_action( 'customize_register', 'mbag_customize_register' );
@@ -373,6 +677,8 @@ function mbag_contact_defaults() {
 		'phone'      => '+91 63629 46008',
 		'phone_link' => '+916362946008',
 		'whatsapp'   => '916362946008',
+		'hours'      => __( 'Monday to Saturday, 9:00 am to 8:00 pm', 'mba-admission-guide' ),
+		'response'   => __( 'We usually reply within one working day.', 'mba-admission-guide' ),
 	);
 }
 
@@ -421,6 +727,24 @@ function mbag_phone_link() {
  */
 function mbag_whatsapp_number() {
 	return mbag_sanitize_digits( get_theme_mod( 'mbag_whatsapp', mbag_contact_defaults()['whatsapp'] ) );
+}
+
+/**
+ * Counselling hours, as shown on the Contact page.
+ *
+ * @return string
+ */
+function mbag_hours() {
+	return trim( (string) get_theme_mod( 'mbag_hours', mbag_contact_defaults()['hours'] ) );
+}
+
+/**
+ * Expected response time, as shown on the Contact page.
+ *
+ * @return string
+ */
+function mbag_response_time() {
+	return trim( (string) get_theme_mod( 'mbag_response', mbag_contact_defaults()['response'] ) );
 }
 
 /**
@@ -688,128 +1012,61 @@ add_action( 'admin_notices', 'mbag_thankyou_admin_notice' );
 
 /**
  * ---------------------------------------------------------------
- * FONT AWESOME ICONS
+ * INLINE SVG ICONS
  *
- * Loaded from cdnjs as three split files (core + solid + brands)
- * instead of all.min.css: the theme uses no "regular" or v4-shim
- * glyphs, and skipping them saves roughly 40% of the payload.
+ * The theme used to pull Font Awesome from cdnjs as three CSS
+ * files. Lighthouse measured that at ~2,550ms of render-blocking
+ * time: three round trips to a third-party origin, plus the two
+ * webfonts (fa-solid-900 + fa-brands-400, ~260KB) those files then
+ * request — all to draw 21 icons.
  *
- * Templates never hard-code an <i> tag. They call mbag_icon(), so
+ * Those 21 icons are ~8KB of path data, so they now ship inline in
+ * the page. That is zero requests, zero third-party DNS/TLS, and
+ * nothing render-blocking. The paths below are lifted verbatim from
+ * Font Awesome Free 6.7.2 (CC BY 4.0), so the icons are the same
+ * shapes the design was drawn with.
+ *
+ * Templates never hard-code an <svg> tag. They call mbag_icon(), so
  * swapping icon sets later is a change in one function, not in
  * fifty templates.
  * ---------------------------------------------------------------
  */
 
-define( 'MBAG_FA_VERSION', '6.7.2' );
-
 /**
- * Handles used by plugins that ship their own Font Awesome.
- *
- * If any of these is already queued we stand down, because two copies of
- * Font Awesome is 200KB of duplicate CSS and a specificity fight.
- *
- * @return string[]
- */
-function mbag_fa_conflict_handles() {
-	return array(
-		'font-awesome',
-		'fontawesome',
-		'font-awesome-5',
-		'elementor-icons-fa-solid',
-		'elementor-icons-fa-brands',
-		'wpforms-font-awesome',
-	);
-}
-
-/**
- * Should the theme load Font Awesome itself?
- *
- * Disable from a child theme or snippet with:
- *     add_filter( 'mbag_load_font_awesome', '__return_false' );
- *
- * @return bool
- */
-function mbag_load_font_awesome() {
-	foreach ( mbag_fa_conflict_handles() as $handle ) {
-		if ( wp_style_is( $handle, 'enqueued' ) || wp_style_is( $handle, 'done' ) ) {
-			return apply_filters( 'mbag_load_font_awesome', false );
-		}
-	}
-
-	return apply_filters( 'mbag_load_font_awesome', true );
-}
-
-/**
- * Enqueue Font Awesome after plugins have had their turn, so the
- * conflict check above sees their handles.
- */
-function mbag_enqueue_font_awesome() {
-	if ( ! mbag_load_font_awesome() ) {
-		return;
-	}
-
-	$base = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/' . MBAG_FA_VERSION . '/css/';
-
-	wp_enqueue_style( 'mbag-fa-core', $base . 'fontawesome.min.css', array(), MBAG_FA_VERSION );
-	wp_enqueue_style( 'mbag-fa-solid', $base . 'solid.min.css', array( 'mbag-fa-core' ), MBAG_FA_VERSION );
-	wp_enqueue_style( 'mbag-fa-brands', $base . 'brands.min.css', array( 'mbag-fa-core' ), MBAG_FA_VERSION );
-}
-add_action( 'wp_enqueue_scripts', 'mbag_enqueue_font_awesome', 20 );
-
-/**
- * Warm up the connections the stylesheets above depend on.
- *
- * @param array  $urls           URLs to print.
- * @param string $relation_type  The hint type.
- * @return array
- */
-function mbag_resource_hints( $urls, $relation_type ) {
-	if ( 'preconnect' === $relation_type ) {
-		$urls[] = array( 'href' => 'https://fonts.gstatic.com', 'crossorigin' => 'anonymous' );
-
-		if ( mbag_load_font_awesome() ) {
-			$urls[] = array( 'href' => 'https://cdnjs.cloudflare.com', 'crossorigin' => 'anonymous' );
-		}
-	}
-
-	return $urls;
-}
-add_filter( 'wp_resource_hints', 'mbag_resource_hints', 10, 2 );
-
-/**
- * The theme's icon vocabulary: one name -> one Font Awesome class.
+ * The theme's icon vocabulary: one name -> [ viewBox, path ].
  *
  * Names are intent-based ('phone', 'secure') rather than shape-based, so a
  * later icon swap does not leave templates lying about what they show.
  *
- * @return array<string,string>
+ * @return array<string,array{0:string,1:string}>
  */
 function mbag_icon_map() {
 	return array(
+
 		// Contact and conversion.
-		'phone'        => 'fa-solid fa-phone-volume',
-		'whatsapp'     => 'fa-brands fa-whatsapp',
-		'chat'         => 'fa-solid fa-comments',
-		'secure'       => 'fa-solid fa-lock',
-		'check'        => 'fa-solid fa-check',
-		'arrow-right'  => 'fa-solid fa-arrow-right-long',
-		'arrow-left'   => 'fa-solid fa-arrow-left-long',
-		'star'         => 'fa-solid fa-star',
-		'search'       => 'fa-solid fa-magnifying-glass',
-		'clock'        => 'fa-solid fa-hourglass-half',
-		'home'         => 'fa-solid fa-house',
-		'download'     => 'fa-solid fa-file-arrow-down',
+		'phone'        => array( '0 0 512 512', 'M280 0C408.1 0 512 103.9 512 232c0 13.3-10.7 24-24 24s-24-10.7-24-24c0-101.6-82.4-184-184-184c-13.3 0-24-10.7-24-24s10.7-24 24-24zm8 192a32 32 0 1 1 0 64 32 32 0 1 1 0-64zm-32-72c0-13.3 10.7-24 24-24c75.1 0 136 60.9 136 136c0 13.3-10.7 24-24 24s-24-10.7-24-24c0-48.6-39.4-88-88-88c-13.3 0-24-10.7-24-24zM117.5 1.4c19.4-5.3 39.7 4.6 47.4 23.2l40 96c6.8 16.3 2.1 35.2-11.6 46.3L144 207.3c33.3 70.4 90.3 127.4 160.7 160.7L345 318.7c11.2-13.7 30-18.4 46.3-11.6l96 40c18.6 7.7 28.5 28 23.2 47.4l-24 88C481.8 499.9 466 512 448 512C200.6 512 0 311.4 0 64C0 46 12.1 30.2 29.5 25.4l88-24z' ),
+		'whatsapp'     => array( '0 0 448 512', 'M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z' ),
+		'chat'         => array( '0 0 640 512', 'M208 352c114.9 0 208-78.8 208-176S322.9 0 208 0S0 78.8 0 176c0 38.6 14.7 74.3 39.6 103.4c-3.5 9.4-8.7 17.7-14.2 24.7c-4.8 6.2-9.7 11-13.3 14.3c-1.8 1.6-3.3 2.9-4.3 3.7c-.5 .4-.9 .7-1.1 .8l-.2 .2s0 0 0 0s0 0 0 0C1 327.2-1.4 334.4 .8 340.9S9.1 352 16 352c21.8 0 43.8-5.6 62.1-12.5c9.2-3.5 17.8-7.4 25.2-11.4C134.1 343.3 169.8 352 208 352zM448 176c0 112.3-99.1 196.9-216.5 207C255.8 457.4 336.4 512 432 512c38.2 0 73.9-8.7 104.7-23.9c7.5 4 16 7.9 25.2 11.4c18.3 6.9 40.3 12.5 62.1 12.5c6.9 0 13.1-4.5 15.2-11.1c2.1-6.6-.2-13.8-5.8-17.9c0 0 0 0 0 0s0 0 0 0l-.2-.2c-.2-.2-.6-.4-1.1-.8c-1-.8-2.5-2-4.3-3.7c-3.6-3.3-8.5-8.1-13.3-14.3c-5.5-7-10.7-15.4-14.2-24.7c24.9-29 39.6-64.7 39.6-103.4c0-92.8-84.9-168.9-192.6-175.5c.4 5.1 .6 10.3 .6 15.5z' ),
+		'secure'       => array( '0 0 448 512', 'M144 144l0 48 160 0 0-48c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192l0-48C80 64.5 144.5 0 224 0s144 64.5 144 144l0 48 16 0c35.3 0 64 28.7 64 64l0 192c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 256c0-35.3 28.7-64 64-64l16 0z' ),
+		'check'        => array( '0 0 448 512', 'M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z' ),
+		'arrow-right'  => array( '0 0 512 512', 'M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l370.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z' ),
+		'arrow-left'   => array( '0 0 512 512', 'M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 288 480 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-370.7 0 73.4-73.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-128 128z' ),
+		'star'         => array( '0 0 576 512', 'M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z' ),
+		'search'       => array( '0 0 512 512', 'M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z' ),
+		'clock'        => array( '0 0 384 512', 'M32 0C14.3 0 0 14.3 0 32S14.3 64 32 64l0 11c0 42.4 16.9 83.1 46.9 113.1L146.7 256 78.9 323.9C48.9 353.9 32 394.6 32 437l0 11c-17.7 0-32 14.3-32 32s14.3 32 32 32l32 0 256 0 32 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l0-11c0-42.4-16.9-83.1-46.9-113.1L237.3 256l67.9-67.9c30-30 46.9-70.7 46.9-113.1l0-11c17.7 0 32-14.3 32-32s-14.3-32-32-32L320 0 64 0 32 0zM96 75l0-11 192 0 0 11c0 19-5.6 37.4-16 53L112 128c-10.3-15.6-16-34-16-53zm16 309c3.5-5.3 7.6-10.3 12.1-14.9L192 301.3l67.9 67.9c4.6 4.6 8.6 9.6 12.1 14.9L112 384z' ),
+		'home'         => array( '0 0 576 512', 'M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z' ),
+		'download'     => array( '0 0 384 512', 'M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM216 232l0 102.1 31-31c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-72 72c-9.4 9.4-24.6 9.4-33.9 0l-72-72c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l31 31L168 232c0-13.3 10.7-24 24-24s24 10.7 24 24z' ),
 
 		// Programme benefits.
-		'anywhere'     => 'fa-solid fa-house-laptop',
-		'flexible'     => 'fa-solid fa-clock',
-		'target'       => 'fa-solid fa-bullseye',
-		'chart'        => 'fa-solid fa-chart-column',
-		'laptop'       => 'fa-solid fa-laptop',
-		'rocket'       => 'fa-solid fa-rocket',
-		'documents'    => 'fa-solid fa-file-lines',
-		'graduate'     => 'fa-solid fa-user-graduate',
-		'university'   => 'fa-solid fa-building-columns',
+		'anywhere'     => array( '0 0 640 512', 'M218.3 8.5c12.3-11.3 31.2-11.3 43.4 0l208 192c6.7 6.2 10.3 14.8 10.3 23.5l-144 0c-19.1 0-36.3 8.4-48 21.7l0-37.7c0-8.8-7.2-16-16-16l-64 0c-8.8 0-16 7.2-16 16l0 64c0 8.8 7.2 16 16 16l64 0 0 128-160 0c-26.5 0-48-21.5-48-48l0-112-32 0c-13.2 0-25-8.1-29.8-20.3s-1.6-26.2 8.1-35.2l208-192zM352 304l0 144 192 0 0-144-192 0zm-48-16c0-17.7 14.3-32 32-32l224 0c17.7 0 32 14.3 32 32l0 160 32 0c8.8 0 16 7.2 16 16c0 26.5-21.5 48-48 48l-48 0-192 0-48 0c-26.5 0-48-21.5-48-48c0-8.8 7.2-16 16-16l32 0 0-160z' ),
+		'flexible'     => array( '0 0 512 512', 'M256 0a256 256 0 1 1 0 512A256 256 0 1 1 256 0zM232 120l0 136c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2 280 120c0-13.3-10.7-24-24-24s-24 10.7-24 24z' ),
+		'target'       => array( '0 0 512 512', 'M448 256A192 192 0 1 0 64 256a192 192 0 1 0 384 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256 80a80 80 0 1 0 0-160 80 80 0 1 0 0 160zm0-224a144 144 0 1 1 0 288 144 144 0 1 1 0-288zM224 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z' ),
+		'chart'        => array( '0 0 512 512', 'M32 32c17.7 0 32 14.3 32 32l0 336c0 8.8 7.2 16 16 16l400 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L80 480c-44.2 0-80-35.8-80-80L0 64C0 46.3 14.3 32 32 32zM160 224c17.7 0 32 14.3 32 32l0 64c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32zm128-64l0 160c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-160c0-17.7 14.3-32 32-32s32 14.3 32 32zm64 32c17.7 0 32 14.3 32 32l0 96c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-96c0-17.7 14.3-32 32-32zM480 96l0 224c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-224c0-17.7 14.3-32 32-32s32 14.3 32 32z' ),
+		'laptop'       => array( '0 0 640 512', 'M128 32C92.7 32 64 60.7 64 96l0 256 64 0 0-256 384 0 0 256 64 0 0-256c0-35.3-28.7-64-64-64L128 32zM19.2 384C8.6 384 0 392.6 0 403.2C0 445.6 34.4 480 76.8 480l486.4 0c42.4 0 76.8-34.4 76.8-76.8c0-10.6-8.6-19.2-19.2-19.2L19.2 384z' ),
+		'rocket'       => array( '0 0 512 512', 'M156.6 384.9L125.7 354c-8.5-8.5-11.5-20.8-7.7-32.2c3-8.9 7-20.5 11.8-33.8L24 288c-8.6 0-16.6-4.6-20.9-12.1s-4.2-16.7 .2-24.1l52.5-88.5c13-21.9 36.5-35.3 61.9-35.3l82.3 0c2.4-4 4.8-7.7 7.2-11.3C289.1-4.1 411.1-8.1 483.9 5.3c11.6 2.1 20.6 11.2 22.8 22.8c13.4 72.9 9.3 194.8-111.4 276.7c-3.5 2.4-7.3 4.8-11.3 7.2l0 82.3c0 25.4-13.4 49-35.3 61.9l-88.5 52.5c-7.4 4.4-16.6 4.5-24.1 .2s-12.1-12.2-12.1-20.9l0-107.2c-14.1 4.9-26.4 8.9-35.7 11.9c-11.2 3.6-23.4 .5-31.8-7.8zM384 168a40 40 0 1 0 0-80 40 40 0 1 0 0 80z' ),
+		'documents'    => array( '0 0 384 512', 'M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM112 256l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z' ),
+		'graduate'     => array( '0 0 448 512', 'M219.3 .5c3.1-.6 6.3-.6 9.4 0l200 40C439.9 42.7 448 52.6 448 64s-8.1 21.3-19.3 23.5L352 102.9l0 57.1c0 70.7-57.3 128-128 128s-128-57.3-128-128l0-57.1L48 93.3l0 65.1 15.7 78.4c.9 4.7-.3 9.6-3.3 13.3s-7.6 5.9-12.4 5.9l-32 0c-4.8 0-9.3-2.1-12.4-5.9s-4.3-8.6-3.3-13.3L16 158.4l0-71.8C6.5 83.3 0 74.3 0 64C0 52.6 8.1 42.7 19.3 40.5l200-40zM111.9 327.7c10.5-3.4 21.8 .4 29.4 8.5l71 75.5c6.3 6.7 17 6.7 23.3 0l71-75.5c7.6-8.1 18.9-11.9 29.4-8.5C401 348.6 448 409.4 448 481.3c0 17-13.8 30.7-30.7 30.7L30.7 512C13.8 512 0 498.2 0 481.3c0-71.9 47-132.7 111.9-153.6z' ),
+		'university'   => array( '0 0 512 512', 'M243.4 2.6l-224 96c-14 6-21.8 21-18.7 35.8S16.8 160 32 160l0 8c0 13.3 10.7 24 24 24l400 0c13.3 0 24-10.7 24-24l0-8c15.2 0 28.3-10.7 31.3-25.6s-4.8-29.9-18.7-35.8l-224-96c-8-3.4-17.2-3.4-25.2 0zM128 224l-64 0 0 196.3c-.6 .3-1.2 .7-1.8 1.1l-48 32c-11.7 7.8-17 22.4-12.9 35.9S17.9 512 32 512l448 0c14.1 0 26.5-9.2 30.6-22.7s-1.1-28.1-12.9-35.9l-48-32c-.6-.4-1.2-.7-1.8-1.1L448 224l-64 0 0 192-40 0 0-192-64 0 0 192-48 0 0-192-64 0 0 192-40 0 0-192zM256 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64z' ),
 	);
 }
 
@@ -819,6 +1076,11 @@ function mbag_icon_map() {
  * Icons here are decorative — every one sits next to a text label — so they
  * are hidden from screen readers. If you ever use an icon *as* the label,
  * pass $label so assistive tech has something to announce.
+ *
+ * The returned string is not run through wp_kses. Everything structural
+ * (viewBox, path) comes from the hardcoded map above, and the two variable
+ * parts are escaped here — so kses would add no safety, and it would lowercase
+ * `viewBox` on the way past.
  *
  * @param string $name  Key from mbag_icon_map().
  * @param string $class Extra CSS classes.
@@ -832,17 +1094,26 @@ function mbag_get_icon( $name, $class = '', $label = '' ) {
 		return '';
 	}
 
-	$classes = trim( $map[ $name ] . ' mbag-i ' . $class );
+	list( $view, $path ) = $map[ $name ];
+
+	$classes = trim( 'mbag-i ' . $class );
+
+	// currentColor keeps the CSS in control of icon colour, exactly as the
+	// font-based icons were. focusable="false" stops IE/Edge legacy from
+	// putting decorative icons in the tab order.
+	$attrs = sprintf(
+		'class="%s" viewBox="%s" xmlns="http://www.w3.org/2000/svg" fill="currentColor" focusable="false"',
+		esc_attr( $classes ),
+		esc_attr( $view )
+	);
 
 	if ( '' !== $label ) {
-		return sprintf(
-			'<i class="%1$s" role="img" aria-label="%2$s"></i>',
-			esc_attr( $classes ),
-			esc_attr( $label )
-		);
+		$attrs .= sprintf( ' role="img" aria-label="%s"', esc_attr( $label ) );
+	} else {
+		$attrs .= ' aria-hidden="true"';
 	}
 
-	return sprintf( '<i class="%s" aria-hidden="true"></i>', esc_attr( $classes ) );
+	return sprintf( '<svg %s><path d="%s"/></svg>', $attrs, esc_attr( $path ) );
 }
 
 /**
@@ -853,10 +1124,7 @@ function mbag_get_icon( $name, $class = '', $label = '' ) {
  * @param string $label Accessible label. Empty = decorative.
  */
 function mbag_icon( $name, $class = '', $label = '' ) {
-	echo wp_kses(
-		mbag_get_icon( $name, $class, $label ),
-		array( 'i' => array( 'class' => array(), 'role' => array(), 'aria-label' => array(), 'aria-hidden' => array() ) )
-	);
+	echo mbag_get_icon( $name, $class, $label ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from a hardcoded map; variable parts escaped in mbag_get_icon().
 }
 
 /**
@@ -920,12 +1188,13 @@ add_action( 'after_setup_theme', 'mbag_editor_palette', 11 );
 function mbag_universities() {
 	return apply_filters( 'mbag_universities', array(
 		'amity'           => 'Amity University Online',
-		'manipal-jaipur'  => 'Manipal University Jaipur',
-		'sikkim-manipal'  => 'Sikkim Manipal University',
 		'vit'             => 'VIT University',
+		'sikkim-manipal'  => 'Sikkim Manipal University',
+		'manipal-jaipur'  => 'Manipal University Jaipur',
 		'nmims'           => 'NMIMS Online',
 		'gla'             => 'GLA University Online',
 		'dayananda-sagar' => 'Dayananda Sagar University Online',
+		'jain'            => 'Jain Online University',
 	) );
 }
 
@@ -1237,6 +1506,55 @@ function mbag_customize_popup( $wp_customize ) {
 add_action( 'customize_register', 'mbag_customize_popup' );
 
 /**
+ * Keep the lead popup off the Contact page.
+ *
+ * That page exists to hand the visitor to a person with no form in the way.
+ * The popup otherwise renders in the footer of every page and opens itself on
+ * a timer and at 50% scroll, so without this a form modal would appear ten
+ * seconds after arriving on the one page built not to have one.
+ *
+ * Side effect worth knowing: mbag_brochure_button() also checks
+ * mbag_popup_active(), so on this page the sticky bar and rail brochure
+ * buttons degrade to a link to the homepage form instead of opening the
+ * modal. That is the intended behaviour here, not a regression.
+ *
+ * @param bool $active Whether the popup should run.
+ * @return bool
+ */
+function mbag_no_popup_on_contact( $active ) {
+	if ( is_page_template( 'page-templates/template-contact.php' ) ) {
+		return false;
+	}
+
+	return $active;
+}
+add_filter( 'mbag_popup_active', 'mbag_no_popup_on_contact' );
+
+/**
+ * Drop Contact Form 7's assets on the Contact page.
+ *
+ * CF7 enqueues its stylesheet and two scripts on every page whether or not a
+ * form is present. On this template there is no form and no popup, so those
+ * are three requests — one of them render-blocking — for markup that never
+ * renders.
+ *
+ * Scoped to this one template on purpose. A site-wide "dequeue when no form
+ * is detected" rule has to guess, and it guesses wrong on any page holding a
+ * form in a widget, a shortcode or a builder block. Here we know.
+ */
+function mbag_dequeue_cf7_on_contact() {
+	if ( ! is_page_template( 'page-templates/template-contact.php' ) ) {
+		return;
+	}
+
+	foreach ( array( 'contact-form-7', 'swv' ) as $handle ) {
+		wp_dequeue_script( $handle );
+		wp_dequeue_style( $handle );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'mbag_dequeue_cf7_on_contact', 100 );
+
+/**
  * ---------------------------------------------------------------
  * RIGHT CTA RAIL
  *
@@ -1472,3 +1790,775 @@ function mbag_customize_university_logos( $wp_customize ) {
 	}
 }
 add_action( 'customize_register', 'mbag_customize_university_logos' );
+
+/**
+ * ---------------------------------------------------------------
+ * MANIPAL UNIVERSITY JAIPUR LANDING PAGE
+ *
+ * Data for page-templates/template-manipal-jaipur.php.
+ *
+ * Every field here is EMPTY BY DEFAULT and every section that reads
+ * one hides itself when it has nothing. That is deliberate: fees,
+ * approvals and placement figures are claims this site would be
+ * making in its own name, on a page paid traffic lands on. An empty
+ * section is a gap; a wrong fee is a complaint. Fill them in from
+ * the university's own material, not from a competitor's page.
+ * ---------------------------------------------------------------
+ */
+
+/**
+ * One Manipal landing field.
+ *
+ * @param string $key Field key without the mbag_muj_ prefix.
+ * @return string Trimmed value, '' when unset.
+ */
+function mbag_muj_field( $key ) {
+	return trim( (string) get_theme_mod( 'mbag_muj_' . $key, '' ) );
+}
+
+/**
+ * A comma-separated field, as a clean array.
+ *
+ * @param string $key Field key without the mbag_muj_ prefix.
+ * @return string[]
+ */
+function mbag_muj_list( $key ) {
+	$raw = mbag_muj_field( $key );
+
+	if ( '' === $raw ) {
+		return array();
+	}
+
+	return array_values( array_filter( array_map( 'trim', explode( ',', $raw ) ) ) );
+}
+
+/**
+ * The fields shown in the Customizer, in order.
+ *
+ * @return array<string,array{label:string,help:string,list:bool}>
+ */
+function mbag_muj_fields() {
+	return array(
+		'duration'        => array(
+			'label' => __( 'Course duration', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. 24 months (4 semesters)', 'mba-admission-guide' ),
+			'list'  => false,
+		),
+		'mode'            => array(
+			'label' => __( 'Study mode', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. Online / Distance', 'mba-admission-guide' ),
+			'list'  => false,
+		),
+		'eligibility'     => array(
+			'label' => __( 'Eligibility', 'mba-admission-guide' ),
+			'help'  => __( 'One line. e.g. Bachelor\'s degree from a recognised university.', 'mba-admission-guide' ),
+			'list'  => false,
+		),
+		'fee'             => array(
+			'label' => __( 'Indicative total fee', 'mba-admission-guide' ),
+			'help'  => __( 'Leave empty unless you have confirmed it. The fee block stays hidden while this is blank.', 'mba-admission-guide' ),
+			'list'  => false,
+		),
+		'emi'             => array(
+			'label' => __( 'EMI / payment note', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. EMI options available. Shown under the fee.', 'mba-admission-guide' ),
+			'list'  => false,
+		),
+		'approvals'       => array(
+			'label' => __( 'Approvals & accreditation', 'mba-admission-guide' ),
+			'help'  => __( 'Comma separated, e.g. UGC-entitled, NAAC A+, AICTE. Only add what you can evidence.', 'mba-admission-guide' ),
+			'list'  => true,
+		),
+		'specializations' => array(
+			'label' => __( 'Specializations', 'mba-admission-guide' ),
+			'help'  => __( 'Comma separated. Falls back to the theme-wide specialization list when empty.', 'mba-admission-guide' ),
+			'list'  => true,
+		),
+	);
+}
+
+/**
+ * Customizer panel for the Manipal landing page.
+ *
+ * @param WP_Customize_Manager $wp_customize Customizer object.
+ */
+function mbag_customize_muj( $wp_customize ) {
+	$wp_customize->add_section( 'mbag_muj', array(
+		'title'       => __( 'Manipal Jaipur Landing', 'mba-admission-guide' ),
+		'priority'    => 38,
+		'description' => __( 'Fills the Manipal University Jaipur landing page. Anything left blank is left off the page rather than guessed at.', 'mba-admission-guide' ),
+	) );
+
+	foreach ( mbag_muj_fields() as $key => $field ) {
+		$wp_customize->add_setting( 'mbag_muj_' . $key, array(
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'transport'         => 'refresh',
+		) );
+
+		$wp_customize->add_control( 'mbag_muj_' . $key, array(
+			'label'       => $field['label'],
+			'description' => $field['help'],
+			'section'     => 'mbag_muj',
+			'type'        => 'text',
+		) );
+	}
+}
+add_action( 'customize_register', 'mbag_customize_muj' );
+
+/**
+ * Specializations for the Manipal page.
+ *
+ * Uses the page's own list when set, otherwise the theme-wide list that the
+ * front page already shows, so the section is never empty for want of copy.
+ *
+ * @return string[]
+ */
+function mbag_muj_specializations() {
+	$own = mbag_muj_list( 'specializations' );
+
+	if ( $own ) {
+		return $own;
+	}
+
+	return array(
+		__( 'Marketing Management', 'mba-admission-guide' ),
+		__( 'Finance', 'mba-admission-guide' ),
+		__( 'Human Resource Management', 'mba-admission-guide' ),
+		__( 'Business Analytics', 'mba-admission-guide' ),
+		__( 'Data Science', 'mba-admission-guide' ),
+		__( 'Operations Management', 'mba-admission-guide' ),
+		__( 'Information Technology', 'mba-admission-guide' ),
+	);
+}
+
+/**
+ * Admin nudge: the template is in use but no data has been entered yet.
+ */
+function mbag_muj_admin_notice() {
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		return;
+	}
+
+	$screen = get_current_screen();
+
+	if ( ! $screen || 'page' !== $screen->id ) {
+		return;
+	}
+
+	global $post;
+
+	if ( ! $post || 'page-templates/template-manipal-jaipur.php' !== get_page_template_slug( $post ) ) {
+		return;
+	}
+
+	$filled = 0;
+
+	foreach ( array_keys( mbag_muj_fields() ) as $key ) {
+		if ( '' !== mbag_muj_field( $key ) ) {
+			++$filled;
+		}
+	}
+
+	if ( $filled ) {
+		return;
+	}
+
+	printf(
+		'<div class="notice notice-warning"><p>%1$s <a href="%2$s">%3$s</a></p></div>',
+		esc_html__( 'This page uses the Manipal Jaipur template, but none of its details are filled in yet — the fee, eligibility and approvals sections are hidden until you add them.', 'mba-admission-guide' ),
+		esc_url( admin_url( 'customize.php?autofocus[section]=mbag_muj' ) ),
+		esc_html__( 'Open Customizer → Manipal Jaipur Landing', 'mba-admission-guide' )
+	);
+}
+add_action( 'admin_notices', 'mbag_muj_admin_notice' );
+
+/**
+ * ---------------------------------------------------------------
+ * SIKKIM MANIPAL LANDING
+ *
+ * Data for page-templates/template-sikkim-manipal.php.
+ *
+ * Same rule as the Manipal Jaipur block above: every field is EMPTY
+ * BY DEFAULT and every block that reads one hides itself when it has
+ * nothing. The design this page is ported from shipped hard-coded
+ * fees, placement counts and accreditation badges. Those are claims
+ * this site would be making in its own name on a page paid traffic
+ * lands on, so none of them are baked into the template — fill them
+ * in from the university's own material.
+ * ---------------------------------------------------------------
+ */
+
+/**
+ * One Sikkim Manipal landing field.
+ *
+ * @param string $key Field key without the mbag_smu_ prefix.
+ * @return string Trimmed value, '' when unset.
+ */
+function mbag_smu_field( $key ) {
+	return trim( (string) get_theme_mod( 'mbag_smu_' . $key, '' ) );
+}
+
+/**
+ * A comma-separated field, as a clean array.
+ *
+ * @param string $key Field key without the mbag_smu_ prefix.
+ * @return string[]
+ */
+function mbag_smu_list( $key ) {
+	$raw = mbag_smu_field( $key );
+
+	if ( '' === $raw ) {
+		return array();
+	}
+
+	return array_values( array_filter( array_map( 'trim', explode( ',', $raw ) ) ) );
+}
+
+/**
+ * Split a stat into an animatable number and its suffix.
+ *
+ * "35K+" becomes 35 / "K+", "100%" becomes 100 / "%". The counter in
+ * sikkim-manipal.js animates the number and the suffix is printed as-is,
+ * which is what lets the Customizer hold a single human-readable string
+ * instead of asking for the two halves separately.
+ *
+ * @param string $value Raw field value.
+ * @return array{num:string,suffix:string,plain:string} Empty num = print plain.
+ */
+function mbag_smu_stat_parts( $value ) {
+	$value = trim( $value );
+
+	if ( '' === $value ) {
+		return array(
+			'num'    => '',
+			'suffix' => '',
+			'plain'  => '',
+		);
+	}
+
+	if ( preg_match( '/^([0-9][0-9,]*)\s*(.*)$/', $value, $matches ) ) {
+		return array(
+			'num'    => str_replace( ',', '', $matches[1] ),
+			'suffix' => trim( $matches[2] ),
+			'plain'  => $value,
+		);
+	}
+
+	// No leading number — print the string and skip the animation.
+	return array(
+		'num'    => '',
+		'suffix' => '',
+		'plain'  => $value,
+	);
+}
+
+/**
+ * The fields shown in the Customizer, in order.
+ *
+ * @return array<string,array{label:string,help:string}>
+ */
+function mbag_smu_fields() {
+	return array(
+		'duration'         => array(
+			'label' => __( 'Course duration', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. 2 Years (4 semesters)', 'mba-admission-guide' ),
+		),
+		'mode'             => array(
+			'label' => __( 'Study mode', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. Online / Distance', 'mba-admission-guide' ),
+		),
+		'eligibility'      => array(
+			'label' => __( 'Eligibility', 'mba-admission-guide' ),
+			'help'  => __( 'One line. e.g. Bachelor\'s degree from a recognised university.', 'mba-admission-guide' ),
+		),
+		'fee_total'        => array(
+			'label' => __( 'Total programme fee', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. INR 1,20,000. The whole fee block stays hidden while all three fee fields are blank.', 'mba-admission-guide' ),
+		),
+		'fee_semester'     => array(
+			'label' => __( 'Fee per semester', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. INR 30,000', 'mba-admission-guide' ),
+		),
+		'fee_emi'          => array(
+			'label' => __( 'EMI starting from', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. INR 5,000/mo', 'mba-admission-guide' ),
+		),
+		'approvals'        => array(
+			'label' => __( 'Approvals & accreditation', 'mba-admission-guide' ),
+			'help'  => __( 'Comma separated, e.g. NAAC A+, UGC entitled, AICTE. Drives the strip under the hero. Only add what you can evidence.', 'mba-admission-guide' ),
+		),
+		'specializations'  => array(
+			'label' => __( 'Specializations', 'mba-admission-guide' ),
+			'help'  => __( 'Comma separated. Falls back to the theme-wide specialization list when empty.', 'mba-admission-guide' ),
+		),
+		'stat_years'       => array(
+			'label' => __( 'Stat — years of education', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. 30+. Shown in the Advantages column.', 'mba-admission-guide' ),
+		),
+		'stat_faculty'     => array(
+			'label' => __( 'Stat — faculty & staff', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. 530+', 'mba-admission-guide' ),
+		),
+		'stat_learners'    => array(
+			'label' => __( 'Stat — learners offered placement assistance', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. 35K+. Shown in the Global Impact band.', 'mba-admission-guide' ),
+		),
+		'stat_opportunities' => array(
+			'label' => __( 'Stat — opportunities created', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. 25K+', 'mba-admission-guide' ),
+		),
+		'stat_partners'    => array(
+			'label' => __( 'Stat — hiring partners', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. 500+', 'mba-admission-guide' ),
+		),
+		'stat_placement'   => array(
+			'label' => __( 'Stat — placement assistance', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. 100%', 'mba-admission-guide' ),
+		),
+		'legacy'           => array(
+			'label' => __( 'Legacy badge', 'mba-admission-guide' ),
+			'help'  => __( 'e.g. 70+ Years. Sits on the degree image. Hidden when blank.', 'mba-admission-guide' ),
+		),
+		'form_id'          => array(
+			'label' => __( 'Landing page Contact Form 7 ID', 'mba-admission-guide' ),
+			'help'  => __( 'Used for the hero form and the popup on this page only, e.g. 31b7fbb. Leave blank to use the site-wide forms from Customize > Lead Forms.', 'mba-admission-guide' ),
+		),
+		'phone'            => array(
+			'label' => __( 'Landing page phone number', 'mba-admission-guide' ),
+			'help'  => __( 'Overrides the site-wide number on this page only — header, footer, closing CTA, sticky bar and WhatsApp. Leave blank to use Contact Details. e.g. +91 96067 02758', 'mba-admission-guide' ),
+		),
+		'whatsapp'         => array(
+			'label' => __( 'Landing page WhatsApp number', 'mba-admission-guide' ),
+			'help'  => __( 'Only if WhatsApp differs from the phone number above. Digits with country code, e.g. 919606702758.', 'mba-admission-guide' ),
+		),
+		'hiring_partners'  => array(
+			'label' => __( 'Hiring partner names', 'mba-admission-guide' ),
+			'help'  => __( 'Comma separated. The recruiter grid is hidden entirely while this is blank, rather than showing empty LOGO tiles.', 'mba-admission-guide' ),
+		),
+	);
+}
+
+/**
+ * Customizer section for the Sikkim Manipal landing page.
+ *
+ * @param WP_Customize_Manager $wp_customize Customizer object.
+ */
+function mbag_customize_smu( $wp_customize ) {
+	$wp_customize->add_section( 'mbag_smu', array(
+		'title'       => __( 'Sikkim Manipal Landing', 'mba-admission-guide' ),
+		'priority'    => 39,
+		'description' => __( 'Fills the Sikkim Manipal University landing page. Anything left blank is left off the page rather than guessed at.', 'mba-admission-guide' ),
+	) );
+
+	foreach ( mbag_smu_fields() as $key => $field ) {
+		$wp_customize->add_setting( 'mbag_smu_' . $key, array(
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'transport'         => 'refresh',
+		) );
+
+		$wp_customize->add_control( 'mbag_smu_' . $key, array(
+			'label'       => $field['label'],
+			'description' => $field['help'],
+			'section'     => 'mbag_smu',
+			'type'        => 'text',
+		) );
+	}
+}
+add_action( 'customize_register', 'mbag_customize_smu' );
+
+/**
+ * Specializations for the Sikkim Manipal page, with a line of copy each.
+ *
+ * The names are Customizer-driven; the descriptions come from the map below
+ * when the name is one we have copy for, and fall back to a line that points
+ * at a counsellor rather than inventing a curriculum claim.
+ *
+ * @return array[] Each entry: array( 'name' => string, 'desc' => string ).
+ */
+function mbag_smu_specializations() {
+	$names = mbag_smu_list( 'specializations' );
+
+	if ( ! $names ) {
+		$names = array(
+			__( 'Finance', 'mba-admission-guide' ),
+			__( 'Human Resource Management', 'mba-admission-guide' ),
+			__( 'Systems', 'mba-admission-guide' ),
+			__( 'Operations & Supply Chain', 'mba-admission-guide' ),
+			__( 'Marketing', 'mba-admission-guide' ),
+			__( 'Healthcare', 'mba-admission-guide' ),
+		);
+	}
+
+	$copy = array(
+		'finance'                  => __( 'Corporate finance, reporting, investments and risk — for FP&A, treasury, banking and controllership tracks.', 'mba-admission-guide' ),
+		'human resource management' => __( 'Talent acquisition, performance systems, compensation and employment law — for HRBP and people-ops roles.', 'mba-admission-guide' ),
+		'hrm'                      => __( 'Talent acquisition, performance systems, compensation and employment law — for HRBP and people-ops roles.', 'mba-admission-guide' ),
+		'systems'                  => __( 'Information systems, data-driven decisions and technology management — for product, IT and business-analyst roles.', 'mba-admission-guide' ),
+		'operations & supply chain' => __( 'Process design, logistics, procurement and quality — for manufacturing, e-commerce and supply-chain roles.', 'mba-admission-guide' ),
+		'operations management'    => __( 'Process design, logistics, procurement and quality — for manufacturing, e-commerce and supply-chain roles.', 'mba-admission-guide' ),
+		'marketing'                => __( 'Brand strategy, consumer behaviour, digital channels and sales management — for growth, brand and category roles.', 'mba-admission-guide' ),
+		'marketing management'     => __( 'Brand strategy, consumer behaviour, digital channels and sales management — for growth, brand and category roles.', 'mba-admission-guide' ),
+		'healthcare'               => __( 'Health services, hospital operations and healthcare policy — for administration roles across providers and insurers.', 'mba-admission-guide' ),
+		'business analytics'       => __( 'Data modelling, visualisation and decision science applied to business problems.', 'mba-admission-guide' ),
+		'data science'             => __( 'Statistics, machine learning and analytics tooling aimed at management roles.', 'mba-admission-guide' ),
+		'information technology'   => __( 'IT strategy, systems and delivery management for technology-led organisations.', 'mba-admission-guide' ),
+	);
+
+	$out = array();
+
+	foreach ( $names as $name ) {
+		$key = strtolower( $name );
+
+		$out[] = array(
+			'name' => $name,
+			'desc' => isset( $copy[ $key ] )
+				? $copy[ $key ]
+				: __( 'Ask a counsellor how this specialization maps to the roles you are aiming at next.', 'mba-admission-guide' ),
+		);
+	}
+
+	return $out;
+}
+
+/**
+ * Is the current request the Sikkim Manipal landing page?
+ *
+ * @return bool
+ */
+function mbag_smu_is_template() {
+	return is_page_template( 'page-templates/template-sikkim-manipal.php' );
+}
+
+/**
+ * Load this page's stylesheet, font and script — and only on this page.
+ *
+ * Runs at priority 20 so mbag_scripts() has already registered mbag-style;
+ * the dependency then guarantees the override lands after the theme CSS
+ * rather than racing it. Both defer marking and small-CSS inlining hook at
+ * PHP_INT_MAX, so these get the same treatment as the theme's own assets.
+ */
+function mbag_smu_assets() {
+	if ( ! mbag_smu_is_template() ) {
+		return;
+	}
+
+	// The ported design is set in Poppins; the theme itself ships Manrope.
+	wp_enqueue_style(
+		'mbag-smu-fonts',
+		'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap',
+		array(),
+		null
+	);
+
+	/* Versioned by file mtime rather than MBAG_VERSION. These two files are
+	   edited far more often than the theme version is bumped, and a changed
+	   file behind an unchanged ?ver= is served stale from browser caches. */
+	$css = get_theme_file_path( 'css/sikkim-manipal.css' );
+	$js  = get_theme_file_path( 'js/sikkim-manipal.js' );
+
+	wp_enqueue_style(
+		'mbag-smu',
+		get_template_directory_uri() . '/css/sikkim-manipal.css',
+		array( 'mbag-style' ),
+		file_exists( $css ) ? (string) filemtime( $css ) : MBAG_VERSION
+	);
+
+	wp_enqueue_script(
+		'mbag-smu',
+		get_template_directory_uri() . '/js/sikkim-manipal.js',
+		array(),
+		file_exists( $js ) ? (string) filemtime( $js ) : MBAG_VERSION,
+		true
+	);
+}
+add_action( 'wp_enqueue_scripts', 'mbag_smu_assets', 20 );
+
+/**
+ * Admin nudge: the template is in use but no data has been entered yet.
+ */
+function mbag_smu_admin_notice() {
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		return;
+	}
+
+	$screen = get_current_screen();
+
+	if ( ! $screen || 'page' !== $screen->id ) {
+		return;
+	}
+
+	global $post;
+
+	if ( ! $post || 'page-templates/template-sikkim-manipal.php' !== get_page_template_slug( $post ) ) {
+		return;
+	}
+
+	$filled = 0;
+
+	foreach ( array_keys( mbag_smu_fields() ) as $key ) {
+		if ( '' !== mbag_smu_field( $key ) ) {
+			++$filled;
+		}
+	}
+
+	if ( $filled ) {
+		return;
+	}
+
+	printf(
+		'<div class="notice notice-warning"><p>%1$s <a href="%2$s">%3$s</a></p></div>',
+		esc_html__( 'This page uses the Sikkim Manipal template, but none of its details are filled in yet — the accreditation strip, fee block, statistics and recruiter grid stay hidden until you add them.', 'mba-admission-guide' ),
+		esc_url( admin_url( 'customize.php?autofocus[section]=mbag_smu' ) ),
+		esc_html__( 'Open Customizer → Sikkim Manipal Landing', 'mba-admission-guide' )
+	);
+}
+add_action( 'admin_notices', 'mbag_smu_admin_notice' );
+
+/**
+ * ---------------------------------------------------------------
+ * COURSE CAROUSEL
+ *
+ * Drives the "Explore Our Top Online Degree Courses" carousel.
+ *
+ * Edited here rather than in the Customizer for the same reason the
+ * university cards are edited in the `U` array in js/main.js: one
+ * course needs ten fields, and ten Customizer text boxes per course
+ * is worse to maintain than one array. See UNIVERSITIES.md.
+ *
+ * 'slug' must match a key from mbag_universities() — it is what the
+ * logo lookup and the lead popup's university field key off. Any
+ * field left as '' is simply not printed on the card, so a course
+ * with no confirmed fee shows the rest of its row and omits that line.
+ *
+ * Filterable, so a child theme or a plugin can replace the list
+ * without touching this file.
+ *
+ * @return array[]
+ */
+function mbag_courses() {
+	return apply_filters( 'mbag_courses', array(
+		array(
+			'title'       => __( 'Master of Business Administration', 'mba-admission-guide' ),
+			'university'  => 'Manipal University Jaipur',
+			'slug'        => 'manipal-jaipur',
+			'badge'       => __( 'Most Popular', 'mba-admission-guide' ),
+			'tag'         => __( 'Super/Dual Specialization', 'mba-admission-guide' ),
+			'rating'      => '4.9',
+			'duration'    => __( '24 months', 'mba-admission-guide' ),
+			'fee'         => 'INR 1,80,000',
+			'eligibility' => __( 'Min 50% in graduation', 'mba-admission-guide' ),
+			'scholarship' => __( 'Up to 20% Scholarship', 'mba-admission-guide' ),
+			'image'       => 'course-mba-muj.webp',
+		),
+		array(
+			'title'       => __( 'Master of Business Administration', 'mba-admission-guide' ),
+			'university'  => 'Sikkim Manipal University',
+			'slug'        => 'sikkim-manipal',
+			'badge'       => __( 'Trending', 'mba-admission-guide' ),
+			'tag'         => __( 'Dual Specialization', 'mba-admission-guide' ),
+			'rating'      => '4.5',
+			'duration'    => __( '24 months', 'mba-admission-guide' ),
+			'fee'         => 'INR 1,20,000',
+			'eligibility' => __( 'Min 50% in graduation', 'mba-admission-guide' ),
+			'scholarship' => __( 'Up to 30% Scholarship', 'mba-admission-guide' ),
+			'image'       => 'course-mba-smu.webp',
+		),
+		array(
+			'title'       => __( 'Master of Computer Applications', 'mba-admission-guide' ),
+			'university'  => 'Manipal University Jaipur',
+			'slug'        => 'manipal-jaipur',
+			'badge'       => __( 'Most Popular', 'mba-admission-guide' ),
+			'tag'         => __( 'In-Demand Specializations', 'mba-admission-guide' ),
+			'rating'      => '4.8',
+			'duration'    => __( '24 months', 'mba-admission-guide' ),
+			'fee'         => 'INR 1,58,000',
+			'eligibility' => __( 'Min 50% in graduation', 'mba-admission-guide' ),
+			'scholarship' => __( 'Up to 20% Scholarship', 'mba-admission-guide' ),
+			'image'       => 'course-mca-muj.webp',
+		),
+		array(
+			'title'       => __( 'Master of Computer Applications', 'mba-admission-guide' ),
+			'university'  => 'Sikkim Manipal University',
+			'slug'        => 'sikkim-manipal',
+			'badge'       => __( 'Trending', 'mba-admission-guide' ),
+			'tag'         => __( 'Flexible Schedule', 'mba-admission-guide' ),
+			'rating'      => '4.5',
+			'duration'    => __( '24 months', 'mba-admission-guide' ),
+			'fee'         => 'INR 1,44,000',
+			'eligibility' => __( 'Min 50% in graduation', 'mba-admission-guide' ),
+			'scholarship' => __( 'Up to 30% Scholarship', 'mba-admission-guide' ),
+			'image'       => 'course-mca-smu.webp',
+		),
+		array(
+			'title'       => __( 'Master of Arts', 'mba-admission-guide' ),
+			'university'  => 'Sikkim Manipal University',
+			'slug'        => 'sikkim-manipal',
+			'badge'       => __( 'Trending', 'mba-admission-guide' ),
+			'tag'         => __( 'Multiple Specializations', 'mba-admission-guide' ),
+			'rating'      => '4.4',
+			'duration'    => __( '24 months', 'mba-admission-guide' ),
+			'fee'         => 'INR 72,000',
+			'eligibility' => __( 'Min 50% in graduation', 'mba-admission-guide' ),
+			'scholarship' => __( 'Up to 30% Scholarship', 'mba-admission-guide' ),
+			'image'       => 'course-ma-smu.webp',
+		),
+	) );
+}
+
+
+/**
+ * URL for a file in images/smu/, or '' when it is not there.
+ *
+ * filemtime doubles as a cache-buster, the same trick mbag_university_logos()
+ * uses — replace the file and the new one is served immediately.
+ *
+ * Returning '' for a missing file is what lets every caller wrap its <img>
+ * in a truthiness check, so a deleted asset leaves a tidy gap instead of a
+ * broken image icon.
+ *
+ * @param string $file File name inside images/smu/.
+ * @return string
+ */
+function mbag_smu_img( $file ) {
+	$file = ltrim( (string) $file, '/' );
+
+	if ( '' === $file ) {
+		return '';
+	}
+
+	$path = get_theme_file_path( 'images/smu/' . $file );
+
+	if ( ! file_exists( $path ) ) {
+		return '';
+	}
+
+	return add_query_arg(
+		'v',
+		(string) filemtime( $path ),
+		get_theme_file_uri( 'images/smu/' . $file )
+	);
+}
+
+/**
+ * The landing header's navigation.
+ *
+ * Uses the menu assigned to the "Landing Page Menu" location when there is
+ * one, so the links stay editable from Appearance > Menus. With none
+ * assigned it falls back to this page's own section anchors, which is what
+ * a landing page actually wants — same pattern as mbag_fallback_menu().
+ *
+ * @param string $class UL class.
+ */
+function mbag_smu_nav( $class = 'smu-nav__list' ) {
+	if ( has_nav_menu( 'smu_landing' ) ) {
+		wp_nav_menu( array(
+			'theme_location' => 'smu_landing',
+			'container'      => false,
+			'menu_class'     => $class,
+			'depth'          => 1,
+		) );
+
+		return;
+	}
+
+	$links = array(
+		'courses'        => __( 'Courses', 'mba-admission-guide' ),
+		'programme'      => __( 'Programme', 'mba-admission-guide' ),
+		'advantages'     => __( 'Why SMU', 'mba-admission-guide' ),
+		'placements'     => __( 'Placements', 'mba-admission-guide' ),
+		'fees'           => __( 'Fees', 'mba-admission-guide' ),
+		'admission'      => __( 'Admission', 'mba-admission-guide' ),
+	);
+
+	echo '<ul class="' . esc_attr( $class ) . '">';
+	foreach ( $links as $anchor => $label ) {
+		printf(
+			'<li><a href="#%1$s">%2$s</a></li>',
+			esc_attr( $anchor ),
+			esc_html( $label )
+		);
+	}
+	echo '</ul>';
+}
+
+/**
+ * Point every contact touchpoint on the landing page at its own number.
+ *
+ * The template never prints a number directly — the header, footer, closing
+ * CTA, mobile sticky bar, floating WhatsApp button and the numbers handed to
+ * main.js all resolve through mbag_phone_display(), mbag_phone_link() and
+ * mbag_whatsapp_number(). Those read theme mods, so filtering the mods here
+ * redirects all of them at once, and nothing else on the site moves.
+ *
+ * Hooked to 'wp' because mbag_smu_is_template() needs the main query, and
+ * because that still runs before wp_enqueue_scripts — which is where
+ * mbag_scripts() localizes the same numbers into mbagSettings for the JS.
+ * Hooking any later would leave the scripts pointing at the site number.
+ */
+function mbag_smu_contact_overrides() {
+	if ( ! mbag_smu_is_template() ) {
+		return;
+	}
+
+	/* Defaults live in code, not only in the database. A theme mod set through
+	   the Customizer exists on one install; this page's number has to be right
+	   the moment the theme is deployed anywhere, so the constant below is the
+	   fallback and the Customizer field overrides it. */
+	$phone = mbag_smu_field( 'phone' );
+
+	if ( '' === $phone ) {
+		$phone = mbag_smu_default_phone();
+	}
+
+	if ( '' !== $phone ) {
+		add_filter( 'theme_mod_mbag_phone', static function () use ( $phone ) {
+			return $phone;
+		} );
+
+		add_filter( 'theme_mod_mbag_phone_link', static function () use ( $phone ) {
+			return mbag_sanitize_phone( $phone );
+		} );
+	}
+
+	// Every lead form on this page — the hero card and the popup — comes from
+	// this page's own CF7 form when one is set. mbag_form_slot_id() reads
+	// these mods, so filtering them redirects each slot without touching the
+	// site-wide assignments in Customize > Lead Forms.
+	$form = mbag_smu_field( 'form_id' );
+
+	if ( '' !== $form ) {
+		foreach ( array_keys( mbag_form_slots() ) as $slot ) {
+			add_filter( 'theme_mod_mbag_cf7_' . $slot, static function () use ( $form ) {
+				return $form;
+			} );
+		}
+	}
+
+	// WhatsApp follows the phone number unless it is set separately.
+	$whatsapp = mbag_smu_field( 'whatsapp' );
+	$whatsapp = ( '' !== $whatsapp ) ? $whatsapp : $phone;
+
+	if ( '' !== $whatsapp ) {
+		add_filter( 'theme_mod_mbag_whatsapp', static function () use ( $whatsapp ) {
+			return mbag_sanitize_digits( $whatsapp );
+		} );
+	}
+}
+add_action( 'wp', 'mbag_smu_contact_overrides' );
+
+/**
+ * The landing page's own phone number.
+ *
+ * Kept here rather than left to a Customizer value alone so the number is
+ * correct on a fresh deploy, before anyone opens the Customizer. The
+ * "Landing page phone number" field still wins when it is filled in.
+ *
+ * WhatsApp derives from this unless a separate WhatsApp number is set.
+ *
+ * @return string
+ */
+function mbag_smu_default_phone() {
+	return (string) apply_filters( 'mbag_smu_default_phone', '+91 96067 02758' );
+}
