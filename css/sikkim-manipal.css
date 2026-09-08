@@ -146,10 +146,50 @@
 
 /* ================= HERO ================= */
 .smu-hero{
-  position:relative;overflow:hidden;padding:76px 0 88px;border-bottom:1px solid var(--smu-line);
-  background:radial-gradient(760px 460px at 86% 0%,rgba(238,90,17,.10),transparent 62%),
-             radial-gradient(620px 420px at 0% 100%,rgba(201,162,39,.10),transparent 60%),
-             #fff;
+  position:relative;overflow:hidden;padding:88px 0 96px;
+  /* Campus photograph behind the hero. The layers, front to back:
+     a left-weighted scrim that keeps the headline side dark enough for white
+     text wherever the photo happens to be bright, a warm orange wash for the
+     brand, then the image itself. The colour underneath matters — it is what
+     shows while the image loads and if it ever 404s. */
+  background:
+    linear-gradient(100deg,rgba(10,14,35,.92) 0%,rgba(10,14,35,.80) 38%,rgba(10,14,35,.55) 68%,rgba(10,14,35,.42) 100%),
+    radial-gradient(900px 520px at 88% 6%,rgba(238,90,17,.26),transparent 62%),
+    url("../images/smu/hero-campus.webp") center/cover no-repeat,
+    #10142c;
+}
+
+/* Everything in the hero is now on a dark ground. */
+.smu-hero h1,
+.smu-hero .smu-h-underline{color:#fff}
+.smu-hero .smu-sell{color:rgba(255,255,255,.84)}
+.smu-hero .smu-hero-ticks li{color:rgba(255,255,255,.88)}
+
+/* The orange sits on near-black here, where the brand tone reads dull and
+   fails contrast. Lifted to a lighter tint that keeps the hue. */
+.smu-hero .smu-h-orange{color:#FF9A5C}
+.smu-hero .smu-h-underline{border-bottom-color:#FF9A5C}
+
+.smu-hero .smu-eyebrow{
+  color:#FFD9C6;background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.22);
+}
+
+/* The outlined button was navy-on-white and would have vanished. */
+.smu-hero .smu-btn-line-navy{border-color:rgba(255,255,255,.55);color:#fff;background:transparent}
+.smu-hero .smu-btn-line-navy:hover,
+.smu-hero .smu-btn-line-navy:focus{background:rgba(255,255,255,.14);border-color:#fff;color:#fff}
+
+.smu-hero :focus-visible{outline-color:#FFD9C6}
+
+/* On a phone the photo is mostly cropped away and the text column is full
+   width, so the scrim becomes vertical and heavier. */
+@media(max-width:760px){
+  .smu-hero{
+    background:
+      linear-gradient(180deg,rgba(10,14,35,.90) 0%,rgba(10,14,35,.82) 55%,rgba(10,14,35,.90) 100%),
+      url("../images/smu/hero-campus.webp") center/cover no-repeat,
+      #10142c;
+  }
 }
 .smu-hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:1.06fr .94fr;gap:56px;align-items:start}
 .smu-hero .smu-sell{color:var(--smu-text);font-size:1.06rem;max-width:52ch;margin-top:1.4rem}
