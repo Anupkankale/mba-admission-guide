@@ -150,7 +150,7 @@ the file is actually there:
 
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' \
-  https://onlinembacourses.co.in/wp-content/themes/mba-admission-guide/.git/config
+  https://online-manipalmba.com/wp-content/themes/mba-admission-guide/.git/config
 ```
 
 Anything other than 403/404 means it is readable. Fix by adding a theme-root
@@ -169,7 +169,7 @@ The universities, comparison table, testimonials and FAQ are all rendered by
 sections**, which is precisely the failure mode that has bitten this theme
 before.
 
-1. `curl -s https://onlinembacourses.co.in/ | grep -o 'style.css?ver=[0-9.]*'`
+1. `curl -s https://online-manipalmba.com/ | grep -o 'style.css?ver=[0-9.]*'`
    shows the version you just released.
 2. University cards and the comparison table have content.
 3. The testimonial carousel scrolls and its dots respond.
