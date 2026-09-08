@@ -2526,7 +2526,14 @@ function mbag_smu_contact_overrides() {
 	// this page's own CF7 form when one is set. mbag_form_slot_id() reads
 	// these mods, so filtering them redirects each slot without touching the
 	// site-wide assignments in Customize > Lead Forms.
+	/* Same reason as the phone number below: a theme mod set in the Customizer
+	   exists in one database, so a fresh deploy would fall back to the
+	   site-wide forms. The default lives in code; the Customizer field wins. */
 	$form = mbag_smu_field( 'form_id' );
+
+	if ( '' === $form ) {
+		$form = mbag_smu_default_form_id();
+	}
 
 	if ( '' !== $form ) {
 		foreach ( array_keys( mbag_form_slots() ) as $slot ) {
@@ -2588,3 +2595,20 @@ function mbag_front_page_template( $template ) {
 	return $template;
 }
 add_filter( 'frontpage_template', 'mbag_front_page_template' );
+
+/**
+ * The Contact Form 7 form used on the landing page.
+ *
+ * Kept in code so the page is wired to the right form the moment the theme is
+ * deployed, before anyone opens the Customizer. The "Landing page Contact
+ * Form 7 ID" field still overrides it.
+ *
+ * If the form is missing on an install, mbag_lead_form() falls back to the
+ * phone and WhatsApp CTA and the popup does not render, rather than printing
+ * a shortcode for a form that is not there.
+ *
+ * @return string
+ */
+function mbag_smu_default_form_id() {
+	return (string) apply_filters( 'mbag_smu_default_form_id', 'a28fde8' );
+}
