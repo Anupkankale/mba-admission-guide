@@ -107,11 +107,11 @@
 
 .smu h1,.smu h2,.smu h3,.smu h4{
   margin:0;font-family:var(--smu-f);color:var(--smu-navy);
-  font-weight:800;line-height:1.18;letter-spacing:-.025em;
+  font-weight:700;line-height:1.18;letter-spacing:-.025em;
 }
 .smu h1{font-size:clamp(2rem,4.4vw,3.2rem)}
 .smu h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
-.smu h3{font-size:1.12rem;font-weight:700;letter-spacing:-.012em}
+.smu h3{font-size:1.12rem;letter-spacing:-.012em}
 
 /* Editorial accent.
    Poppins carries every heading; this is for the short phrase inside one that
@@ -520,7 +520,7 @@
 .smu-head__in{display:flex;align-items:center;justify-content:space-between;gap:22px;min-height:76px}
 .smu-head__brand{display:flex;align-items:center;flex:0 0 auto}
 .smu-head__brand img{width:auto;height:40px;max-width:min(330px,44vw);object-fit:contain}
-.smu-head__name{font-weight:800;font-size:1.05rem;color:var(--smu-navy)}
+.smu-head__name{font-weight:700;font-size:1.05rem;color:var(--smu-navy)}
 
 .smu-nav__list{display:flex;align-items:center;gap:26px;list-style:none;margin:0;padding:0}
 .smu-nav__list a{
@@ -740,7 +740,7 @@
   padding:11px 16px;box-shadow:0 6px 20px rgba(0,0,0,.25);
 }
 .smu-foot__plate img{width:auto;height:34px;max-width:250px;object-fit:contain}
-.smu-foot__name{font-size:1.1rem;font-weight:800;color:#fff}
+.smu-foot__name{font-size:1.1rem;font-weight:700;color:#fff}
 
 .smu-foot__col h2{
   font-size:.76rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
@@ -930,7 +930,7 @@
 .smu-rank__badge img{width:100%;height:100%;object-fit:contain}
 
 .smu-rank b{
-  display:block;font-family:var(--smu-f);font-weight:800;font-size:1rem;
+  display:block;font-family:var(--smu-f);font-weight:700;font-size:1rem;
   color:var(--smu-navy);line-height:1.3;
 }
 .smu-rank span{
