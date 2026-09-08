@@ -132,8 +132,6 @@
 .smu-h-orange--inline{display:inline}
 .smu-h-underline{display:inline-block;border-bottom:3px solid var(--smu-orange);padding-bottom:6px}
 
-.smu-gold-bar{width:62px;height:5px;background:var(--smu-gold);border-radius:3px;margin:20px 0 0}
-.smu-center .smu-gold-bar{margin-left:auto;margin-right:auto}
 .smu-center{text-align:center}
 .smu-center .smu-lede{margin-left:auto;margin-right:auto}
 
@@ -606,7 +604,6 @@
 .smu-impact{background:var(--smu-surface-deep);color:rgba(255,255,255,.72)}
 .smu-impact h2{color:#fff}
 .smu-impact .smu-imp span{color:rgba(255,255,255,.66)}
-.smu-impact .smu-gold-bar{background:var(--smu-gold-2)}
 .smu-impact .smu-map-wrap img{
   filter:drop-shadow(0 10px 30px rgba(0,0,0,.35));
 }
@@ -627,7 +624,6 @@
 
 /* --- Section heads: consistent spacing above the body copy --- */
 .smu-center .smu-lede{margin-top:24px}
-.smu-courses-head h2 + .smu-gold-bar{margin-top:16px}
 
 /* --- Sections that sit on the tinted band need their insets lifted --- */
 .smu-band--alt .smu-step-card{background:#fff;border-color:var(--smu-line)}

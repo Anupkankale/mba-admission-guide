@@ -216,7 +216,6 @@ if ( $mbag_smu_courses ) :
       <div>
         <span class="smu-eyebrow"><?php esc_html_e( 'Programmes', 'mba-admission-guide' ); ?></span>
         <h2><?php esc_html_e( 'Explore Our Top', 'mba-admission-guide' ); ?> <span class="smu-h-orange smu-h-orange--inline"><?php esc_html_e( 'Online Degree Courses', 'mba-admission-guide' ); ?></span></h2>
-        <div class="smu-gold-bar"></div>
       </div>
       <div class="smu-course-nav">
         <button type="button" class="smu-course-arrow" data-smu-prev aria-label="<?php esc_attr_e( 'Previous courses', 'mba-admission-guide' ); ?>" aria-controls="smuCourseTrack">&lsaquo;</button>
@@ -302,7 +301,6 @@ if ( $mbag_smu_rankings ) :
     <div class="smu-center">
       <span class="smu-eyebrow"><?php esc_html_e( 'Recognition', 'mba-admission-guide' ); ?></span>
       <h2><?php esc_html_e( 'Rankings &amp;', 'mba-admission-guide' ); ?> <span class="smu-h-orange smu-h-orange--inline smu-em"><?php esc_html_e( 'Accreditations', 'mba-admission-guide' ); ?></span></h2>
-      <div class="smu-gold-bar"></div>
       <p class="smu-lede"><?php esc_html_e( 'The bodies that accredit, rank and evaluate the university — the things worth checking before you pay any fee.', 'mba-admission-guide' ); ?></p>
     </div>
 
@@ -334,7 +332,6 @@ if ( $mbag_smu_rankings ) :
     <div class="smu-prog__intro">
       <span class="smu-eyebrow"><?php esc_html_e( 'The programme', 'mba-admission-guide' ); ?></span>
       <h2><?php esc_html_e( 'Online MBA from', 'mba-admission-guide' ); ?><br><span class="smu-h-orange"><?php echo esc_html( $mbag_smu_name ); ?></span></h2>
-      <div class="smu-gold-bar"></div>
 
       <p class="smu-lede"><?php
         printf(
@@ -405,7 +402,6 @@ if ( $mbag_smu_rankings ) :
     <div>
       <span class="smu-eyebrow"><?php esc_html_e( 'Advantages', 'mba-admission-guide' ); ?></span>
       <h2><?php esc_html_e( 'Online MBA', 'mba-admission-guide' ); ?><br><span class="smu-h-orange"><?php esc_html_e( 'Advantages', 'mba-admission-guide' ); ?></span></h2>
-      <div class="smu-gold-bar"></div>
       <p class="smu-lede"><?php esc_html_e( 'Everything you need to grow — academically, professionally, and personally.', 'mba-admission-guide' ); ?></p>
 
       <?php if ( $mbag_smu_adv_stats ) : ?>
@@ -450,7 +446,6 @@ if ( $mbag_smu_rankings ) :
   <div class="smu-shell">
     <div class="smu-center">
       <h2><?php esc_html_e( 'Academic Excellence,', 'mba-admission-guide' ); ?> <span class="smu-h-orange smu-h-orange--inline smu-em"><?php esc_html_e( 'Global Impact.', 'mba-admission-guide' ); ?></span></h2>
-      <div class="smu-gold-bar"></div>
     </div>
 
     <div class="smu-impact-grid">
@@ -491,7 +486,6 @@ if ( $mbag_smu_rankings ) :
     <div class="smu-center">
       <span class="smu-eyebrow"><?php esc_html_e( 'Placements', 'mba-admission-guide' ); ?></span>
       <h2><?php esc_html_e( 'Placement', 'mba-admission-guide' ); ?> <span class="smu-h-orange smu-h-orange--inline"><?php esc_html_e( 'Support', 'mba-admission-guide' ); ?></span></h2>
-      <div class="smu-gold-bar"></div>
       <p class="smu-lede" style="margin-top:24px"><?php esc_html_e( 'Resume reviews, mock interviews and access to a shared recruiter pool — from your first semester, not just at the end.', 'mba-admission-guide' ); ?></p>
     </div>
 
@@ -534,7 +528,6 @@ if ( $mbag_smu_rankings ) :
   <div class="smu-shell">
     <span class="smu-eyebrow"><?php esc_html_e( 'Pricing', 'mba-admission-guide' ); ?></span>
     <h2><?php esc_html_e( 'Fee &amp;', 'mba-admission-guide' ); ?> <span class="smu-h-orange smu-h-orange--inline"><?php esc_html_e( 'Scholarships', 'mba-admission-guide' ); ?></span></h2>
-    <div class="smu-gold-bar"></div>
     <p class="smu-lede" style="margin-top:24px"><?php esc_html_e( 'Flexi-payment options let the fee be paid in instalments rather than one lump sum.', 'mba-admission-guide' ); ?></p>
 
     <div class="smu-fee-tab">
@@ -603,7 +596,6 @@ if ( $mbag_smu_rankings ) :
     <div class="smu-center">
       <span class="smu-eyebrow"><?php esc_html_e( 'How to Apply', 'mba-admission-guide' ); ?></span>
       <h2><?php esc_html_e( 'Admission', 'mba-admission-guide' ); ?> <span class="smu-h-orange smu-h-orange--inline"><?php esc_html_e( 'Process', 'mba-admission-guide' ); ?></span></h2>
-      <div class="smu-gold-bar"></div>
       <p class="smu-lede" style="margin-top:24px;max-width:46ch"><?php
         printf(
           /* translators: %s: university name. */
@@ -679,7 +671,6 @@ if ( $mbag_smu_rankings ) :
     <div>
       <span class="smu-eyebrow"><?php esc_html_e( 'The Degree', 'mba-admission-guide' ); ?></span>
       <h2><?php esc_html_e( 'Get a Prestigious', 'mba-admission-guide' ); ?> <span class="smu-h-orange smu-h-orange--inline"><?php esc_html_e( 'Degree', 'mba-admission-guide' ); ?></span></h2>
-      <div class="smu-gold-bar"></div>
       <p class="smu-lede" style="margin-top:24px"><?php
         printf(
           /* translators: %s: university name. */
