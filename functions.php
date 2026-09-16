@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MBAG_VERSION', '1.37.4' );
+define( 'MBAG_VERSION', '1.38.0' );
 
 /**
  * Theme setup.
@@ -444,8 +444,14 @@ add_action( 'customize_register', 'mbag_customize_register' );
 
 /**
  * Fallback menu for the primary nav (if no menu is assigned).
+ *
+ * @param string $class      UL class.
+ * @param bool   $with_legal Append the Privacy Policy link. Passed explicitly
+ *                           rather than inferred from $class, because the
+ *                           header and the footer share this function and
+ *                           only the footer wants the legal link.
  */
-function mbag_fallback_menu( $class = 'flinks' ) {
+function mbag_fallback_menu( $class = 'flinks', $with_legal = false ) {
 	$links = array(
 		'universities'    => __( 'Universities', 'mba-admission-guide' ),
 		'compare'         => __( 'Compare', 'mba-admission-guide' ),
@@ -461,8 +467,53 @@ function mbag_fallback_menu( $class = 'flinks' ) {
 			esc_html( $label )
 		);
 	}
+
+	if ( $with_legal ) {
+		$mbag_privacy = mbag_privacy_url();
+
+		if ( '' !== $mbag_privacy ) {
+			printf(
+				'<li><a href="%1$s">%2$s</a></li>',
+				esc_url( $mbag_privacy ),
+				esc_html__( 'Privacy Policy', 'mba-admission-guide' )
+			);
+		}
+	}
+
 	echo '</ul>';
 }
+
+/**
+ * Append Privacy Policy to an assigned footer menu.
+ *
+ * The fallback above only runs when no menu is assigned to the footer
+ * location. Once a site owner assigns one, the legal link would disappear
+ * with it — which is the opposite of what a legal link is for — so it is
+ * added back here. Skipped when the menu already contains that URL, so an
+ * owner who adds it themselves does not end up with two.
+ *
+ * @param string   $items Menu markup.
+ * @param stdClass $args  wp_nav_menu arguments.
+ * @return string
+ */
+function mbag_footer_privacy_item( $items, $args ) {
+	if ( empty( $args->theme_location ) || 'footer' !== $args->theme_location ) {
+		return $items;
+	}
+
+	$privacy = mbag_privacy_url();
+
+	if ( '' === $privacy || false !== strpos( $items, esc_url( $privacy ) ) ) {
+		return $items;
+	}
+
+	return $items . sprintf(
+		'<li class="menu-item"><a href="%1$s">%2$s</a></li>',
+		esc_url( $privacy ),
+		esc_html__( 'Privacy Policy', 'mba-admission-guide' )
+	);
+}
+add_filter( 'wp_nav_menu_items', 'mbag_footer_privacy_item', 10, 2 );
 
 /**
  * ---------------------------------------------------------------
@@ -794,6 +845,33 @@ function mbag_thank_you_url() {
 
 	if ( $id > 0 && 'publish' === get_post_status( $id ) ) {
 		return get_permalink( $id );
+	}
+
+	return '';
+}
+
+/**
+ * The Privacy Policy page URL.
+ *
+ * Reads Settings > Privacy first, because that is where WordPress itself
+ * stores the answer and where a site owner expects to set it. Installs that
+ * never filled that setting in almost always still have the page, so a
+ * published page at /privacy-policy/ is accepted as the fallback rather
+ * than dropping the link from the footer entirely.
+ *
+ * @return string Empty string when neither exists.
+ */
+function mbag_privacy_url() {
+	$url = (string) get_privacy_policy_url();
+
+	if ( '' !== $url ) {
+		return $url;
+	}
+
+	$page = get_page_by_path( 'privacy-policy' );
+
+	if ( $page instanceof WP_Post && 'publish' === $page->post_status ) {
+		return (string) get_permalink( $page );
 	}
 
 	return '';
@@ -2090,7 +2168,7 @@ function mbag_smu_fields() {
 		),
 		'specializations'  => array(
 			'label' => __( 'Specializations', 'mba-admission-guide' ),
-			'help'  => __( 'Comma separated. Falls back to the theme-wide specialization list when empty.', 'mba-admission-guide' ),
+			'help'  => __( 'Comma separated, and they appear in the order you type them. A name that matches the built-in list keeps its description and Popular badge. Leave empty to show all thirteen.', 'mba-admission-guide' ),
 		),
 		'stat_years'       => array(
 			'label' => __( 'Stat — years of education', 'mba-admission-guide' ),
@@ -2169,57 +2247,163 @@ function mbag_customize_smu( $wp_customize ) {
 add_action( 'customize_register', 'mbag_customize_smu' );
 
 /**
- * Specializations for the Sikkim Manipal page, with a line of copy each.
+ * Descriptions for specialization names outside the card catalogue.
  *
- * The names are Customizer-driven; the descriptions come from the map below
- * when the name is one we have copy for, and fall back to a line that points
- * at a counsellor rather than inventing a curriculum claim.
+ * Kept from the chip picker this section replaced. A site owner listing a
+ * specialization the university publishes but this page's catalogue does not
+ * carry — Healthcare, say — still gets a real line rather than the generic
+ * fallback. Keyed lowercase, because the Customizer value is typed by hand.
  *
- * @return array[] Each entry: array( 'name' => string, 'desc' => string ).
+ * @return string[] name (lowercase) => description.
  */
-function mbag_smu_specializations() {
-	$names = mbag_smu_list( 'specializations' );
+function mbag_smu_spec_copy() {
+	return array(
+		'systems'                   => __( 'Information systems, data-driven decisions and technology management — for product, IT and business-analyst roles.', 'mba-admission-guide' ),
+		'operations & supply chain' => __( 'Process design, logistics, procurement and quality — for manufacturing, e-commerce and supply-chain roles.', 'mba-admission-guide' ),
+		'healthcare'                => __( 'Health services, hospital operations and healthcare policy — for administration roles across providers and insurers.', 'mba-admission-guide' ),
+		'business analytics'        => __( 'Data modelling, visualisation and decision science applied to business problems.', 'mba-admission-guide' ),
+		'data science'              => __( 'Statistics, machine learning and analytics tooling aimed at management roles.', 'mba-admission-guide' ),
+		'information technology'    => __( 'IT strategy, systems and delivery management for technology-led organisations.', 'mba-admission-guide' ),
+		'hrm'                       => __( 'Talent acquisition, performance systems, compensation and employment law — for HRBP and people-ops roles.', 'mba-admission-guide' ),
+		'marketing management'      => __( 'Brand strategy, consumer behaviour, digital channels and sales management — for growth, brand and category roles.', 'mba-admission-guide' ),
+	);
+}
+
+/**
+ * The full elective catalogue, in the university's own order.
+ *
+ * The numbering on the cards refers to this order, so entries are not
+ * re-sorted. 'popular' drives both the badge and the highlighted border, so
+ * the two can never disagree.
+ *
+ * @return array[] Each: name, desc, popular.
+ */
+function mbag_smu_spec_catalogue() {
+	return array(
+		array(
+			'name'    => __( 'Finance', 'mba-admission-guide' ),
+			'desc'    => __( 'Security analysis, M&A, taxation, international financial management.', 'mba-admission-guide' ),
+			'popular' => true,
+		),
+		array(
+			'name'    => __( 'Marketing', 'mba-admission-guide' ),
+			'desc'    => __( 'Consumer behaviour, retail marketing, international marketing.', 'mba-admission-guide' ),
+			'popular' => true,
+		),
+		array(
+			'name'    => __( 'Human Resource Management', 'mba-admission-guide' ),
+			'desc'    => __( 'Manpower planning, HR audit, compensation, talent management.', 'mba-admission-guide' ),
+			'popular' => true,
+		),
+		array(
+			'name'    => __( 'Analytics & Data Science', 'mba-admission-guide' ),
+			'desc'    => __( 'Programming, machine learning, visualization, business analytics.', 'mba-admission-guide' ),
+			'popular' => true,
+		),
+		array(
+			'name'    => __( 'IT & FinTech', 'mba-admission-guide' ),
+			'desc'    => __( 'Database systems, e-commerce, cryptocurrency, enterprise IT.', 'mba-admission-guide' ),
+			'popular' => false,
+		),
+		array(
+			'name'    => __( 'Operations Management', 'mba-admission-guide' ),
+			'desc'    => __( 'Production planning, ERP, logistics, quality management.', 'mba-admission-guide' ),
+			'popular' => false,
+		),
+		array(
+			'name'    => __( 'International Business', 'mba-admission-guide' ),
+			'desc'    => __( 'Global finance, export-import, multinational corporations.', 'mba-admission-guide' ),
+			'popular' => false,
+		),
+		array(
+			'name'    => __( 'Information System Management', 'mba-admission-guide' ),
+			'desc'    => __( 'Software engineering, ERP, e-commerce, web design.', 'mba-admission-guide' ),
+			'popular' => false,
+		),
+		array(
+			'name'    => __( 'Project Management', 'mba-admission-guide' ),
+			'desc'    => __( 'Planning, risk, budgeting, contracts management.', 'mba-admission-guide' ),
+			'popular' => false,
+		),
+		array(
+			'name'    => __( 'Supply Chain Management', 'mba-admission-guide' ),
+			'desc'    => __( 'Inventory, logistics, sourcing, purchasing strategy.', 'mba-admission-guide' ),
+			'popular' => false,
+		),
+		array(
+			'name'    => __( 'Banking, Financial Services & Insurance', 'mba-admission-guide' ),
+			'desc'    => __( 'Risk management, treasury, life & general insurance.', 'mba-admission-guide' ),
+			'popular' => false,
+		),
+		array(
+			'name'    => __( 'Digital Marketing', 'mba-admission-guide' ),
+			'desc'    => __( 'Social media, media planning, e-marketing, brand management.', 'mba-admission-guide' ),
+			'popular' => true,
+		),
+		array(
+			'name'    => __( 'Retail Management', 'mba-admission-guide' ),
+			'desc'    => __( 'Merchandising, CRM, e-retailing, brand management.', 'mba-admission-guide' ),
+			'popular' => false,
+		),
+	);
+}
+
+/**
+ * The specialization cards actually rendered.
+ *
+ * Empty Customizer field means the whole catalogue, which is the common
+ * case and what the section was designed around. When the field is filled,
+ * it picks and orders the cards: a name matching the catalogue keeps that
+ * entry's description and Popular badge, and anything else still renders,
+ * with copy from mbag_smu_spec_copy() when we have a line for it. Matching
+ * is done on a lowercased, whitespace-collapsed name because the value is
+ * typed by hand; the catalogue's own spelling is what gets shown, so a
+ * hurried "finance" does not reach the page in lower case.
+ *
+ * The numbering and the count in the heading both follow this list, so a
+ * shortened list renumbers itself and the heading agrees with it.
+ *
+ * @return array[] Each: name, desc, popular.
+ */
+function mbag_smu_spec_cards() {
+	$catalogue = mbag_smu_spec_catalogue();
+	$names     = mbag_smu_list( 'specializations' );
 
 	if ( ! $names ) {
-		$names = array(
-			__( 'Finance', 'mba-admission-guide' ),
-			__( 'Human Resource Management', 'mba-admission-guide' ),
-			__( 'Systems', 'mba-admission-guide' ),
-			__( 'Operations & Supply Chain', 'mba-admission-guide' ),
-			__( 'Marketing', 'mba-admission-guide' ),
-			__( 'Healthcare', 'mba-admission-guide' ),
-		);
+		return apply_filters( 'mbag_smu_spec_cards', $catalogue );
 	}
 
-	$copy = array(
-		'finance'                  => __( 'Corporate finance, reporting, investments and risk — for FP&A, treasury, banking and controllership tracks.', 'mba-admission-guide' ),
-		'human resource management' => __( 'Talent acquisition, performance systems, compensation and employment law — for HRBP and people-ops roles.', 'mba-admission-guide' ),
-		'hrm'                      => __( 'Talent acquisition, performance systems, compensation and employment law — for HRBP and people-ops roles.', 'mba-admission-guide' ),
-		'systems'                  => __( 'Information systems, data-driven decisions and technology management — for product, IT and business-analyst roles.', 'mba-admission-guide' ),
-		'operations & supply chain' => __( 'Process design, logistics, procurement and quality — for manufacturing, e-commerce and supply-chain roles.', 'mba-admission-guide' ),
-		'operations management'    => __( 'Process design, logistics, procurement and quality — for manufacturing, e-commerce and supply-chain roles.', 'mba-admission-guide' ),
-		'marketing'                => __( 'Brand strategy, consumer behaviour, digital channels and sales management — for growth, brand and category roles.', 'mba-admission-guide' ),
-		'marketing management'     => __( 'Brand strategy, consumer behaviour, digital channels and sales management — for growth, brand and category roles.', 'mba-admission-guide' ),
-		'healthcare'               => __( 'Health services, hospital operations and healthcare policy — for administration roles across providers and insurers.', 'mba-admission-guide' ),
-		'business analytics'       => __( 'Data modelling, visualisation and decision science applied to business problems.', 'mba-admission-guide' ),
-		'data science'             => __( 'Statistics, machine learning and analytics tooling aimed at management roles.', 'mba-admission-guide' ),
-		'information technology'   => __( 'IT strategy, systems and delivery management for technology-led organisations.', 'mba-admission-guide' ),
-	);
+	$key = static function ( $name ) {
+		return strtolower( preg_replace( '/\s+/', ' ', trim( (string) $name ) ) );
+	};
 
-	$out = array();
+	$indexed = array();
+
+	foreach ( $catalogue as $card ) {
+		$indexed[ $key( $card['name'] ) ] = $card;
+	}
+
+	$copy = mbag_smu_spec_copy();
+	$out  = array();
 
 	foreach ( $names as $name ) {
-		$key = strtolower( $name );
+		$k = $key( $name );
+
+		if ( isset( $indexed[ $k ] ) ) {
+			$out[] = $indexed[ $k ];
+			continue;
+		}
 
 		$out[] = array(
-			'name' => $name,
-			'desc' => isset( $copy[ $key ] )
-				? $copy[ $key ]
+			'name'    => $name,
+			'desc'    => isset( $copy[ $k ] )
+				? $copy[ $k ]
 				: __( 'Ask a counsellor how this specialization maps to the roles you are aiming at next.', 'mba-admission-guide' ),
+			'popular' => false,
 		);
 	}
 
-	return $out;
+	return apply_filters( 'mbag_smu_spec_cards', $out );
 }
 
 /**
@@ -2245,12 +2429,15 @@ function mbag_smu_assets() {
 	}
 
 	/* The ported design is set in Poppins; the theme itself ships Manrope.
-	   Playfair Display comes with it in one italic weight only — it is used
-	   for a handful of accent phrases, not for running text, so asking for
-	   the upright faces would download files nothing renders. */
+	   Poppins is the only family the page uses — the accent phrases in the
+	   headings were the sole reason a second face was ever loaded here, and
+	   they now set in Poppins with everything else. Three weights, because
+	   after the weight pass the stylesheet asks for 400, 500 and 600 and
+	   nothing else: no b, strong, th or summary on this template reaches a
+	   browser default bold without a rule of its own. */
 	wp_enqueue_style(
 		'mbag-smu-fonts',
-		'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,700&display=swap',
+		'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap',
 		array(),
 		null
 	);
@@ -2467,7 +2654,6 @@ function mbag_smu_nav( $class = 'smu-nav__list' ) {
 	}
 
 	$links = array(
-		'courses'        => __( 'Courses', 'mba-admission-guide' ),
 		'programme'      => __( 'Programme', 'mba-admission-guide' ),
 		'advantages'     => __( 'Why SMU', 'mba-admission-guide' ),
 		'placements'     => __( 'Placements', 'mba-admission-guide' ),

@@ -15,7 +15,7 @@
             'depth'          => 1,
           ) );
         } else {
-          mbag_fallback_menu( 'flinks' );
+          mbag_fallback_menu( 'flinks', true );
         }
         ?>
       </nav>
