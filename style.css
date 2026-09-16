@@ -5,7 +5,7 @@ Author: Anup Kankale
 Author URI: https://anupkankale.com
 Description: Online MBA Admission counselling & comparison theme. Landing page front end plus full WordPress template hierarchy — pages, posts, archives, search, 404 and a dedicated Thank You (lead confirmation) page template.
 Tags: education, landing-page, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
-Version: 1.37.4
+Version: 1.38.0
 Requires at least: 6.0
 Requires PHP: 7.4
 License: GNU General Public License v2 or later
@@ -1039,13 +1039,35 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .mbag-modal__close{
   position:absolute;top:12px;right:12px;z-index:2;
   width:42px;height:42px;border-radius:50%;border:0;cursor:pointer;
-  background:rgba(255,255,255,.18);color:#fff;font-size:26px;line-height:1;
+  background:var(--grey-100);color:var(--ink-700);font-size:26px;line-height:1;
   display:grid;place-items:center;transition:background var(--dur) var(--ease)
 }
-.mbag-modal__close:hover{background:rgba(255,255,255,.32)}
+.mbag-modal__close:hover{background:var(--grey-200)}
 
 /* The dialog reuses .card, so its head keeps room for the close button. */
 .mbag-modal .card__head{padding-right:60px}
+
+/* --- Popup head: white and orange, not the royal/violet gradient ---
+   .card__head is shared with the inline form cards, so this is scoped to
+   the dialog and leaves those alone. The gradient was built to carry white
+   text; orange cannot. Every --grad-hot surface in this file sets #2A1600
+   or --color-on-accent on top, because white on amber is about 2:1 and
+   fails AA outright. So the head goes white with dark ink, and orange
+   carries the brand as a bar along the top edge instead. */
+.mbag-modal .card__head{
+  background:#fff;
+  color:var(--ink-900);
+  border-bottom:1px solid var(--line);
+}
+/* The amber orb existed to warm the violet behind it. On white it only
+   smudges the corner, so the same pseudo-element becomes the orange rule. */
+.mbag-modal .card__head::after{
+  inset:0 0 auto 0;
+  width:auto;height:4px;
+  background:var(--grad-hot);
+  border-radius:0;filter:none;
+}
+.mbag-modal .card__head p{color:var(--muted)}
 
 /* Page behind a modal must not scroll under it. */
 .mbag-noscroll{overflow:hidden}

@@ -21,6 +21,7 @@
 $mbag_smu_f_logo = mbag_smu_img( 'logo-smu.webp' );
 $mbag_smu_f_hours = mbag_hours();
 $mbag_smu_f_reply = mbag_response_time();
+$mbag_smu_f_privacy = mbag_privacy_url();
 ?>
 </main><!-- #main -->
 
@@ -86,6 +87,9 @@ $mbag_smu_f_reply = mbag_response_time();
     <div class="smu-foot__bot">
       <span>&copy; <?php echo esc_html( wp_date( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?></span>
       <span><?php esc_html_e( 'Independent counselling platform — not affiliated with the university', 'mba-admission-guide' ); ?></span>
+      <?php if ( '' !== $mbag_smu_f_privacy ) : ?>
+        <a class="smu-foot__legal" href="<?php echo esc_url( $mbag_smu_f_privacy ); ?>"><?php esc_html_e( 'Privacy Policy', 'mba-admission-guide' ); ?></a>
+      <?php endif; ?>
     </div>
   </div>
 </footer>

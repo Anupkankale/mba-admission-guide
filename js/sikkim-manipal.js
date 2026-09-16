@@ -25,52 +25,6 @@
 
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- specialization chips ----------
-     The copy lives on the buttons as data attributes, because the list is
-     Customizer-driven — the JS must not hold its own copy of it. */
-  var chips = root.querySelector('[data-smu-chips]');
-  var specBox = root.querySelector('[data-smu-specbox]');
-
-  function showSpec(chip) {
-    if (!specBox || !chip) {
-      return;
-    }
-
-    var title = document.createElement('b');
-    var body = document.createElement('p');
-
-    title.textContent = chip.getAttribute('data-smu-title') || chip.textContent;
-    body.textContent = chip.getAttribute('data-smu-desc') || '';
-
-    specBox.textContent = '';
-    specBox.appendChild(title);
-
-    if (body.textContent) {
-      specBox.appendChild(body);
-    }
-  }
-
-  if (chips) {
-    chips.addEventListener('click', function (e) {
-      var chip = e.target.closest('.smu-chip');
-
-      if (!chip || !chips.contains(chip)) {
-        return;
-      }
-
-      chips.querySelectorAll('.smu-chip').forEach(function (c) {
-        c.classList.remove('is-on');
-        c.setAttribute('aria-pressed', 'false');
-      });
-
-      chip.classList.add('is-on');
-      chip.setAttribute('aria-pressed', 'true');
-      showSpec(chip);
-    });
-
-    showSpec(chips.querySelector('.smu-chip.is-on') || chips.querySelector('.smu-chip'));
-  }
-
   /* ---------- counters ---------- */
   function count(el) {
     var target = parseInt(el.getAttribute('data-smu-target'), 10);
